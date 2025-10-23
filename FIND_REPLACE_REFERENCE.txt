@@ -1,0 +1,251 @@
+# Find and Replace Reference for Theme Transformation
+# Use your code editor's Find & Replace (Ctrl+H / Cmd+H) with these patterns
+
+## CRITICAL: Do these replacements in order to avoid conflicts
+
+### Step 1: Background Colors (Dark → Light)
+Find: bg-neutral-900
+Replace: bg-white
+
+Find: bg-gray-900/60
+Replace: bg-white
+
+Find: bg-gray-800/40
+Replace: bg-gray-50
+
+Find: bg-gray-800/70
+Replace: bg-gray-100
+
+Find: bg-gray-900/40
+Replace: bg-gray-50
+
+### Step 2: Text Colors (Light → Dark)
+Find: text-neutral-200
+Replace: text-gray-900
+
+Find: text-gray-200
+Replace: text-gray-900
+
+Find: text-gray-300
+Replace: text-gray-700
+
+Find: text-gray-400
+Replace: text-gray-600
+
+### Step 3: Rose/Pink/Fuchsia → Charcoal (Gradients)
+Find: from-rose-500 via-pink-500 to-fuchsia-500
+Replace: from-gray-700 via-gray-800 to-gray-900
+
+Find: from-rose-500/20 via-pink-500/20 to-fuchsia-500/20
+Replace: from-gray-100 via-gray-50 to-gray-100
+
+Find: from-rose-500/10 via-pink-500/10 to-fuchsia-500/10
+Replace: from-gray-400/5 via-gray-500/5 to-gray-600/5
+
+Find: from-rose-400 via-pink-400 to-fuchsia-400
+Replace: from-gray-600 via-gray-700 to-gray-800
+
+### Step 4: Rose/Pink/Fuchsia → Charcoal (Individual Colors)
+Find: rose-500
+Replace: gray-700
+
+Find: rose-400
+Replace: gray-600
+
+Find: rose-300
+Replace: gray-500
+
+Find: rose-200
+Replace: gray-400
+
+Find: rose-100
+Replace: gray-200
+
+Find: rose-50
+Replace: gray-100
+
+Find: pink-500
+Replace: gray-700
+
+Find: pink-400
+Replace: gray-600
+
+Find: pink-300
+Replace: gray-500
+
+Find: pink-200
+Replace: gray-400
+
+Find: pink-100
+Replace: gray-200
+
+Find: pink-50
+Replace: gray-100
+
+Find: fuchsia-500
+Replace: gray-700
+
+Find: fuchsia-400
+Replace: gray-600
+
+Find: fuchsia-300
+Replace: gray-500
+
+Find: fuchsia-200
+Replace: gray-400
+
+Find: fuchsia-100
+Replace: gray-200
+
+Find: fuchsia-50
+Replace: gray-100
+
+### Step 5: Shadows
+Find: shadow-rose-500/
+Replace: shadow-gray-700/
+
+Find: shadow-pink-500/
+Replace: shadow-gray-700/
+
+### Step 6: Borders
+Find: border-gray-700/50
+Replace: border-gray-300/50
+
+Find: border-gray-700
+Replace: border-gray-300
+
+Find: border-gray-600
+Replace: border-gray-400
+
+### Step 7: Focus Rings
+Find: focus:ring-rose-500
+Replace: focus:ring-gray-700
+
+Find: focus:ring-pink-500
+Replace: focus:ring-gray-700
+
+Find: focus:ring-rose-400
+Replace: focus:ring-gray-600
+
+Find: focus:ring-pink-400
+Replace: focus:ring-gray-600
+
+### Step 8: Hover States
+Find: hover:border-rose-400
+Replace: hover:border-gray-500
+
+Find: hover:border-pink-400
+Replace: hover:border-gray-500
+
+Find: hover:text-rose-300
+Replace: hover:text-gray-700
+
+Find: hover:text-pink-300
+Replace: hover:text-gray-700
+
+Find: hover:bg-rose-500/20
+Replace: hover:bg-gray-100
+
+Find: hover:bg-pink-500/20
+Replace: hover:bg-gray-100
+
+### Step 9: Marker Colors (for lists)
+Find: marker:text-rose-400
+Replace: marker:text-gray-600
+
+Find: marker:text-pink-400
+Replace: marker:text-gray-600
+
+### Step 10: Scrollbar
+Find: scrollbar-thumb-rose-500/50
+Replace: scrollbar-thumb-gray-700/50
+
+### Step 11: Amber/Orange Warnings (Keep but adjust)
+Find: bg-amber-900/40
+Replace: bg-yellow-50
+
+Find: border-amber-800/60
+Replace: border-yellow-200
+
+Find: text-amber-300
+Replace: text-yellow-700
+
+Find: text-amber-600
+Replace: text-yellow-700
+
+Find: bg-amber-50
+Replace: bg-yellow-50
+
+Find: border-amber-200
+Replace: border-yellow-200
+
+Find: text-orange-600
+Replace: text-gray-700
+
+### Step 12: Specific Component Colors
+Find: text-pink-600
+Replace: text-gray-700
+
+Find: bg-pink-600
+Replace: bg-gray-700
+
+Find: hover:bg-pink-700
+Replace: hover:bg-gray-800
+
+Find: bg-pink-50
+Replace: bg-gray-100
+
+Find: border-pink-500
+Replace: border-gray-600
+
+Find: border-pink-300
+Replace: border-gray-400
+
+Find: focus:ring-pink-200
+Replace: focus:ring-gray-100
+
+Find: focus:ring-pink-500
+Replace: focus:ring-gray-700
+
+Find: bg-pink-100
+Replace: bg-gray-200
+
+Find: text-pink-300
+Replace: text-gray-500
+
+Find: text-pink-200
+Replace: text-gray-400
+
+### Step 13: Specific Gradient Backgrounds
+Find: from-rose-900/20 via-pink-900/20 to-fuchsia-900/20
+Replace: from-gray-200/20 via-gray-100/20 to-gray-200/20
+
+Find: from-rose-900/10
+Replace: from-gray-200/10
+
+Find: to-pink-900/20
+Replace: to-gray-200/20
+
+### Step 14: Specific Hover Gradients
+Find: hover:from-rose-500/20 hover:to-pink-500/20
+Replace: hover:from-gray-100 hover:to-gray-100
+
+### Step 15: Specific Focus States
+Find: focus:border-rose-500
+Replace: focus:border-gray-700
+
+Find: focus:border-pink-500
+Replace: focus:border-gray-700
+
+Find: focus:border-rose-400
+Replace: focus:border-gray-600
+
+Find: focus:border-pink-400
+Replace: focus:border-gray-600
+
+## NOTES:
+- Always use "Replace All" carefully - review changes
+- Test after each major replacement
+- Some components may need manual adjustment
+- Hover effects should be preserved
+- Maintain accessibility contrast ratios

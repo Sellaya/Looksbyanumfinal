@@ -1,0 +1,131 @@
+/* Light Theme with Charcoal Accents - Comprehensive Color Utilities */
+
+/* Primary Charcoal Colors */
+:root {
+  --charcoal-900: #1a1a1a;
+  --charcoal-800: #2d2d2d;
+  --charcoal-700: #404040;
+  --charcoal-600: #525252;
+  --charcoal-500: #656565;
+  --charcoal-400: #787878;
+  --charcoal-300: #8b8b8b;
+  --charcoal-200: #d1d5db;
+  --charcoal-100: #e5e7eb;
+  --charcoal-50: #f9fafb;
+}
+
+/* Light Theme Base */
+body {
+  background-color: white;
+  color: #1f2937;
+}
+
+/* Form Elements - Light Theme */
+input,
+select,
+textarea {
+  background-color: #f9fafb;
+  color: #1f2937;
+  border-color: #d1d5db;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #404040;
+  box-shadow: 0 0 0 3px rgba(64, 64, 64, 0.1);
+}
+
+/* Button Styles - Charcoal */
+.btn-primary {
+  background: linear-gradient(to right, #404040, #2d2d2d, #1a1a1a);
+  color: white;
+  border-color: #525252;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(to right, #525252, #404040, #2d2d2d);
+  box-shadow: 0 10px 25px rgba(64, 64, 64, 0.3);
+}
+
+.btn-secondary {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  border-color: #d1d5db;
+}
+
+.btn-secondary:hover {
+  background-color: #d1d5db;
+}
+
+/* Card Styles - Light Theme */
+.card {
+  background-color: white;
+  border-color: #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-selected {
+  background: linear-gradient(to bottom right, #f3f4f6, #f9fafb, #f3f4f6);
+  border-color: #525252;
+  box-shadow: 0 20px 25px rgba(64, 64, 64, 0.2);
+}
+
+/* Divider - Charcoal Gradient */
+.divider-charcoal {
+  background: linear-gradient(to right, #404040, #525252, #1a1a1a);
+}
+
+/* Text Colors */
+.text-charcoal-900 {
+  color: #1a1a1a;
+}
+.text-charcoal-700 {
+  color: #404040;
+}
+.text-charcoal-600 {
+  color: #525252;
+}
+
+/* Border Colors */
+.border-charcoal-300 {
+  border-color: #8b8b8b;
+}
+.border-charcoal-200 {
+  border-color: #d1d5db;
+}
+
+/* Background Colors */
+.bg-charcoal-50 {
+  background-color: #f9fafb;
+}
+.bg-charcoal-100 {
+  background-color: #e5e7eb;
+}
+
+/* Hover Effects - Maintained */
+.hover-charcoal:hover {
+  background-color: #f3f4f6;
+  border-color: #525252;
+  transition: all 0.3s ease;
+}
+
+/* Focus Ring - Charcoal */
+.focus-ring-charcoal:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(64, 64, 64, 0.1), 0 0 0 2px #404040;
+}
+
+/* Shadow - Charcoal */
+.shadow-charcoal {
+  box-shadow: 0 10px 25px rgba(64, 64, 64, 0.15);
+}
+
+/* Gradient Backgrounds */
+.gradient-charcoal {
+  background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%);
+}
+
+.gradient-charcoal-dark {
+  background: linear-gradient(135deg, #404040 0%, #2d2d2d 100%);
+}

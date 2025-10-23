@@ -1,0 +1,377 @@
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+impor        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Payment</h1>
+          <p className="text-gray-600">Pay the remaining balance for your booking</p>
+        </div>
+
+        {/* Loading State for Auto-lookup */}
+        {loading && step === 'lookup' && (
+          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Your Booking</h2>
+            <p className="text-gray-600">Please wait while we retrieve your booking information...</p>
+          </div>
+        )}
+
+        {/* Lookup Step */}
+        {step === 'lookup' && !loading && (from 'axios';
+
+// Create API client with base URL
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+});
+
+export default function RemainingPayment() {
+  const [searchParams] = useSearchParams();
+  const [step, setStep] = useState('lookup'); // 'lookup', 'confirm', 'processing'
+  const [lookupMethod, setLookupMethod] = useState('booking-id'); // 'booking-id' or 'email'
+  const [bookingId, setBookingId] = useState('');
+  const [email, setEmail] = useState('');
+  const [booking, setBooking] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Check for booking_id in URL parameters
+  useEffect(() => {
+    const bookingIdFromUrl = searchParams.get('booking_id');
+    if (bookingIdFromUrl) {
+      setBookingId(bookingIdFromUrl);
+      setLookupMethod('booking-id');
+      setLoading(true);
+      // Auto-lookup the booking
+      handleAutoLookup(bookingIdFromUrl);
+    }
+  }, [searchParams]);
+
+  const handleAutoLookup = async (autoBookingId) => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const response = await api.get(`/bookings/lookup/${autoBookingId}`);
+      setBooking(response.data);
+      setStep('confirm');
+    } catch (error) {
+      setError('Invalid or expired payment link. Please enter your booking ID manually.');
+      setStep('lookup');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLookupBooking = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      if (lookupMethod === 'booking-id') {
+        if (!bookingId.trim()) {
+          setError('Please enter your booking ID');
+          return;
+        }
+        
+        const response = await api.get(`/bookings/lookup/${bookingId.trim()}`);
+        setBooking(response.data);
+        setStep('confirm');
+      } else {
+        if (!email.trim()) {
+          setError('Please enter your email address');
+          return;
+        }
+        
+        const response = await api.post('/bookings/lookup-by-email', { email: email.trim() });
+        setBookings(response.data.bookings);
+        setStep('select');
+      }
+    } catch (error) {
+      setError(error.response?.data?.details || 'Failed to find booking. Please check your information and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectBooking = (selectedBooking) => {
+    setBooking(selectedBooking);
+    setStep('confirm');
+  };
+
+  const handleProcessPayment = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      const response = await api.post('/stripe/create-remaining-payment-session', {
+        booking_id: booking.booking_id
+      });
+      
+      // Redirect to Stripe Checkout
+      window.location.href = response.data.url;
+    } catch (error) {
+      setError(error.response?.data?.details || 'Failed to process payment. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-CA');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-2xl mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Payment</h1>
+          <p className="text-gray-600">Pay the remaining balance for your booking</p>
+        </div>
+
+        {/* Lookup Step */}
+        {step === 'lookup' && !loading && (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Find Your Booking</h2>
+            
+            {/* Lookup Method Selection */}
+            <div className="space-y-4 mb-6">
+              <div className="flex space-x-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="booking-id"
+                    checked={lookupMethod === 'booking-id'}
+                    onChange={(e) => setLookupMethod(e.target.value)}
+                    className="mr-2"
+                  />
+                  <span>I have my Booking ID</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="email"
+                    checked={lookupMethod === 'email'}
+                    onChange={(e) => setLookupMethod(e.target.value)}
+                    className="mr-2"
+                  />
+                  <span>Lookup by Email</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Input Fields */}
+            <div className="space-y-4 mb-6">
+              {lookupMethod === 'booking-id' ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Booking ID
+                  </label>
+                  <input
+                    type="text"
+                    value={bookingId}
+                    onChange={(e) => setBookingId(e.target.value)}
+                    placeholder="Enter your booking ID (e.g., BB2025123456)"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter the email used for booking"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500"
+                  />
+                </div>
+              )}
+            </div>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+
+            <button
+              onClick={handleLookupBooking}
+              disabled={loading}
+              className="w-full px-4 py-3 bg-pink-600 text-white rounded-lg font-semibold hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Searching...' : 'Find Booking'}
+            </button>
+          </div>
+        )}
+
+        {/* Booking Selection Step (for email lookup) */}
+        {step === 'select' && (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Select Your Booking</h2>
+            
+            <div className="space-y-4">
+              {bookings.map((booking, index) => (
+                <div
+                  key={booking.booking_id}
+                  className="border border-gray-200 rounded-lg p-4 hover:border-pink-300 cursor-pointer"
+                  onClick={() => handleSelectBooking(booking)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-semibold">{booking.service_type} Service</h3>
+                      <p className="text-sm text-gray-600">Booking ID: {booking.booking_id}</p>
+                      <p className="text-sm text-gray-600">Event Date: {formatDate(booking.event_date)}</p>
+                      <p className="text-sm text-gray-600">Region: {booking.region}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">{formatCurrency(booking.remaining_amount)} remaining</p>
+                      <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                        booking.can_pay_remaining 
+                          ? 'bg-yellow-100 text-yellow-800' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {booking.can_pay_remaining ? 'Payment Due' : 'Paid'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setStep('lookup')}
+              className="mt-4 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+            >
+              Back to Search
+            </button>
+          </div>
+        )}
+
+        {/* Payment Confirmation Step */}
+        {step === 'confirm' && booking && (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Confirm Payment</h2>
+            
+            {/* Booking Details */}
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold text-gray-900 mb-3">Booking Details</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Booking ID:</span>
+                  <span className="font-medium">{booking.booking_id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Client:</span>
+                  <span className="font-medium">{booking.client?.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Service:</span>
+                  <span className="font-medium">{booking.service_type}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Event Date:</span>
+                  <span className="font-medium">{formatDate(booking.event?.date || booking.event_date)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Region:</span>
+                  <span className="font-medium">{booking.region}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Summary */}
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold text-gray-900 mb-3">Payment Summary</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Payment Status:</span>
+                  <span className={`font-medium capitalize ${
+                    booking.payment_status === 'pending' ? 'text-yellow-600' :
+                    booking.payment_status === 'deposit_paid' ? 'text-blue-600' :
+                    booking.payment_status === 'fully_paid' ? 'text-green-600' : 'text-gray-600'
+                  }`}>
+                    {booking.payment_status?.replace('_', ' ') || 'Unknown'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Quote:</span>
+                  <span className="font-medium">{formatCurrency(booking.pricing?.quote_total || booking.quote_total)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Amount Paid:</span>
+                  <span className="font-medium">{formatCurrency(booking.pricing?.amount_paid || booking.amount_paid)}</span>
+                </div>
+                <hr className="my-2" />
+                <div className="flex justify-between text-lg font-semibold text-pink-600">
+                  <span>Remaining Balance:</span>
+                  <span>{formatCurrency(booking.pricing?.remaining_amount || booking.remaining_amount)}</span>
+                </div>
+              </div>
+              
+              {/* Status Message */}
+              {booking.payment_status === 'pending' && (
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-yellow-800">Payment Pending</h3>
+                      <p className="text-sm text-yellow-700">This booking's deposit hasn't been paid yet. You can still proceed to pay the full amount.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Payment Status Check */}
+            {!booking.can_pay_remaining && booking.payment_status === 'fully_paid' ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-green-800">Payment Complete</h3>
+                    <p className="text-sm text-green-700">This booking has been fully paid.</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                    {error}
+                  </div>
+                )}
+
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => setStep('lookup')}
+                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={handleProcessPayment}
+                    disabled={loading}
+                    className="flex-1 px-6 py-3 bg-pink-600 text-white rounded-lg font-semibold hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Processing...' : `Pay ${formatCurrency(booking.pricing?.remaining_amount || booking.remaining_amount)}`}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
