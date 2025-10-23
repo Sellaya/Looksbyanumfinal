@@ -14,7 +14,7 @@ import BridalParty from "./components/BridalParty.jsx";
 import BridalPartyAddons from "./components/BridalPartyAddons.jsx";
 import SemiBridalServiceSelection from "./components/SemiBridalServiceSelection.jsx";
 import SemiBridalAddons from "./components/SemiBridalAddons.jsx";
-import SemiBridalParty from "./components/SemiBridalParty.jsx";
+import SemiBridalParty from "./components/SemiBridalParty.jsx"; 
 import SemiBridalPartyAddons from "./components/SemiBridalPartyAddons.jsx";
 import NonBridalServiceSelection from "./components/NonBridalServiceSelection.jsx";
 import NonBridalBreakdown from "./components/NonBridalBreakdown.jsx";
