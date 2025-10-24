@@ -29,7 +29,7 @@ export default function EditBookingLookup({ onBookingLoaded, onBack }) {
     try {
       const response = await fetch(
         `${
-          import.meta.env.VITE_API_URL || "http://localhost:4000/api"
+          import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api"
         }/bookings/lookup/${bookingId.trim()}`
       );
       if (!response.ok) throw new Error("Booking not found");

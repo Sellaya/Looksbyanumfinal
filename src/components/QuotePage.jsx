@@ -636,7 +636,7 @@ function ArtistSelection({
       if (booking?.email) fd.append("email", booking.email);
       const res = await fetch(
         `${
-          import.meta.env.VITE_API_URL || "http://localhost:4000/api"
+          import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api"
         }/uploads/inspiration`,
         {
           method: "POST",

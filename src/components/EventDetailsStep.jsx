@@ -85,7 +85,7 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
         className={`p-2.5 rounded-md text-sm font-light transition-all duration-200
           ${
             isSelected
-              ? "bg-gray-500 text-gray-50 border border-gray-400 shadow-sm"
+              ? "bg-gray-100 text-gray-50 border border-gray-400 shadow-sm"
               : isDisabled
               ? "bg-gray-50 border border-transparent text-gray-400 cursor-not-allowed"
               : "bg-gray-100 text-gray-800 hover:bg-white hover:text-gray-900 border  hover:border-gray-300"
@@ -107,8 +107,8 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="group relative w-full p-3.5 sm:p-4 rounded-lg border border-gray-300 bg-gray-50 
-          hover:border-gray-400 hover:bg-white text-left flex items-center justify-between transition-all duration-300 shadow-sm"
+          className="group relative w-full p-3.5 sm:p-4 rounded-lg border border-gray-300 bg-white 
+          hover:border-gray-500 hover:bg-gray-50 text-left flex items-center justify-between transition-all duration-300"
         >
           <span className={selectedDate ? "text-gray-800" : "text-gray-400"}>
             {selectedDate ? formatDisplayDate(selectedDate) : "Select date..."}
@@ -271,66 +271,75 @@ export default function EventDetails({ onNext, onBack, register, errors, handleS
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
-      <div className="text-left mb-6 sm:mb-8">
-        <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 tracking-wide">
+    <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
+      <div className="sm:p-8">
+        <h2 className="text-left sm:text-3xl font-normal text-gray-900 mb-1 tracking-wide">
           Event Details<span className="text-gray-400 ml-2">*</span>
         </h2>
-        <p className="text-gray-700 text-sm sm:text-base font-light" style={{ letterSpacing: "0.01em" }}>
+        <p
+          className="text-gray-700 text-sm sm:text-base font-light max-w-2xl mx-auto"
+          style={{ letterSpacing: "0.01em" }}
+        >
           Tell us when and where you need us.
         </p>
       </div>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          onSubmit(watchedValues)
-        }}
-      >
-        <div className="space-y-6 sm:space-y-3">
-          <CustomDatePicker
-            register={register}
-            name="event_date"
-            label="What's your event date?"
-            required={true}
-            error={errors.event_date?.message}
-          />
+      {/* Centered inner wrapper for the form */}
+      <div className="max-w-2xl mx-auto">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            onSubmit(watchedValues)
+          }}
+        >
+          <div className="space-y-6 sm:space-y-3">
+            <CustomDatePicker
+              register={register}
+              name="event_date"
+              label="What's your event date?"
+              required={true}
+              error={errors.event_date?.message}
+            />
 
-          <CustomTimePicker
-            register={register}
-            name="ready_time"
-            label="What is your get ready time?"
-            required={true}
-            error={errors.ready_time?.message}
-          />
+            <CustomTimePicker
+              register={register}
+              name="ready_time"
+              label="What is your get ready time?"
+              required={true}
+              error={errors.ready_time?.message}
+            />
 
-          <p className="text-xs sm:text-sm text-gray-600 mb-5">
-            This is the{" "}
-            <span className="font-semibold text-gray-800">time you need to be ready by</span>. It is NOT the start time.
-          </p>
-        </div>
+            <p className="text-xs sm:text-sm text-gray-600 mb-5">
+              This is the{" "}
+              <span className="font-semibold text-gray-800">time you need to be ready by</span>. It is NOT the start time.
+            </p>
+          </div>
 
-        <div className="flex justify-between gap-5 pt-6 sm:pt-8 border-t border-gray-200">
-          <button
-            onClick={onBack}
-            className="group relative px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden bg-gray-200 text-gray-900 shadow-md shadow-gray-400/20 hover:bg-gray-300 hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-400"
-          >
-            Back
-          </button>
+          {/* Buttons */}
+          <div className="flex justify-between gap-5 pt-6 sm:pt-8 border-t border-gray-200">
+            <button
+              onClick={onBack}
+              className="group relative px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden bg-gray-200 text-gray-900 shadow-md shadow-gray-400/20 hover:bg-gray-300 hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-400"
+            >
+              Back
+            </button>
 
-          <button
-              type="submit" className="relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden
+            <button
+              type="submit"
+              className="relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden
               bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white
               shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30
               hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
             >
-              {/* Animated shimmer effect (Always active since submit buttons are typically enabled) */}
-                Continue
+              Continue
             </button>
-        </div>
-      </form>
+          </div>
+        </form>
+      </div>
     </div>
   )
+
+
 }
 
 

@@ -1,101 +1,94 @@
-"use client";
-import React from "react";
+"use client"
+import React from "react"
 
-const WARNING_COLOR_CLASS = "amber-500";
+const WARNING_COLOR_CLASS = "amber-300"
 
-export default function SemiBridalParty({
-  register,
-  watch,
-  errors,
-  onNext,
-  onBack,
-  setValue,
-}) {
-  const watchedFields = watch();
+export default function SemiBridalParty({ register, watch, errors, onNext, onBack, setValue }) {
+  const watchedFields = watch()
 
-  const hairCount = Number(watchedFields.party_hair_count || 0);
-  const makeupCount = Number(watchedFields.party_makeup_count || 0);
-  const bothCount = Number(watchedFields.party_both_count || 0);
-  const dupattaCount = Number(watchedFields.party_dupatta_count || 0);
-  const extensionsCount = Number(watchedFields.party_extensions_count || 0);
-  const sareeDrapingCount = Number(watchedFields.party_saree_draping_count || 0);
-  const hijabSettingCount = Number(watchedFields.party_hijab_setting_count || 0);
-  const airbrushCount = Number(watchedFields.airbrush_count || 0);
-  const hasAirbrush = watchedFields.has_airbrush === "Yes";
+  const hairCount = Number(watchedFields.party_hair_count || 0)
+  const makeupCount = Number(watchedFields.party_makeup_count || 0)
+  const bothCount = Number(watchedFields.party_both_count || 0)
+  const dupattaCount = Number(watchedFields.party_dupatta_count || 0)
+  const extensionsCount = Number(watchedFields.party_extensions_count || 0)
+  const sareeDrapingCount = Number(watchedFields.party_saree_draping_count || 0)
+  const hijabSettingCount = Number(watchedFields.party_hijab_setting_count || 0)
+  const airbrushCount = Number(watchedFields.airbrush_count || 0)
+  const hasAirbrush = watchedFields.has_airbrush === "Yes"
 
-  const totalHairCount = hairCount + bothCount;
-  const totalPartyMembers = hairCount + makeupCount + bothCount;
-  const maxExtensions = totalHairCount;
+  const totalPartyMembers = hairCount + makeupCount + bothCount
+  const totalHairCount = hairCount + bothCount
+  const maxExtensions = totalHairCount
 
   const handleCountChange = (field, value) => {
-    const numValue = value === "" ? "" : parseInt(value) || "";
-    setValue(`party_${field}_count`, numValue);
+    const numValue = value === "" ? "" : Number.parseInt(value) || ""
+    setValue(`party_${field}_count`, numValue)
 
     const total =
       (field === "both" ? numValue : bothCount) +
       (field === "makeup" ? numValue : makeupCount) +
-      (field === "hair" ? numValue : hairCount);
-    if (total > 0) setValue("has_party_members", "Yes");
-  };
+      (field === "hair" ? numValue : hairCount)
+    if (total > 0) setValue("has_party_members", "Yes")
+  }
 
   const RadioOption = ({ label, value, fieldName, isSelected }) => (
     <button
       type="button"
       onClick={() => setValue(fieldName, value)}
-      className={`group relative w-full flex items-center justify-between p-3 sm:p-4 rounded-lg border transition-all duration-300 cursor-pointer overflow-hidden ${
+      className={`group relative w-full flex items-center justify-between p-3 sm:p-3.5 rounded-lg border transition-all duration-300 cursor-pointer overflow-hidden ${
         isSelected
           ? "border-gray-700 bg-gray-100 shadow-md shadow-gray-400/20"
           : "border-gray-300 bg-white hover:border-gray-500 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-400/10"
       }`}
     >
-      <span className="font-light text-gray-800">{label}</span>
+      <span className="font-light text-gray-800 text-sm sm:text-base">{label}</span>
       <div className="w-5 h-5 rounded-full border border-gray-400 flex items-center justify-center transition-all duration-300">
         {isSelected && <div className="w-3 h-3 rounded-full bg-gray-700"></div>}
       </div>
     </button>
-  );
+  )
 
   const SectionCard = ({ title, subtitle, field, value, max, warning }) => (
-    <div className="group relative w-full flex items-center justify-between p-3 sm:p-4 rounded-lg border transition-all duration-300 cursor-pointer overflow-hidden border-gray-300 bg-white hover:border-gray-500 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-400/10">
-      <div className="flex-1">
-        <h3 className="text-lg font-light text-gray-800">{title}</h3>
-        {subtitle && <p className="text-sm font-light text-gray-600">{subtitle}</p>}
+    <div className="group relative w-full flex items-center justify-between p-3 sm:p-3.5 rounded-lg border transition-all duration-300 cursor-pointer overflow-hidden border-gray-300 bg-white hover:border-gray-500 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-400/10">
+      <div className="flex-1 pr-3">
+        <h3 className="text-base font-light text-gray-800">{title}</h3>
+        {subtitle && <p className="text-xs sm:text-sm font-light text-gray-600 leading-snug">{subtitle}</p>}
         {warning && (
           <p
-            className={`text-sm text-${WARNING_COLOR_CLASS} font-light p-2 mt-1 rounded border border-${WARNING_COLOR_CLASS}/50 bg-${WARNING_COLOR_CLASS}/10`}
+            className={`text-xs text-gray-400 font-light mt-1 rounded border border-${WARNING_COLOR_CLASS}/50 bg-${WARNING_COLOR_CLASS}/20 px-2 py-1`}
           >
             {warning}
           </p>
         )}
       </div>
-      <div className="ml-4 w-24 sm:w-28 md:w-32">
+      <div className="ml-2 w-20 sm:w-24">
         <input
           type="number"
-          value={value}
+          value={value === 0 ? "" : value}
           min="0"
           max={max}
           onChange={(e) => handleCountChange(field, e.target.value)}
-          className="w-full px-3 py-2 bg-white border border-gray-300 rounded-xl focus:ring-1 focus:ring-gray-500 focus:border-gray-500 text-gray-800 font-light"
+          className="w-full px-2 py-1.5 bg-white border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-500 focus:border-gray-500 text-gray-800 font-light text-sm"
         />
       </div>
     </div>
-  );
+  )
 
   return (
-    <div className="max-w-3xl mx-auto px-3 py-6 sm:py-8">
+    <div className="max-w-3xl mx-auto px-2 py-6 sm:py-8">
       <div className="sm:p-8">
         {/* Header */}
-        <div className="mb-5 text-left">
+        <div className="mb-4 sm:mb-5 text-left">
           <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 tracking-wide mb-2">
             Semi Bridal Party Services
           </h2>
-          <p className="text-gray-700 text-sm sm:text-base font-light">
-            Aside from the bride, are there other party members requiring hair and/or makeup?
+          <p className="text-gray-700 text-sm sm:text-base font-light max-w-2xl mx-auto">
+            Aside from the semi bride, are there other members requiring hair and/or makeup services?
           </p>
         </div>
 
         {/* Radio Question */}
-        <div className="flex flex-row space-x-4 mb-4">
+        <div className="flex flex-row space-x-3 mb-4">
           <RadioOption
             label="Yes"
             value="Yes"
@@ -110,61 +103,68 @@ export default function SemiBridalParty({
           />
         </div>
 
-        {/* Party Options */}
+        {/* Service List */}
         {watchedFields.has_party_members === "Yes" && (
           <div className="space-y-2">
-            <div className="mb-4 text-left">
+            <div className="mb-3 text-left">
               <p className="text-gray-700 text-sm sm:text-base font-light">
-                Specify the number of members for each service (0-20):
+                Select quantity for each service
               </p>
             </div>
 
             <SectionCard
               title="Both Hair & Makeup"
+              subtitle="Complete semi-bridal styling package. This does not include the bride."
               field="both"
               value={bothCount}
               max={20}
             />
             <SectionCard
               title="Makeup Only"
+              subtitle="Professional makeup application for party members. This does not include the bride."
               field="makeup"
               value={makeupCount}
               max={20}
             />
             <SectionCard
               title="Hair Only"
+              subtitle="Professional hair styling for party members. This does not include the bride."
               field="hair"
               value={hairCount}
               max={20}
-              min={0}
             />
             <SectionCard
-              title="Dupatta / Veil Setting"
+              title="Dupatta/Veil Setting"
+              subtitle="Assistance with dupatta or veil styling."
               field="dupatta"
               value={dupattaCount}
               max={totalPartyMembers}
             />
             <SectionCard
               title="Hair Extensions Installation"
+              subtitle="Professional installation for those with their own extensions."
               field="extensions"
               value={extensionsCount}
               max={maxExtensions}
+              warning="*Note: Extensions must be provided by each member."
             />
             <SectionCard
               title="Saree Draping"
+              subtitle="Elegant draping for dupatta or veil."
               field="saree_draping"
               value={sareeDrapingCount}
               max={totalPartyMembers}
             />
             <SectionCard
               title="Hijab Setting"
+              subtitle="Professional hijab styling and arrangement."
               field="hijab_setting"
               value={hijabSettingCount}
               max={totalPartyMembers}
             />
 
-            {/* Airbrush */}
-            <div className="flex flex-row justify-around space-x-4 mt-4 mb-6">
+            {/* Airbrush Radio */}
+            <div className="flex flex-row justify-around space-x-4 mt-4 mb-5">
               <RadioOption
                 label="Airbrush: Yes"
                 value="Yes"
@@ -182,6 +182,7 @@ export default function SemiBridalParty({
             {hasAirbrush && (
               <SectionCard
                 title="Airbrush Makeup"
+                subtitle="Professional airbrush makeup for a flawless finish."
                 field="airbrush"
                 value={airbrushCount}
                 max={bothCount + makeupCount}
@@ -190,48 +191,30 @@ export default function SemiBridalParty({
           </div>
         )}
 
-        {/* Summary */}
-        {totalPartyMembers > 0 && (
-          <div className="pt-6 mt-4 border-t border-gray-200">
-            <h4 className="text-lg font-light text-gray-800 mb-2">
-              Bridal Party Summary
-            </h4>
-            <p className="text-sm text-gray-700 mb-2">
-              Total Members:{" "}
-              <span className="font-medium text-gray-900">
-                {totalPartyMembers}
-              </span>
-            </p>
-            <ul className="text-sm text-gray-700 list-disc ml-5 space-y-1">
-              {bothCount > 0 && <li>{bothCount} — Both Hair & Makeup</li>}
-              {makeupCount > 0 && <li>{makeupCount} — Makeup Only</li>}
-              {hairCount > 0 && <li>{hairCount} — Hair Only</li>}
-            </ul>
-          </div>
-        )}
-
-        {/* Buttons */}
-        <div className="flex justify-between gap-5 pt-6 sm:pt-8 border-t border-gray-200 mt-6">
+        {/* Action Buttons */}
+        <div className="flex justify-between gap-5 pt-6 sm:pt-8 border-t border-gray-200">
           <button
             onClick={onBack}
-            className="px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 bg-gray-200 text-gray-900 border border-gray-400 shadow-md hover:bg-gray-300 hover:scale-[1.02]"
+            className="group relative px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden bg-gray-200 text-gray-900 shadow-md shadow-gray-400/20 hover:bg-gray-300 hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-400"
           >
             Back
           </button>
 
           <button
             onClick={onNext}
-            className="px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300
+            className="relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden
               bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white
-              border border-gray-600 shadow-md hover:shadow-lg hover:scale-[1.02]"
+              shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30
+              hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
           >
             Continue
           </button>
         </div>
       </div>
     </div>
-  );
+  )
 }
+
 
 
 // import React from "react";

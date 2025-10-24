@@ -1,13 +1,14 @@
 import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  build: {
-    outDir: 'dist'
-  },
+  plugins: [
+    tailwindcss(),
+    react()
+  ],
   server: {
-    port: 5173
-  },
-}) 
+    allowedHosts: true, // ✅ allow all hosts (zrok/ngrok/etc.)
+    host: true          // ✅ listen on 0.0.0.0 so tunnels & LAN work
+  }
+})

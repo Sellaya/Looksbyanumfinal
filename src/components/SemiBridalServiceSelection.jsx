@@ -1,3 +1,4 @@
+"use client"
 import React from "react"
 
 const CheckCircleIcon = ({ className = "w-5 h-5" }) => (
@@ -17,114 +18,96 @@ export default function SemiBridalServiceSelection({ register, watch, errors, on
 
   const isNextEnabled = !!selectedService
 
-  const SelectCard = ({ value, label, subtext, priceText, onClick, isSelected, registerProps }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`group w-full text-left flex items-center justify-between p-4 sm:p-5 rounded-lg border transition-all duration-300
-        ${
-          isSelected
-            ? "border-gray-700 bg-gray-100 shadow-md shadow-gray-400/20"
-            : "border-gray-300 bg-white hover:border-gray-500 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-400/10"
-        }
-      `}
-    >
-      <div className="flex items-start space-x-3 sm:space-x-4">
-        <input
-          type="radio"
-          {...registerProps}
-          value={value}
-          checked={isSelected}
-          readOnly
-          className="sr-only"
-        />
-        <div>
-          <h3
-            className={`text-base sm:text-lg font-light transition-colors ${
-              isSelected ? "text-gray-900" : "text-gray-800 group-hover:text-gray-900"
-            }`}
-            style={{ letterSpacing: "0.01em" }}
-          >
-            {label}
-          </h3>
-          <p
-            className={`text-sm font-light transition-colors ${
-              isSelected ? "text-gray-700" : "text-gray-600 group-hover:text-gray-700"
-            }`}
-          >
-            {subtext}
-          </p>
-        </div>
-      </div>
-
-      <div className="text-right flex items-center space-x-3">
-        <span
-          className={`text-sm sm:text-base font-light ${
-            isSelected ? "text-gray-900" : "text-gray-600"
-          }`}
-        >
-          {priceText}
-        </span>
-        {isSelected ? (
-          <div className="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center">
-            <CheckCircleIcon className="w-3 h-3 text-white" />
-          </div>
-        ) : (
-          <div className="w-5 h-5 rounded-full border border-gray-400 group-hover:border-gray-600 transition-all" />
-        )}
-      </div>
-    </button>
-  )
+  const services = [
+    {
+      value: "Both Hair & Makeup",
+      label: "Both Hair & Makeup",
+      subtext: "Complete semi bridal styling package",
+    },
+    {
+      value: "Hair Only",
+      label: "Hair Only",
+      subtext: "Professional hair styling",
+    },
+    {
+      value: "Makeup Only",
+      label: "Makeup Only",
+      subtext: "Professional makeup application",
+    },
+  ]
 
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
       <div className="sm:p-8">
         {/* Header */}
-        <div className="text-left mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 tracking-wide mb-2">
-            Semi Bridal Service Details <span className="text-gray-400">*</span>
+        <div className="text-left mb-4 sm:mb-5">
+          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 lg:mb-3 mb-0 tracking-wide">
+            Semi Bridal Service Details
+            <span className="text-gray-400 ml-2">*</span>
           </h2>
-          <p className="text-gray-700 text-sm sm:text-base font-light max-w-2xl">
+          <p
+            className="text-gray-700 text-sm sm:text-base font-light max-w-2xl"
+            style={{ letterSpacing: "0.01em" }}
+          >
             What service do you need?
           </p>
         </div>
 
         {/* Service Options */}
-        <div className="space-y-3 mb-8">
-          <SelectCard
-            value="Both Hair & Makeup"
-            label="Both Hair & Makeup"
-            subtext="Complete semi bridal styling package"
-            onClick={() => handleServiceSelect("Both Hair & Makeup")}
-            isSelected={selectedService === "Both Hair & Makeup"}
-            registerProps={register("bride_service")}
-          />
+        <div className="space-y-2 mb-6 sm:mb-5">
+          {services.map((service) => {
+            const isSelected = selectedService === service.value
+            return (
+              <button
+                key={service.value}
+                type="button"
+                onClick={() => handleServiceSelect(service.value)}
+                className={`group relative w-full p-3 sm:p-4 rounded-lg border transition-all duration-300 text-left overflow-hidden cursor-pointer flex items-center gap-3 sm:gap-4 ${
+                  isSelected
+                    ? "border-gray-700 bg-gray-100 shadow-md shadow-gray-400/20"
+                    : "border-gray-300 bg-white hover:border-gray-500 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-400/10"
+                }`}
+              >
+                {/* Selection Indicator */}
+                <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center transition-all duration-300">
+                  {isSelected ? (
+                    <div className="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center">
+                      <CheckCircleIcon className="w-3 h-3 text-white" />
+                    </div>
+                  ) : (
+                    <div className="w-5 h-5 rounded-full border border-gray-400 group-hover:border-gray-600 transition-all duration-300" />
+                  )}
+                </div>
 
-          <SelectCard
-            value="Hair Only"
-            label="Hair Only"
-            subtext="Professional hair styling"
-            onClick={() => handleServiceSelect("Hair Only")}
-            isSelected={selectedService === "Hair Only"}
-            registerProps={register("bride_service")}
-          />
-
-          <SelectCard
-            value="Makeup Only"
-            label="Makeup Only"
-            subtext="Professional makeup application"
-            onClick={() => handleServiceSelect("Makeup Only")}
-            isSelected={selectedService === "Makeup Only"}
-            registerProps={register("bride_service")}
-          />
+                {/* Text */}
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className={`text-sm sm:text-base font-light transition-colors leading-tight ${
+                      isSelected ? "text-gray-900" : "text-gray-800 group-hover:text-gray-900"
+                    }`}
+                    style={{ letterSpacing: "0.01em" }}
+                  >
+                    {service.label}
+                  </h3>
+                  <p
+                    className={`text-xs sm:text-sm font-light transition-colors leading-relaxed ${
+                      isSelected ? "text-gray-700" : "text-gray-600 group-hover:text-gray-700"
+                    }`}
+                    style={{ letterSpacing: "0.01em" }}
+                  >
+                    {service.subtext}
+                  </p>
+                </div>
+              </button>
+            )
+          })}
         </div>
-        
+
         <div className="text-left mb-6 sm:mb-8">
           <p className="text-gray-900 italic text-sm sm:text-base font-light max-w-2xl">
             *Price varies by package
           </p>
         </div>
-        
 
         {/* Validation Message */}
         {errors.bride_service && (
@@ -134,12 +117,10 @@ export default function SemiBridalServiceSelection({ register, watch, errors, on
         )}
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between items-center pt-5 border-t border-gray-200">
+        <div className="flex justify-between gap-5 pt-6 sm:pt-8 border-t border-gray-200">
           <button
-            type="button"
             onClick={onBack}
-            className="px-6 sm:px-8 py-3 rounded-lg bg-gray-100 text-gray-800 font-light border border-gray-300 hover:bg-gray-200 hover:shadow-sm transition-all duration-300"
-            style={{ letterSpacing: "0.03em" }}
+            className="group relative px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden bg-gray-200 text-gray-900 shadow-md shadow-gray-400/20 hover:bg-gray-300 hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-400"
           >
             Back
           </button>
@@ -148,14 +129,17 @@ export default function SemiBridalServiceSelection({ register, watch, errors, on
             type="button"
             onClick={handleNext}
             disabled={!isNextEnabled}
-            className={`px-8 sm:px-10 py-3 rounded-lg font-light transition-all duration-300 border ${
+            className={`relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden ${
               isNextEnabled
-                ? "bg-gray-900 text-white border-gray-900 hover:bg-gray-800 hover:shadow-md shadow-gray-500/30"
-                : "bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed"
+                ? "bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30 hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed border border-gray-400"
             }`}
-            style={{ letterSpacing: "0.03em" }}
+            style={{ letterSpacing: "0.05em" }}
           >
-            Continue
+            {isNextEnabled && (
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+            )}
+            <span className="relative flex items-center justify-center gap-2">Continue</span>
           </button>
         </div>
       </div>

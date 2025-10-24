@@ -51,10 +51,10 @@ export default function BridalParty({ register, watch, errors, onNext, onBack, s
     <div className="group relative w-full flex items-center justify-between p-3 sm:p-3.5 rounded-lg border transition-all duration-300 cursor-pointer overflow-hidden border-gray-300 bg-white hover:border-gray-500 hover:bg-gray-50 hover:shadow-sm hover:shadow-gray-400/10">
       <div className="flex-1 pr-3">
         <h3 className="text-base font-light text-gray-800">{title}</h3>
-        {subtitle && <p className="text-sm font-light text-gray-600 leading-snug">{subtitle}</p>}
+        {subtitle && <p className="text-xs sm:text-sm font-light text-gray-600 leading-snug">{subtitle}</p>}
         {warning && (
           <p
-            className={`text-xs text-${WARNING_COLOR_CLASS} font-light mt-1 rounded border border-${WARNING_COLOR_CLASS}/50 bg-${WARNING_COLOR_CLASS}/20 px-2 py-1`}
+            className={`text-xs sm:text-xs text text-gray-400 font-light mt-1 rounded border border-${WARNING_COLOR_CLASS}/50 bg-${WARNING_COLOR_CLASS}/20 px-2 py-1`}
           >
             {warning}
           </p>
@@ -63,7 +63,7 @@ export default function BridalParty({ register, watch, errors, onNext, onBack, s
       <div className="ml-2 w-20 sm:w-24">
         <input
           type="number"
-          value={value}
+          value={value === 0 ? "" : value}
           min="0"
           max={max}
           onChange={(e) => handleCountChange(field, e.target.value)}

@@ -3,11 +3,11 @@ import { useState, useEffect } from "react"
 
 // Icons
 const RingIcon = ({ className }) => (
-  <img src="/src/assets/Semi-Bridal-Makeup.png"></img>
+  <img src="/src/assets/Bridal-Makeup (2).png"></img>
 )
 
 const MakeupIcon = ({ className }) => (
-  <img src="/src/assets/Bridal-Makeup.svg"></img>
+  <img src="/src/assets/Semi-Bridal-Makeup.png" classname=""></img>
 )
 
 const CameraIcon = ({ className }) => (

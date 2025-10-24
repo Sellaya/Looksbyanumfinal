@@ -5,7 +5,7 @@ import { calculateBookingPrice } from "../lib/pricing";
 import { formatCurrency } from "../../lib/currencyFormat"; // Added currency formatter import
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
+  baseURL: import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api",
 });
 
 export default function PaymentSuccess() {
