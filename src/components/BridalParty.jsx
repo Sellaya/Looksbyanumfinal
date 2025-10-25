@@ -74,11 +74,12 @@ export default function BridalParty({ register, watch, errors, onNext, onBack, s
   )
 
   return (
-    <div className="max-w-3xl mx-auto px-2 py-6 sm:py-8">
-      <div className="sm:p-8">
+    <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
         {/* Header */}
-        <div className="mb-4 sm:mb-5 text-left">
-          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 tracking-wide mb-2">
+        <div className="sm:p-8 text-left">
+        {/* Header Section */}
+        <div className="text-left mb-4 sm:mb-5">
+          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 sm:mb-3 tracking-wide">
             Bridal Party Services
           </h2>
           <p className="text-gray-700 text-sm sm:text-base font-light max-w-2xl mx-auto">

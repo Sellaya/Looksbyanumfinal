@@ -307,8 +307,9 @@ export default function EventDetails({ onNext, onBack, register, errors, handleS
 
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
-      <div className="sm:p-8">
-        <h2 className="text-left sm:text-3xl font-normal text-gray-900 mb-1 tracking-wide">
+        {/* Header Section */}
+        <div className="sm:p-8 text-left">
+          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 sm:mb-3 tracking-wide">
           Event Details<span className="text-gray-400 ml-2">*</span>
         </h2>
         <p

@@ -78,10 +78,11 @@ export default function ClientDetails({
 
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
-      <div className="sm:p-8">
         {/* Header */}
+        <div className="sm:p-8 text-left">
+        {/* Header Section */}
         <div className="text-left mb-4 sm:mb-5">
-          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-2 tracking-wide">
+          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 sm:mb-3 tracking-wide">
             Contact Information
             <span className="text-gray-400 ml-2">*</span>
           </h2>

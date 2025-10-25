@@ -11,12 +11,7 @@ const ErrorIcon = ({ className }) => (
   </svg>
 );
 
-export default function DestinationDetails({
-  onNext,
-  onBack,
-  register,
-  errors,
-}) {
+export default function DestinationDetails({ onNext, onBack, register, errors }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     onNext();
@@ -24,49 +19,30 @@ export default function DestinationDetails({
 
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
-      <div className="bg-white rounded-2xl p-5 sm:p-8 border border-gray-200 shadow-2xl shadow-gray-400/20">
         {/* Header */}
-        <div className="mb-5 sm:mb-14 text-center">
-          <h2
-            className="text-2xl sm:text-3xl font-normal text-gray-900 mb-3 tracking-wide"
-            style={{
-              fontFamily: "system-ui, -apple-system, sans-serif",
-              letterSpacing: "0.02em",
-            }}
-          >
+        <div className="sm:p-8 text-left">
+        {/* Header */}
+        <div className="mb-5 sm:mb-5 text-left">
+          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 sm:mb-3 tracking-wide">
             Destination Wedding Details
-            <span className="text-gray-500 ml-2 font-normal">*</span>
+            <span className="text-gray-400 ml-2 font-normal">*</span>
           </h2>
-
-          
-
-          <p
-            className="text-gray-600 text-sm sm:text-base font-light max-w-2xl mx-auto"
-            style={{ letterSpacing: "0.01em" }}
-          >
-            Please provide additional information about your event.
+          <p className="text-gray-700 text-sm sm:text-base font-light max-w-2xl mx-auto">
+            Additional details about your destination wedding:
           </p>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="space-y-6 mb-12 sm:mb-16">
+          <div className="space-y-6 mb-5 sm:mb-5">
             <div>
-              <label className="block text-base md:text-lg font-light text-gray-800 mb-3">
-                Additional details about your destination wedding:
-              </label>
               <textarea
                 {...register("destination_details", { required: true })}
                 rows={6}
                 placeholder="Please share any additional details about your destination wedding, such as location, venue, special requirements, or any other information that would help us serve you better..."
                 className={`w-full px-4 py-3 rounded-xl transition-all duration-200 text-gray-800 
-                bg-gray-100 border border-gray-300
-                focus:outline-none focus:ring-2 focus:ring-gray-500/40 focus:border-gray-500
-                resize-none placeholder-gray-500 font-light text-base
-                ${
-                  errors.destination_details
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-400/40"
-                    : ""
-                }`}
+                  bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500/40 focus:border-gray-500
+                  resize-none placeholder-gray-500 font-light text-base
+                  ${errors.destination_details ? "border-red-500 focus:border-red-500 focus:ring-red-400/40" : ""}`}
               />
               {errors.destination_details && (
                 <div className="mt-4 p-3 bg-red-100 border border-red-400 rounded-lg shadow-md flex items-center">
@@ -80,27 +56,23 @@ export default function DestinationDetails({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-between items-center pt-6 sm:pt-8 border-t border-gray-300 mt-4 md:mt-6">
-            {/* Back Button */}
+          <div className="flex justify-between gap-5 pt-6 sm:pt-8 border-t border-gray-200">
             <button
               type="button"
               onClick={onBack}
-              className="px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg bg-gray-200 text-gray-900 
-              hover:bg-gray-300 border border-gray-400 transition-all duration-300"
+              className="group relative px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden bg-gray-200 text-gray-900 shadow-md shadow-gray-400/20 hover:bg-gray-300 hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-400"
             >
               Back
             </button>
 
-            {/* Continue Button (Charcoal Gradient) */}
             <button
               type="submit"
-              className="px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg 
-              bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white shadow-md hover:scale-[1.02] border border-gray-600 transition-all duration-300"
-              style={{ letterSpacing: "0.05em" }}
+              className="relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden
+              bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white
+              shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30
+              hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
             >
-              <span className="relative flex items-center justify-center gap-2.5">
-                Continue
-              </span>
+              Continue
             </button>
           </div>
         </form>

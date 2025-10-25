@@ -198,18 +198,19 @@ export default function DestinationEventDates({ onNext, onBack, register, errors
 
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
-      <div className="sm:p-8">
-        <h2 className="text-left sm:text-3xl font-normal text-gray-900 mb-1 tracking-wide">
+        {/* Header Section */}
+        <div className="sm:p-8 text-left">
+          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 sm:mb-3 tracking-wide">
           Event Dates<span className="text-gray-400 ml-2">*</span>
-        </h2>
-        <p className="text-gray-700 text-sm sm:text-base font-light max-w-2xl mx-auto">
-          Tell us when your destination event takes place.
-        </p>
-      </div>
+          </h2>
+          <p className="text-gray-700 text-sm sm:text-base font-light max-w-2xl mx-auto">
+            Tell us when your destination event takes place.
+          </p>
+        </div>
 
       <div className="max-w-2xl mx-auto">
         <form onSubmit={handleSubmit}>
-          <div className="space-y-6 sm:space-y-3 mb-12 sm:mb-16">
+          <div className="space-y-6 sm:space-y-3 mb-12 sm:mb-5">
             <CustomDatePicker
               register={register}
               name="event_start_date"

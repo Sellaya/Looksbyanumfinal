@@ -30,7 +30,7 @@ export default function NonBridalBreakdown({
     const checked = watch(name);
     return (
       <div
-        className={`flex justify-between items-center border border-gray-300 bg-white rounded-xl px-4 py-3 sm:px-6 sm:py-4 shadow-sm hover:shadow-md transition-all duration-200 ${
+        className={`flex justify-between items-center border border-gray-300 bg-white rounded-xl px-4 py-3 sm:px-6 sm:py-4 hover:shadow-sm transition-all duration-200 ${
           checked ? "border-gray-500" : ""
         }`}
       >
@@ -58,10 +58,11 @@ export default function NonBridalBreakdown({
 
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
-      <div className="sm:p-8">
         {/* Header */}
-        <div className="mb-8 text-left">
-          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-2 tracking-wide">
+        <div className="sm:p-8 text-left">
+        {/* Header Section */}
+        <div className="text-left mb-4 sm:mb-5">
+          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 sm:mb-3 tracking-wide">
             Non-Bridal Service Breakdown
           </h2>
           <p className="text-gray-600 text-sm sm:text-base font-light">
