@@ -1,129 +1,155 @@
-import React from "react";
+import React from "react"
 
-const CustomDatePicker = ({ label, name, register, error, required }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [selectedDate, setSelectedDate] = React.useState("");
-  const [currentMonth, setCurrentMonth] = React.useState(new Date());
-  const dropdownRef = React.useRef(null);
+// Reusable Custom Date Picker (Charcoalish theme)
+const CustomDatePicker = ({ label, name, register, error, required, minDate: propMinDate, maxDate }) => {
+  const [isOpen, setIsOpen] = React.useState(false)
+  const [selectedDate, setSelectedDate] = React.useState("")
+  const [currentMonth, setCurrentMonth] = React.useState(new Date())
+  const dropdownRef = React.useRef(null)
 
-  const getMinimumDate = (minDaysAdvance = 2) => {
-    const today = new Date();
-    const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const minimumDate = new Date(localToday);
-    minimumDate.setDate(minimumDate.getDate() + minDaysAdvance);
-    return minimumDate;
-  };
+  // ✅ Use prop minDate if provided, otherwise today
+  const getMinimumDate = () => {
+    const today = new Date()
+    const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    return propMinDate ? new Date(propMinDate) : localToday
+  }
 
-  const minDate = getMinimumDate(2);
-  minDate.setHours(0, 0, 0, 0);
+  const minDate = getMinimumDate()
+  minDate.setHours(0, 0, 0, 0)
+
+  const isDateDisabled = (date) => {
+    if (date < minDate) return true
+    if (maxDate && date > new Date(maxDate)) return true
+    return false
+  }
+
+  const internalMinDate = getMinimumDate(2)
+  internalMinDate.setHours(0, 0, 0, 0)
 
   const formatDisplayDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString + "T00:00:00");
+    if (!dateString) return ""
+    const date = new Date(dateString + "T00:00:00")
     return date.toLocaleDateString("en-US", {
       weekday: "short",
       year: "numeric",
       month: "short",
       day: "numeric",
-    });
-  };
+    })
+  }
 
   const getDaysInMonth = (date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    return { daysInMonth: lastDay.getDate(), startingDayOfWeek: firstDay.getDay(), year, month };
-  };
-
-  const isDateDisabled = (date) => date < minDate;
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    return { daysInMonth: lastDay.getDate(), startingDayOfWeek: firstDay.getDay(), year, month }
+  }
 
   const handleDateSelect = (day, onChange) => {
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
-    const selectedDateObj = new Date(year, month, day);
-    if (isDateDisabled(selectedDateObj)) return;
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    const selectedDateObj = new Date(year, month, day)
+    if (isDateDisabled(selectedDateObj)) return
 
-    const formatted = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    setSelectedDate(formatted);
-    onChange({ target: { name, value: formatted } });
-    setIsOpen(false);
-  };
+    const formatted = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    setSelectedDate(formatted)
+    onChange({ target: { name, value: formatted } })
+    setIsOpen(false)
+  }
 
-  const handlePrevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
-  const handleNextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+  const handlePrevMonth = () =>
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
+  const handleNextMonth = () =>
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
 
   React.useEffect(() => {
     const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false)
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
-  const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentMonth);
-  const monthName = currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-  const { onChange, ...registerProps } = register(name);
+  const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentMonth)
+  const monthName = currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  const { onChange, ...registerProps } = register(name)
 
-  const calendarDays = [];
-  for (let i = 0; i < startingDayOfWeek; i++) calendarDays.push(<div key={`empty-${i}`} className="p-2"></div>);
+  const calendarDays = []
+  for (let i = 0; i < startingDayOfWeek; i++) calendarDays.push(<div key={`empty-${i}`} className="p-2" />)
   for (let day = 1; day <= daysInMonth; day++) {
-    const dateObj = new Date(year, month, day);
-    const isDisabled = isDateDisabled(dateObj);
-    const isSelected = selectedDate === `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const dateObj = new Date(year, month, day)
+    const isDisabled = isDateDisabled(dateObj)
+    const isSelected =
+      selectedDate === `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+
     calendarDays.push(
       <button
         key={day}
         type="button"
         onClick={() => !isDisabled && handleDateSelect(day, onChange)}
         disabled={isDisabled}
-        className={`p-2 rounded-lg text-sm font-light transition-all duration-150
-          ${isSelected
-            ? "bg-gradient-to-r from-gray-100 to-gray-200 text-white shadow-md shadow-gray-700/40"
-            : isDisabled
-            ? " bg-gray-200 text-gray-400 cursor-not-allowed"
-            : " bg-gray-200 text-gray-900 hover:bg-gray-800 hover:text-gray-200"
+        className={`p-2.5 rounded-md text-sm font-light transition-all duration-200
+          ${
+            isSelected
+              ? "bg-gray-800 text-gray-50 border border-gray-400 shadow-sm"
+              : isDisabled
+              ? "bg-gray-50 text-gray-400 cursor-not-allowed border border-transparent"
+              : "bg-gray-100 text-gray-800 hover:bg-white hover:text-gray-900 border hover:border-gray-300"
           }`}
       >
         {day}
       </button>
-    );
+    )
   }
 
   return (
     <div>
-      <label htmlFor={name} className="block text-sm md:text-base font-light text-gray-800 mb-2">
-        {label} {required && <span className="text-gray-900">*</span>}
+      <label htmlFor={name} className="block text-sm sm:text-base font-light text-gray-800 mb-2">
+        {label} {required && <span className="text-gray-700">*</span>}
       </label>
 
       <div className="relative" ref={dropdownRef}>
         <input type="hidden" {...registerProps} onChange={onChange} />
-
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="group relative w-full p-4 sm:p-5 rounded-lg border border-gray-300 bg-white 
-          hover:border-gray-500 hover:bg-gray-50 hover:shadow-md text-left flex items-center justify-between transition-all duration-300"
+          className="group relative w-full p-3.5 sm:p-4 rounded-lg border border-gray-300 bg-white 
+          hover:border-gray-500 hover:bg-gray-50 text-left flex items-center justify-between transition-all duration-300"
         >
           <span className={selectedDate ? "text-gray-800" : "text-gray-400"}>
             {selectedDate ? formatDisplayDate(selectedDate) : "Select date..."}
           </span>
           <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
           </svg>
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-xl shadow-xl p-4">
+          <div className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-xl shadow-lg p-4">
             <div className="flex items-center justify-between mb-4">
-              <button onClick={handlePrevMonth} type="button" className="p-2 hover:bg-gray-100 rounded-lg">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button
+                onClick={handlePrevMonth}
+                type="button"
+                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+              >
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <h3 className="text-gray-800 font-medium text-base">{monthName}</h3>
-              <button onClick={handleNextMonth} type="button" className="p-2 hover:bg-gray-100 rounded-lg">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+              <h3 className="text-gray-800 font-medium text-sm sm:text-base">{monthName}</h3>
+
+              <button
+                onClick={handleNextMonth}
+                type="button"
+                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+              >
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -131,7 +157,9 @@ const CustomDatePicker = ({ label, name, register, error, required }) => {
 
             <div className="grid grid-cols-7 gap-1 mb-2">
               {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-                <div key={d} className="text-center text-xs text-gray-500 p-2">{d}</div>
+                <div key={d} className="text-center text-xs text-gray-500 p-1.5">
+                  {d}
+                </div>
               ))}
             </div>
 
@@ -141,95 +169,56 @@ const CustomDatePicker = ({ label, name, register, error, required }) => {
       </div>
 
       {error && (
-        <div className="mt-4 p-3 bg-gray-100 border border-gray-300 rounded-lg">
-          <p className="text-sm text-gray-800 font-light">{error}</p>
+        <div className="mt-3 p-3 bg-gray-50 border border-gray-300 rounded-md">
+          <p className="text-sm text-gray-700 font-light">{error}</p>
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-
-// Icon for Error Messages
-const ErrorIcon = ({ className }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path
-      fillRule="evenodd"
-      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-      clipRule="evenodd"
-    />
-  </svg>
-);
-
-export default function DestinationEventDates({
-  onNext,
-  onBack,
-  register,
-  errors,
-  watch,
-}) {
-  const watchedValues = watch();
+export default function DestinationEventDates({ onNext, onBack, register, errors, watch }) {
+  const watchedValues = watch()
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault()
+    const startDate = watchedValues.event_start_date
+    const endDate = watchedValues.event_end_date
 
-    const startDate = watchedValues.event_start_date;
-    const endDate = watchedValues.event_end_date;
+    if (!startDate) return window.showToast?.("Please select an event start date.", "error")
+    if (!endDate) return window.showToast?.("Please select an event end date.", "error")
 
-    if (!startDate) {
-      window.showToast?.("Please select an event start date.", "error");
-      return;
-    }
+    const startDateObj = new Date(startDate)
+    const endDateObj = new Date(endDate)
+    if (endDateObj <= startDateObj)
+      return window.showToast?.("Event end date must be after the start date.", "error")
 
-    if (!endDate) {
-      window.showToast?.("Please select an event end date.", "error");
-      return;
-    }
-
-    const startDateObj = new Date(startDate);
-    const endDateObj = new Date(endDate);
-
-    if (endDateObj <= startDateObj) {
-      window.showToast?.(
-        "Event end date must be after the start date.",
-        "error"
-      );
-      return;
-    }
-
-    onNext();
-  };
+    onNext()
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
-      <div className="bg-white rounded-2xl p-5 sm:p-8 border border-gray-200 shadow-2xl shadow-gray-400/20">
-        {/* Header */}
-        <div className="mb-5 sm:mb-6 text-center">
-          <h2
-            className="text-2xl sm:text-3xl font-light text-gray-900 mb-3 tracking-wide"
-          >
-            Event Dates
-            <span className="text-gray-500 ml-2 font-normal">*</span>
-          </h2>
-          <p
-            className="text-gray-600 text-sm sm:text-base font-light max-w-2xl mx-auto"
-          >
-            Tell us when your destination event takes place.
-          </p>
-        </div>
+      <div className="sm:p-8">
+        <h2 className="text-left sm:text-3xl font-normal text-gray-900 mb-1 tracking-wide">
+          Event Dates<span className="text-gray-400 ml-2">*</span>
+        </h2>
+        <p className="text-gray-700 text-sm sm:text-base font-light max-w-2xl mx-auto">
+          Tell us when your destination event takes place.
+        </p>
+      </div>
 
+      <div className="max-w-2xl mx-auto">
         <form onSubmit={handleSubmit}>
-          <div className="space-y-10 mb-12 sm:mb-16">
-            {/* Start Date */}
+          <div className="space-y-6 sm:space-y-3 mb-12 sm:mb-16">
             <CustomDatePicker
               register={register}
               name="event_start_date"
               label="Event Starting Date"
               required={true}
               error={errors.event_start_date?.message}
+              minDate={new Date().toISOString().split("T")[0]} // allow today onwards
             />
 
-            {/* End Date */}
             <CustomDatePicker
               register={register}
               name="event_end_date"
@@ -238,48 +227,39 @@ export default function DestinationEventDates({
               error={errors.event_end_date?.message}
               minDate={
                 watchedValues.event_start_date
-                  ? new Date(
-                      new Date(watchedValues.event_start_date).setDate(
-                        new Date(watchedValues.event_start_date).getDate() + 1
-                      )
-                    )
+                  ? new Date(new Date(watchedValues.event_start_date).setDate(new Date(watchedValues.event_start_date).getDate() + 1))
                       .toISOString()
                       .split("T")[0]
-                  : undefined
+                  : new Date().toISOString().split("T")[0]
               }
             />
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-between items-center pt-6 sm:pt-8 border-t border-gray-200 mt-4 md:mt-6">
-            {/* Back Button */}
+          <div className="flex justify-between gap-5 pt-6 sm:pt-8 border-t border-gray-200">
             <button
               type="button"
               onClick={onBack}
-              className="px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg bg-gray-200 text-gray-900 
-              hover:bg-gray-300 border border-gray-400 transition-all duration-300"
-              style={{ letterSpacing: "0.05em" }}
+              className="group relative px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden bg-gray-200 text-gray-900 shadow-md shadow-gray-400/20 hover:bg-gray-300 hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-400"
             >
               Back
             </button>
 
-            {/* Continue Button (Charcoal Gradient) */}
             <button
               type="submit"
               className="relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden
-       bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30 hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
-              style={{ letterSpacing: "0.05em" }}
+              bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white
+              shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30
+              hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
             >
-              <span className="relative flex items-center justify-center gap-2.5">
-                Continue
-              </span>
+              Continue
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
+  )
 }
+
 
 
 // import React from 'react';

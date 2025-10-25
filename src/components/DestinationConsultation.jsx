@@ -2,12 +2,14 @@ import React from 'react';
 
 export default function DestinationConsultation({ onNext, onBack }) {
   return (
-    <div className="max-w-sm md:max-w-2xl mx-auto p-4 md:p-8 glass-card">
-      <h2 className="text-2xl font-bold text-gray-900 mb-8 text-left">
-        Schedule Your Consultation
-      </h2>
+    <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8 max-w-2xl mx-auto">
+      <div className="sm:p-8">
+        <h2 className="text-left sm:text-3xl font-normal text-gray-900 mb-1 tracking-wide">
+          Schedule Your Consultation
+        </h2>
+      </div>
 
-      <div className="mb-8">
+      <div className="mb-8 max-w-2xl mx-auto">
         <iframe
           src="https://calendly.com/looksbyanum-info/30min?embed_domain=localhost&embed_type=Inline&hide_landing_page_details=1"
           width="100%"
@@ -19,18 +21,18 @@ export default function DestinationConsultation({ onNext, onBack }) {
         />
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between max-w-2xl mx-auto">
         <button
           type="button"
           onClick={onBack}
-          className="px-8 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200"
+          className="px-8 py-3 border border-gray-700 text-gray-900 rounded-lg hover:bg-gray-300 bg-gray-200 transition-colors duration-200"
         >
           Back
         </button>
         <button
           type="button"
           onClick={onNext}
-          className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 cursor-pointer"
+          className="relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
         >
           Continue to Summary
         </button>

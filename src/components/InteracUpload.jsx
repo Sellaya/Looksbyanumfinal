@@ -340,27 +340,43 @@ export default function InteracUpload() {
               )}
             </div>
 
-            <div className="mt-5">
+            <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-4">
+              {/* Back Button */}
+              <button
+                onClick = {() => (window.location.href = "/")} // <- define this function to navigate back to the previous step
+                className={`relative w-full sm:w-auto bg-gray-200 text-gray-800 py-3 px-5 rounded-lg font-light shadow-sm hover:shadow-md border border-gray-300 hover:border-gray-400 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base`}
+                style={{ letterSpacing: "0.05em" }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+                <span className="relative flex items-center justify-center gap-2">
+                  Back
+                </span>
+              </button>
+
+              {/* Upload Screenshot Button */}
               <button
                 onClick={uploadScreenshot}
                 disabled={uploading || !screenshot}
-                className={`${buttonBase} ${
+                className={`relative w-full sm:w-auto ${buttonBase} ${
                   uploading || !screenshot ? disabledButton : activeButton
                 }`}
               >
                 {!uploading && !(!screenshot) && (
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
                 )}
-                {uploading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block align-middle"></div>
-                    Uploading Screenshot...
-                  </>
-                ) : (
-                  "Upload Payment Screenshot"
-                )}
+                <span className="relative flex items-center justify-center gap-2">
+                  {uploading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block align-middle"></div>
+                      Uploading Screenshot...
+                    </>
+                  ) : (
+                    "Upload Payment Screenshot"
+                  )}
+                </span>
               </button>
             </div>
+
           </div>
         )}
       </div>

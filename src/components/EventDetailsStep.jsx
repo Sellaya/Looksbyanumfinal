@@ -1,21 +1,28 @@
 import React from "react"
 
 // Custom Date Picker (Light + Charcoalish Theme)
-const CustomDatePicker = ({ label, name, register, error, required, maxDate }) => {
+const CustomDatePicker = ({
+  label,
+  name,
+  register,
+  error,
+  required,
+  maxDate,
+  minDate: propMinDate, // 👈 allow passing minDate from parent
+}) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const [selectedDate, setSelectedDate] = React.useState("")
   const [currentMonth, setCurrentMonth] = React.useState(new Date())
   const dropdownRef = React.useRef(null)
 
-  const getMinimumDate = (minDaysAdvance = 2) => {
+  // ✅ Use today's date if no minDate prop is provided
+  const getMinimumDate = () => {
     const today = new Date()
     const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-    const minimumDate = new Date(localToday)
-    minimumDate.setDate(minimumDate.getDate() + minDaysAdvance)
-    return minimumDate
+    return propMinDate ? new Date(propMinDate) : localToday
   }
 
-  const minDate = getMinimumDate(2)
+  const minDate = getMinimumDate()
   minDate.setHours(0, 0, 0, 0)
 
   const formatDisplayDate = (dateString) => {
@@ -38,6 +45,7 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
   }
 
   const isDateDisabled = (date) => {
+    // ✅ allow current day and onwards
     if (date < minDate) return true
     if (maxDate && date > new Date(maxDate)) return true
     return false
@@ -55,8 +63,10 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
     setIsOpen(false)
   }
 
-  const handlePrevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
-  const handleNextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
+  const handlePrevMonth = () =>
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
+  const handleNextMonth = () =>
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
 
   React.useEffect(() => {
     const handleClickOutside = (e) => {
@@ -71,11 +81,15 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
   const { onChange, ...registerProps } = register(name)
 
   const calendarDays = []
-  for (let i = 0; i < startingDayOfWeek; i++) calendarDays.push(<div key={`empty-${i}`} className="p-2" />)
+  for (let i = 0; i < startingDayOfWeek; i++)
+    calendarDays.push(<div key={`empty-${i}`} className="p-2" />)
+
   for (let day = 1; day <= daysInMonth; day++) {
     const dateObj = new Date(year, month, day)
     const isDisabled = isDateDisabled(dateObj)
-    const isSelected = selectedDate === `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    const isSelected =
+      selectedDate === `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+
     calendarDays.push(
       <button
         key={day}
@@ -85,10 +99,10 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
         className={`p-2.5 rounded-md text-sm font-light transition-all duration-200
           ${
             isSelected
-              ? "bg-gray-100 text-gray-50 border border-gray-400 shadow-sm"
+              ? "bg-gray-800 text-white border border-gray-600 shadow-sm"
               : isDisabled
-              ? "bg-gray-50 border border-transparent text-gray-400 cursor-not-allowed"
-              : "bg-gray-100 text-gray-800 hover:bg-white hover:text-gray-900 border  hover:border-gray-300"
+              ? "bg-gray-50 text-gray-400 border border-transparent cursor-not-allowed"
+              : "bg-gray-100 text-gray-800 hover:bg-white hover:text-gray-900 border hover:border-gray-300"
           }`}
       >
         {day}
@@ -98,7 +112,10 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
 
   return (
     <div>
-      <label htmlFor={name} className="block text-sm sm:text-base font-light text-gray-800 mb-2">
+      <label
+        htmlFor={name}
+        className="block text-sm sm:text-base font-light text-gray-800 mb-2"
+      >
         {label} {required && <span className="text-gray-700">*</span>}
       </label>
 
@@ -113,7 +130,12 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
           <span className={selectedDate ? "text-gray-800" : "text-gray-400"}>
             {selectedDate ? formatDisplayDate(selectedDate) : "Select date..."}
           </span>
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-5 h-5 text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -131,7 +153,12 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
                 type="button"
                 className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
               >
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
@@ -143,7 +170,12 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
                 type="button"
                 className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
               >
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -151,7 +183,9 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
 
             <div className="grid grid-cols-7 gap-1 mb-2">
               {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-                <div key={d} className="text-center text-xs text-gray-500 p-1.5">{d}</div>
+                <div key={d} className="text-center text-xs text-gray-500 p-1.5">
+                  {d}
+                </div>
               ))}
             </div>
 
@@ -168,6 +202,7 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
     </div>
   )
 }
+
 
 
 
@@ -299,6 +334,7 @@ export default function EventDetails({ onNext, onBack, register, errors, handleS
               label="What's your event date?"
               required={true}
               error={errors.event_date?.message}
+              minDate={new Date().toISOString().split("T")[0]} // allow today onwards
             />
 
             <CustomTimePicker

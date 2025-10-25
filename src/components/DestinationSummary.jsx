@@ -43,12 +43,14 @@ export default function DestinationSummary({ onNext, onBack, getValues }) {
   }
 
   return (
-    <div className="max-w-sm md:max-w-2xl mx-auto p-4 md:p-8 glass-card">
-      <h2 className="text-2xl font-bold text-gray-900 mb-8 text-left">
-        Booking Summary
-      </h2>
+    <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
+      <div className="sm:p-8">
+        <h2 className="text-left sm:text-3xl font-normal text-gray-900 mb-1 tracking-wide">
+          Booking Summary
+        </h2>
+      </div>
 
-      <div className="bg-gray-50 p-6 rounded-lg mb-8 border-2 border-gray-200">
+      <div className="bg-gray-50 p-6 rounded-lg mb-8 border-2 border-gray-200 max-w-2xl mx-auto">
         <div className="space-y-4 text-gray-800">
           <div className="flex justify-between">
             <span className="font-semibold">Service Type:</span>
@@ -85,28 +87,30 @@ export default function DestinationSummary({ onNext, onBack, getValues }) {
         </div>
       </div>
 
-      <div className="bg-blue-50 p-4 rounded-lg mb-8 border border-blue-200">
+      <div className="bg-blue-50 p-4 rounded-lg mb-8 border border-blue-200 max-w-2xl mx-auto">
         <p className="text-blue-800 text-sm">
           We'll contact you with a custom quote for destination wedding services.
         </p>
       </div>
 
-      <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={onBack}
-          className="px-8 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200"
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={handleConfirmBooking}
-          className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200"
-        >
-          Confirm Booking ✓
-        </button>
-      </div>
+      <div className="flex justify-between gap-5 pt-6 sm:pt-8 border-t border-gray-200 max-w-2xl mx-auto">
+          <button
+            onClick={onBack}
+            className="group relative px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden bg-gray-200 text-gray-900 shadow-md shadow-gray-400/20 hover:bg-gray-300 hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-400"
+          >
+            Back
+          </button>
+
+          <button
+            type="submit"
+            className="relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden
+            bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white
+            shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30
+            hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
+          >
+            Continue
+          </button>
+        </div>
     </div>
   );
 }

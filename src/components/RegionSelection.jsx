@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import TorontoGTAIcon from "../assets/Torronto-GTA.png"
 
 const CheckIcon = ({ className }) => (
   <svg
@@ -12,6 +13,49 @@ const CheckIcon = ({ className }) => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
   </svg>
 )
+
+// Toronto icon (e.g., a city skyline)
+const TorontoIcon = ({ className }) => (
+  <img src={TorontoGTAIcon} alt="Toronto Icon" className="w-10" />
+)
+
+// Outside GTA icon (e.g., a road or map pin)
+const OutsideIcon = ({ className }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M2 16l20-5-20-5v5h15H2v5z" />
+    <rect x="2" y="20" width="20" height="1.8" rx="0.5" />
+  </svg>
+)
+
+const DestinationIcon = ({ className }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    {/* Filled pin shape */}
+    <path d="M12 2C8 2 5 5 5 9c0 4 7 13 7 13s7-9 7-13c0-4-3-7-7-7z" />
+    
+    {/* Hollow circle (center dot) */}
+    <circle
+      cx="12"
+      cy="9"
+      r="2.3"
+      fill="white"         // makes it hollow
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+  </svg>
+)
+
+
+
 
 const RegionIcon = ({ className }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,9 +85,24 @@ export default function RegionSelection({ onNext, onBack, register, setValue, ge
   const [selectedSubRegion, setSelectedSubRegion] = useState(getValues("subRegion") || "")
 
   const regions = [
-    { id: "toronto", name: "Toronto/GTA", description: "Available for studio and on-location services" },
-    { id: "outside", name: "Outside GTA", description: "We travel to nearby areas for mobile services" },
-    { id: "destination", name: "Destination Wedding", description: "We provide travel-based bookings" },
+    {
+      id: "toronto",
+      name: "Toronto/GTA",
+      description: "Available for studio and on-location services",
+      icon: TorontoIcon,
+    },
+    {
+      id: "outside",
+      name: "Outside GTA",
+      description: "We travel to nearby areas for mobile services",
+      icon: OutsideIcon,
+    },
+    {
+      id: "destination",
+      name: "Destination Wedding",
+      description: "We provide travel-based bookings",
+      icon: DestinationIcon,
+    },
   ]
 
   const subRegions = [
@@ -122,12 +181,13 @@ export default function RegionSelection({ onNext, onBack, register, setValue, ge
                       : "bg-gray-200/50 group-hover:bg-gray-300/50"
                   }`}
                 >
-                  <RegionIcon
-                    className={`w-4 h-4 sm:w-5 sm:h-5 ${
-                      isSelected ? "text-gray-700" : "text-gray-600 group-hover:text-gray-700"
+                  <region.icon
+                    className={`w-4 h-4 sm:w-6 sm:h-6 ${
+                      isSelected ? "text-gray-900" : "text-gray-900 group-hover:text-black"
                     }`}
                   />
                 </div>
+
 
                 {/* Text */}
                 <div className="flex-1 min-w-0 text-left">
