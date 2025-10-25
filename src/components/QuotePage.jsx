@@ -480,7 +480,7 @@ export default function QuotePage() {
     );
 
   return (
-    <div className="max-w-4xl items-center mx-auto">
+    <div className="max-w-4xl items-center w-[110%] mx-auto">
       <div className="bg-white p-6 sm:p-8">
         {/* Header */}
         <div className="mb-4 text-center">
