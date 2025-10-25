@@ -530,7 +530,7 @@ export default function QuotePage() {
                 </div>
 
                 {/* Date Picker + Selected Date */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 w-full sm:w-[70%]">
+                <div className="flex flex-col sm:flex-row sm:items-center items-center gap-2 sm:gap-4 w-xs sm:w-[70%]">
                   <div className="flex-1 w-full">
                     <CustomDatePicker
                       label=""
