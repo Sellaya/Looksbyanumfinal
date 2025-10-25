@@ -319,6 +319,8 @@ export default function QuotePage() {
   const loadBooking = async () => {
     try {
       const res = await api.get(`/quote/${bookingId}`)
+      console.log("🛰 baseURL:", api.defaults.baseURL);
+      console.log("🧾 Fetching:", `/quote/${bookingId}`);
       const bk = res.data
       const paymentStatus = bk.payment_status || bk.ops?.payment_status
 

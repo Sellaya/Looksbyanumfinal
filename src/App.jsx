@@ -47,6 +47,8 @@ const api = axios.create({
     import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api/",
 });
 
+console.log("baseURL test", api)
+
 export default function App() {
   const [step, setStep] = useState(1);
   const [config, setConfig] = useState(null);
@@ -675,7 +677,7 @@ export default function App() {
 
           // Existing timeout logic remains unchanged
           setTimeout(() => {
-            window.location.replace(`/quote/${bookingId}`);
+            window.location.replace(`${import.meta.env.VITE_FRONTEND_URL || ""}/quote/${bookingId}`);
           }, 1200);
         } else {
           // Standard error toast fallback (functionality remains unchanged)
@@ -756,7 +758,7 @@ export default function App() {
       // Calculate quote first if not already calculated (skip for destination weddings)
       let quoteData = quote;
       const region = getValues("region");
-
+      console.log("Quote Data Test",quoteData)
       if (region === "Destination Wedding") {
         // For destination weddings, always set pricing to 0
         quoteData = {
