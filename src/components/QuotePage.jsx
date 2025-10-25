@@ -8,84 +8,120 @@ import DatePicker from "./DatePicker";
 import Logo from "../assets/Black.png";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api/",
+  baseURL:
+    import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api/",
 });
 
-const CustomDatePicker = ({ label, name, register, error, required, maxDate }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
-  const [selectedDate, setSelectedDate] = React.useState("")
-  const [currentMonth, setCurrentMonth] = React.useState(new Date())
-  const dropdownRef = React.useRef(null)
+const CustomDatePicker = ({
+  label,
+  name,
+  register,
+  error,
+  required,
+  maxDate,
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [selectedDate, setSelectedDate] = React.useState("");
+  const [currentMonth, setCurrentMonth] = React.useState(new Date());
+  const dropdownRef = React.useRef(null);
 
   const getMinimumDate = (minDaysAdvance = 2) => {
-    const today = new Date()
-    const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-    const minimumDate = new Date(localToday)
-    minimumDate.setDate(minimumDate.getDate() + minDaysAdvance)
-    return minimumDate
-  }
+    const today = new Date();
+    const localToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const minimumDate = new Date(localToday);
+    minimumDate.setDate(minimumDate.getDate() + minDaysAdvance);
+    return minimumDate;
+  };
 
-  const minDate = getMinimumDate(2)
-  minDate.setHours(0, 0, 0, 0)
+  const minDate = getMinimumDate(2);
+  minDate.setHours(0, 0, 0, 0);
 
   const formatDisplayDate = (dateString) => {
-    if (!dateString) return ""
-    const date = new Date(dateString + "T00:00:00")
+    if (!dateString) return "";
+    const date = new Date(dateString + "T00:00:00");
     return date.toLocaleDateString("en-US", {
       weekday: "short",
       year: "numeric",
       month: "short",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   const getDaysInMonth = (date) => {
-    const year = date.getFullYear()
-    const month = date.getMonth()
-    const firstDay = new Date(year, month, 1)
-    const lastDay = new Date(year, month + 1, 0)
-    return { daysInMonth: lastDay.getDate(), startingDayOfWeek: firstDay.getDay(), year, month }
-  }
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    return {
+      daysInMonth: lastDay.getDate(),
+      startingDayOfWeek: firstDay.getDay(),
+      year,
+      month,
+    };
+  };
 
   const isDateDisabled = (date) => {
-    if (date < minDate) return true
-    if (maxDate && date > new Date(maxDate)) return true
-    return false
-  }
+    if (date < minDate) return true;
+    if (maxDate && date > new Date(maxDate)) return true;
+    return false;
+  };
 
   const handleDateSelect = (day, onChange) => {
-    const year = currentMonth.getFullYear()
-    const month = currentMonth.getMonth()
-    const selectedDateObj = new Date(year, month, day)
-    if (isDateDisabled(selectedDateObj)) return
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const selectedDateObj = new Date(year, month, day);
+    if (isDateDisabled(selectedDateObj)) return;
 
-    const formatted = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-    setSelectedDate(formatted)
-    onChange({ target: { name, value: formatted } })
-    setIsOpen(false)
-  }
+    const formatted = `${year}-${String(month + 1).padStart(2, "0")}-${String(
+      day
+    ).padStart(2, "0")}`;
+    setSelectedDate(formatted);
+    onChange({ target: { name, value: formatted } });
+    setIsOpen(false);
+  };
 
-  const handlePrevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
-  const handleNextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
+  const handlePrevMonth = () =>
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
+    );
+  const handleNextMonth = () =>
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
+    );
 
   React.useEffect(() => {
     const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false)
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target))
+        setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentMonth)
-  const monthName = currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })
-  const { onChange, ...registerProps } = register(name)
+  const { daysInMonth, startingDayOfWeek, year, month } =
+    getDaysInMonth(currentMonth);
+  const monthName = currentMonth.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+  const { onChange, ...registerProps } = register(name);
 
-  const calendarDays = []
-  for (let i = 0; i < startingDayOfWeek; i++) calendarDays.push(<div key={`empty-${i}`} className="p-2" />)
+  const calendarDays = [];
+  for (let i = 0; i < startingDayOfWeek; i++)
+    calendarDays.push(<div key={`empty-${i}`} className="p-2" />);
   for (let day = 1; day <= daysInMonth; day++) {
-    const dateObj = new Date(year, month, day)
-    const isDisabled = isDateDisabled(dateObj)
-    const isSelected = selectedDate === `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    const dateObj = new Date(year, month, day);
+    const isDisabled = isDateDisabled(dateObj);
+    const isSelected =
+      selectedDate ===
+      `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(
+        2,
+        "0"
+      )}`;
     calendarDays.push(
       <button
         key={day}
@@ -103,12 +139,15 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
       >
         {day}
       </button>
-    )
+    );
   }
 
   return (
     <div>
-      <label htmlFor={name} className="block text-sm sm:text-base font-light text-gray-800 mb-2">
+      <label
+        htmlFor={name}
+        className="block text-sm sm:text-base font-light text-gray-800 mb-2"
+      >
         {label} {required}
       </label>
 
@@ -123,7 +162,12 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
           <span className={selectedDate ? "text-gray-800" : "text-gray-400"}>
             {selectedDate ? formatDisplayDate(selectedDate) : "Select date..."}
           </span>
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-5 h-5 text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -141,27 +185,54 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
                 type="button"
                 className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
               >
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg
+                  className="w-4 h-4 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
               </button>
 
-              <h3 className="text-gray-800 font-medium text-sm sm:text-base">{monthName}</h3>
+              <h3 className="text-gray-800 font-medium text-sm sm:text-base">
+                {monthName}
+              </h3>
 
               <button
                 onClick={handleNextMonth}
                 type="button"
                 className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
               >
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <svg
+                  className="w-4 h-4 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </button>
             </div>
 
             <div className="grid grid-cols-7 gap-1 mb-2">
               {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-                <div key={d} className="text-center text-xs text-gray-500 p-1.5">{d}</div>
+                <div
+                  key={d}
+                  className="text-center text-xs text-gray-500 p-1.5"
+                >
+                  {d}
+                </div>
               ))}
             </div>
 
@@ -176,9 +247,8 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
         </div>
       )}
     </div>
-  )
-}
-
+  );
+};
 
 // Loading Spinner Component
 const LoadingSpinner = () => (
@@ -289,61 +359,62 @@ const CheckIcon = ({ className }) => (
 );
 
 export default function QuotePage() {
-  const { bookingId } = useParams()
-  const navigate = useNavigate()
-  const [booking, setBooking] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [selectedDate, setSelectedDate] = useState("")
-  const [selectedPackage, setSelectedPackage] = useState("")
-  const [selectedArtist, setSelectedArtist] = useState("")
-  const [selectedService, setSelectedService] = useState("")
-  const [selectedTime, setSelectedTime] = useState("")
-  const [selectedAddress, setSelectedAddress] = useState("")
-  const [step, setStep] = useState("packages")
-  const [pricingReady, setPricingReady] = useState(false)
-  const [paymentCompleted, setPaymentCompleted] = useState(false)
+  const { bookingId } = useParams();
+  const navigate = useNavigate();
+  const [booking, setBooking] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedPackage, setSelectedPackage] = useState("");
+  const [selectedArtist, setSelectedArtist] = useState("");
+  const [selectedService, setSelectedService] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const [step, setStep] = useState("packages");
+  const [pricingReady, setPricingReady] = useState(false);
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
 
   useEffect(() => {
-    if (bookingId) loadBooking()
-    else setLoading(false)
-  }, [bookingId])
+    if (bookingId) loadBooking();
+    else setLoading(false);
+  }, [bookingId]);
 
   useEffect(() => {
     if (booking) {
-      const paymentStatus = booking.payment_status || booking.ops?.payment_status
+      const paymentStatus =
+        booking.payment_status || booking.ops?.payment_status;
       if (paymentStatus === "deposit_paid" || paymentStatus === "fully_paid") {
-        setPaymentCompleted(true)
+        setPaymentCompleted(true);
       }
     }
-  }, [booking])
+  }, [booking]);
 
   const loadBooking = async () => {
     try {
-      const res = await api.get(`/quote/${bookingId}`)
+      const res = await api.get(`/quote/${bookingId}`);
       console.log("🛰 baseURL:", api.defaults.baseURL);
       console.log("🧾 Fetching:", `/quote/${bookingId}`);
-      const bk = res.data
-      const paymentStatus = bk.payment_status || bk.ops?.payment_status
+      const bk = res.data;
+      const paymentStatus = bk.payment_status || bk.ops?.payment_status;
 
       if (paymentStatus === "deposit_paid" || paymentStatus === "fully_paid") {
-        setPaymentCompleted(true)
-        setPricingReady(true)
-        setLoading(false)
-        return
+        setPaymentCompleted(true);
+        setPricingReady(true);
+        setLoading(false);
+        return;
       }
 
-      setBooking(bk)
+      setBooking(bk);
       if (bk.event_date)
-        setSelectedDate(new Date(bk.event_date).toISOString().split("T")[0])
-      if (bk.artist) setSelectedArtist(bk.artist)
-      if (bk.ready_time) setSelectedTime(bk.ready_time)
-      setPricingReady(true)
+        setSelectedDate(new Date(bk.event_date).toISOString().split("T")[0]);
+      if (bk.artist) setSelectedArtist(bk.artist);
+      if (bk.ready_time) setSelectedTime(bk.ready_time);
+      setPricingReady(true);
     } catch (err) {
-      console.error("Failed to load booking:", err)
+      console.error("Failed to load booking:", err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (!bookingId)
     return (
@@ -356,7 +427,8 @@ export default function QuotePage() {
             Invalid Quote Link
           </h1>
           <p className="text-gray-600 font-light mb-6">
-            This quote link is missing a booking ID. Please check your email for the correct link.
+            This quote link is missing a booking ID. Please check your email for
+            the correct link.
           </p>
           <button
             onClick={() => (window.location.href = "/")}
@@ -366,7 +438,7 @@ export default function QuotePage() {
           </button>
         </div>
       </div>
-    )
+    );
 
   if (loading || !pricingReady)
     return (
@@ -376,10 +448,12 @@ export default function QuotePage() {
             <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
             <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-gray-700 animate-spin"></div>
           </div>
-          <p className="text-gray-700 font-light">Loading your personalized quote...</p>
+          <p className="text-gray-700 font-light">
+            Loading your personalized quote...
+          </p>
         </div>
       </div>
-    )
+    );
 
   if (paymentCompleted)
     return (
@@ -403,7 +477,7 @@ export default function QuotePage() {
           </button>
         </div>
       </div>
-    )
+    );
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -421,7 +495,7 @@ export default function QuotePage() {
         </div>
 
         {/* Step Progress */}
-        <div className="flex justify-center gap-3">
+        <div className="flex justify-center gap-3 mb-5 sm:mb-0">
           {["1", "2", "3", "4"].map((num, idx) => {
             const stepNames = ["packages", "artist", "address", "review"];
             const currentStepIndex = stepNames.indexOf(step);
@@ -446,37 +520,41 @@ export default function QuotePage() {
         {step !== "review" && (
           <div className="p-4 ">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <CalendarIcon className="w-5 h-5 text-gray-600" />
-                <span className="text-gray-800 font-light">
-                  Select your event date
-                </span>
-              </div>
-
-              <div className="flex items-center gap-12 w-[70%] md:w-[70%]">
-                <div className="flex-1">
-                  <CustomDatePicker
-                    label=""
-                    name="event_date"
-                    register={(name) => ({
-                      onChange: (e) => setSelectedDate(e.target.value),
-                      name,
-                    })}
-                    error={null}
-                    required={true}
-                  />
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-6 w-full">
+                {/* Label */}
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <CalendarIcon className="w-5 h-5 text-gray-600" />
+                  <span className="text-gray-800 font-light text-sm sm:text-base">
+                    Select your event date
+                  </span>
                 </div>
 
-                {selectedDate && (
-                  <span className="text-gray-600 text-xs sm:text-sm font-light whitespace-nowrap">
-                    {new Date(selectedDate).toLocaleDateString("en-CA", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
-                )}
+                {/* Date Picker + Selected Date */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 w-full sm:w-[70%]">
+                  <div className="flex-1 w-full">
+                    <CustomDatePicker
+                      label=""
+                      name="event_date"
+                      register={(name) => ({
+                        onChange: (e) => setSelectedDate(e.target.value),
+                        name,
+                      })}
+                      error={null}
+                      required={true}
+                    />
+                  </div>
+
+                  {selectedDate && (
+                    <span className="text-gray-600 text-xs sm:text-sm font-light sm:whitespace-nowrap text-center sm:text-right">
+                      {new Date(selectedDate).toLocaleDateString("en-CA", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -558,7 +636,6 @@ export default function QuotePage() {
       </div>
     </div>
   );
-
 }
 
 function PackageBreakdown({
@@ -594,200 +671,199 @@ function PackageBreakdown({
   };
 
   return (
-  <div className="text-gray-800 p-4 sm:p-6">
-    {/* Header */}
-    <h2
-      className="text-center text-2xl sm:text-3xl font-normal text-gray-900 mb-2"
-      style={{ letterSpacing: "0.02em" }}
-    >
-      Available Packages
-    </h2>
+    <div className="text-gray-800 px-3 sm:px-6 py-4 sm:py-6">
+      {/* Header */}
+      <h2
+        className="text-center text-2xl sm:text-3xl font-normal text-gray-900 mb-2"
+        style={{ letterSpacing: "0.02em" }}
+      >
+        Available Packages
+      </h2>
 
-    <p
-      className="text-center text-gray-600 mb-5 text-sm sm:text-base font-light"
-      style={{ letterSpacing: "0.01em" }}
-    >
-      Choose a package that fits your occasion.
-    </p>
+      <p
+        className="text-center text-gray-600 mb-5 text-sm sm:text-base font-light"
+        style={{ letterSpacing: "0.01em" }}
+      >
+        Choose a package that fits your occasion.
+      </p>
 
-    {/* Package Grid */}
-    <div className="flex justify-center">
-      <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4">
-        {packages.map((pkg) => (
-          <div
-            key={pkg.id}
-            className="group relative bg-gray-50 border border-gray-300 rounded-xl p-4 sm:p-5 transition-all duration-300 hover:border-gray-500 hover:shadow-md hover:shadow-gray-400/20 overflow-hidden"
-          >
-            {/* Hover shine effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-200/40 via-gray-100/30 to-gray-200/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      {/* Package Grid */}
+      <div className="flex justify-center">
+        <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5 mb-4">
+          {packages.map((pkg) => (
+            <div
+              key={pkg.id}
+              className="group relative border border-gray-300 rounded-xl p-3.5 sm:p-5 transition-all duration-300 hover:border-gray-500 hover:shadow-md hover:shadow-gray-400/20 overflow-hidden"
+            >
+              {/* Subtle shine effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-100/5 via-gray-300/5 to-gray-600/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300 "></div>
 
-            <div className="relative">
-              {/* Title */}
-              <h3
-                className="text-lg sm:text-xl font-light text-gray-900 mb-1.5"
-                style={{ letterSpacing: "0.02em" }}
-              >
-                {pkg.name}
-              </h3>
-
-              <p
-                className="text-gray-600 mb-3 text-sm sm:text-base font-light leading-snug"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                {pkg.description}
-              </p>
-
-              {/* Price */}
-              <div
-                className="text-xl sm:text-2xl font-light text-gray-700 mb-4"
-                style={{ letterSpacing: "0.02em" }}
-              >
-                {formatCurrency(pkg.price)} CAD
-              </div>
-
-              {/* Services */}
-              <div className="mb-4">
-                <h4
-                  className="text-xs sm:text-sm font-light text-gray-700 mb-2 uppercase"
-                  style={{ letterSpacing: "0.05em" }}
+              <div className="relative">
+                {/* Title */}
+                <h3
+                  className="text-lg sm:text-xl font-light text-gray-900 mb-1.5"
+                  style={{ letterSpacing: "0.02em" }}
                 >
-                  What's Included
-                </h4>
-                <ul className="space-y-1.5 mb-4">
-                  {pkg.services
-                    .filter(
-                      (service) =>
-                        !service.includes("Subtotal:") &&
-                        !service.includes("HST (13%):") &&
-                        !service.includes("Total:") &&
-                        !service.includes("Deposit required")
-                    )
-                    .map((service, index) => (
-                      <li
-                        key={index}
-                        className="flex items-start text-xs sm:text-sm text-gray-600 transition-colors group-hover:text-gray-900 font-light"
-                        style={{ letterSpacing: "0.01em" }}
-                      >
-                        <svg
-                          className="w-3.5 h-3.5 mr-2 mt-0.5 flex-shrink-0 text-gray-600/60 group-hover:text-gray-800 transition-colors"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="flex-1">{service}</span>
-                      </li>
-                    ))}
-                </ul>
+                  {pkg.name}
+                </h3>
 
-                {/* Pricing Breakdown */}
-                <div className="border-t border-gray-300/70 pt-3">
+                <p
+                  className="text-gray-600 mb-3 text-sm sm:text-base font-light leading-snug"
+                  style={{ letterSpacing: "0.01em" }}
+                >
+                  {pkg.description}
+                </p>
+
+                {/* Price */}
+                <div
+                  className="text-xl sm:text-2xl font-light text-gray-700 mb-4"
+                  style={{ letterSpacing: "0.02em" }}
+                >
+                  {formatCurrency(pkg.price)} CAD
+                </div>
+
+                {/* Services */}
+                <div className="mb-4">
                   <h4
                     className="text-xs sm:text-sm font-light text-gray-700 mb-2 uppercase"
                     style={{ letterSpacing: "0.05em" }}
                   >
-                    Pricing Breakdown
+                    What's Included
                   </h4>
-                  <div className="space-y-1.5 text-xs sm:text-sm">
+                  <ul className="space-y-1.5 mb-4">
                     {pkg.services
                       .filter(
                         (service) =>
-                          service.includes("Subtotal:") ||
-                          service.includes("HST (13%):") ||
-                          service.includes("Total:") ||
-                          service.includes("Deposit required")
+                          !service.includes("Subtotal:") &&
+                          !service.includes("HST (13%):") &&
+                          !service.includes("Total:") &&
+                          !service.includes("Deposit required")
                       )
                       .map((service, index) => (
-                        <div
+                        <li
                           key={index}
-                          className="flex justify-between font-light"
+                          className="flex items-start text-xs sm:text-sm text-gray-600 transition-colors group-hover:text-gray-900 font-light"
                           style={{ letterSpacing: "0.01em" }}
                         >
-                          <span
-                            className={
-                              service.includes("Total:")
-                                ? "text-gray-900"
-                                : service.includes("Deposit required")
-                                ? "text-gray-700"
-                                : "text-gray-600"
-                            }
+                          <svg
+                            className="w-3.5 h-3.5 mr-2 mt-0.5 flex-shrink-0 text-gray-600/60 group-hover:text-gray-800 transition-colors"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
                           >
-                            {service.split(":")[0]}:
-                          </span>
-                          <span
-                            className={
-                              service.includes("Total:")
-                                ? "font-medium text-gray-900"
-                                : service.includes("Deposit required")
-                                ? "font-medium text-gray-700"
-                                : "text-gray-600"
-                            }
-                          >
-                            {service.split(":")[1]}
-                          </span>
-                        </div>
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <span className="flex-1">{service}</span>
+                        </li>
                       ))}
+                  </ul>
+
+                  {/* Pricing Breakdown */}
+                  <div className="border-t border-gray-300/70 pt-3">
+                    <h4
+                      className="text-xs sm:text-sm font-light text-gray-700 mb-2 uppercase"
+                      style={{ letterSpacing: "0.05em" }}
+                    >
+                      Pricing Breakdown
+                    </h4>
+                    <div className="space-y-1.5 text-xs sm:text-sm">
+                      {pkg.services
+                        .filter(
+                          (service) =>
+                            service.includes("Subtotal:") ||
+                            service.includes("HST (13%):") ||
+                            service.includes("Total:") ||
+                            service.includes("Deposit required")
+                        )
+                        .map((service, index) => (
+                          <div
+                            key={index}
+                            className="flex justify-between font-light"
+                            style={{ letterSpacing: "0.01em" }}
+                          >
+                            <span
+                              className={
+                                service.includes("Total:")
+                                  ? "text-gray-900"
+                                  : service.includes("Deposit required")
+                                  ? "text-gray-700"
+                                  : "text-gray-600"
+                              }
+                            >
+                              {service.split(":")[0]}:
+                            </span>
+                            <span
+                              className={
+                                service.includes("Total:")
+                                  ? "font-medium text-gray-900"
+                                  : service.includes("Deposit required")
+                                  ? "font-medium text-gray-700"
+                                  : "text-gray-600"
+                              }
+                            >
+                              {service.split(":")[1]}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+      </div>
+
+      {/* Notes */}
+      <div className="text-center mb-3 px-2 sm:px-3">
+        <p
+          className="text-xs text-gray-500 font-light leading-snug"
+          style={{ letterSpacing: "0.01em" }}
+        >
+          For multi-day event bookings, please contact us directly to discuss
+          your event details.
+        </p>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="text-center px-3">
+        <div className="space-y-3 max-w-md mx-auto">
+          {/* Book Now */}
+          <button
+            onClick={handleBookNow}
+            disabled={bookingLoading}
+            className="relative w-full bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white py-3 px-5 rounded-lg font-light shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-100 transition-all duration-300 disabled:opacity-50 border border-gray-600 overflow-hidden text-sm sm:text-base"
+            style={{ letterSpacing: "0.05em" }}
+          >
+            {!bookingLoading && (
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+            )}
+            <span className="relative flex items-center justify-center gap-2">
+              {bookingLoading ? <LoadingSpinner /> : "📅"} Proceed to Booking
+            </span>
+          </button>
+
+          {/* Schedule Call */}
+          <button
+            onClick={handleScheduleCall}
+            disabled={callLoading}
+            className="relative w-full bg-gray-200 text-gray-800 py-3 px-5 rounded-lg font-light shadow-sm hover:shadow-md border border-gray-300 hover:border-gray-400 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
+            style={{ letterSpacing: "0.05em" }}
+          >
+            {!callLoading && (
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+            )}
+            <span className="relative flex items-center justify-center gap-2">
+              {callLoading ? <LoadingSpinner /> : "📞"} Schedule a Call
+            </span>
+          </button>
+        </div>
       </div>
     </div>
-
-    {/* Notes */}
-    <div className="text-center mb-3 px-3">
-      <p
-        className="text-xs text-gray-500 font-light leading-snug"
-        style={{ letterSpacing: "0.01em" }}
-      >
-        For multi-day event bookings, please contact us directly to discuss your event details.
-      </p>
-    </div>
-
-    {/* Action Buttons */}
-    <div className="text-center px-3">
-      <div className="space-y-3 max-w-md mx-auto">
-        {/* Book Now */}
-        <button
-          onClick={handleBookNow}
-          disabled={bookingLoading}
-          className="relative w-full bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white py-3 px-5 rounded-lg font-light shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-100 transition-all duration-300 disabled:opacity-50 border border-gray-600 overflow-hidden text-sm sm:text-base"
-          style={{ letterSpacing: "0.05em" }}
-        >
-          {!bookingLoading && (
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-          )}
-          <span className="relative flex items-center justify-center gap-2">
-            {bookingLoading ? <LoadingSpinner /> : "📅"} Proceed to Booking
-          </span>
-        </button>
-
-        {/* Schedule Call */}
-        <button
-          onClick={handleScheduleCall}
-          disabled={callLoading}
-          className="relative w-full bg-gray-200 text-gray-800 py-3 px-5 rounded-lg font-light shadow-sm hover:shadow-md border border-gray-300 hover:border-gray-400 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
-          style={{ letterSpacing: "0.05em" }}
-        >
-          {!callLoading && (
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-          )}
-          <span className="relative flex items-center justify-center gap-2">
-            {callLoading ? <LoadingSpinner /> : "📞"} Schedule a Call
-          </span>
-        </button>
-      </div>
-    </div>
-  </div>
-);
-
-
+  );
 }
 
 function ArtistSelection({
@@ -814,7 +890,8 @@ function ArtistSelection({
       if (booking?.email) fd.append("email", booking.email);
       const res = await fetch(
         `${
-          import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api/"
+          import.meta.env.VITE_API_URL ||
+          "https://looksbyanum-saqib.vercel.app/api/"
         }/uploads/inspiration`,
         {
           method: "POST",
@@ -898,175 +975,173 @@ function ArtistSelection({
     },
   ];
 
- return (
-  <div className="p-8 md:p-16">
-    <h2
-      className="text-left text-3xl font-normal text-gray-900 mb-4"
-      style={{ letterSpacing: "0.02em" }}
-    >
-      Choose Your Artist
-    </h2>
-    <p
-      className="text-left text-gray-600 mb-8 text-base font-light"
-      style={{ letterSpacing: "0.01em" }}
-    >
-      Select which artist you'd like to book with for your Bridal
-    </p>
+  return (
+    <div className="p-8 md:p-16">
+      <h2
+        className="text-left text-3xl font-normal text-gray-900 mb-4"
+        style={{ letterSpacing: "0.02em" }}
+      >
+        Choose Your Artist
+      </h2>
+      <p
+        className="text-left text-gray-600 mb-8 text-base font-light"
+        style={{ letterSpacing: "0.01em" }}
+      >
+        Select which artist you'd like to book with for your Bridal
+      </p>
 
-    {/* Inspiration Section */}
-    <div className="mb-10 p-6 md:p-7 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm">
-      <label className="block text-sm font-medium text-gray-700 mb-4 uppercase tracking-wide">
-        Inspiration (Optional)
-      </label>
+      {/* Inspiration Section */}
+      <div className="mb-10 p-6 md:p-7 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm">
+        <label className="block text-sm font-medium text-gray-700 mb-4 uppercase tracking-wide">
+          Inspiration (Optional)
+        </label>
 
-      {/* Link inputs */}
-      <div className="space-y-3 mb-5">
-        {inspirationLinks.map((link, index) => (
-          <div key={index} className="flex flex-col md:flex-row gap-2">
-            <div className="relative flex-1">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                <LinkIcon className="w-4 h-4 text-gray-400" />
+        {/* Link inputs */}
+        <div className="space-y-3 mb-5">
+          {inspirationLinks.map((link, index) => (
+            <div key={index} className="flex flex-col md:flex-row gap-2">
+              <div className="relative flex-1">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <LinkIcon className="w-4 h-4 text-gray-400" />
+                </div>
+                <input
+                  type="url"
+                  value={link}
+                  onChange={(e) => updateInspirationLink(index, e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500/50 focus:border-gray-600 transition-all text-sm md:text-base text-gray-900 placeholder-gray-400 font-light"
+                  placeholder="Paste inspiration link (Pinterest/Instagram/etc.)"
+                  style={{ letterSpacing: "0.01em" }}
+                />
               </div>
-              <input
-                type="url"
-                value={link}
-                onChange={(e) => updateInspirationLink(index, e.target.value)}
-                className="w-full pl-11 pr-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500/50 focus:border-gray-600 transition-all text-sm md:text-base text-gray-900 placeholder-gray-400 font-light"
-                placeholder="Paste inspiration link (Pinterest/Instagram/etc.)"
-                style={{ letterSpacing: "0.01em" }}
-              />
+              {inspirationLinks.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeInspirationField(index)}
+                  className="px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 text-sm md:text-base font-light border border-red-200"
+                  title="Remove this inspiration link"
+                >
+                  Remove
+                </button>
+              )}
             </div>
-            {inspirationLinks.length > 1 && (
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={addInspirationField}
+          className="mb-5 px-4 py-2.5 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition-all duration-300 flex items-center gap-2 text-sm font-light border border-gray-300 shadow-sm cursor-pointer"
+          style={{ letterSpacing: "0.01em" }}
+        >
+          <span className="text-gray-500 text-lg">+</span>
+          <span>Add Another Link</span>
+        </button>
+
+        {/* File Upload */}
+        <div className="border-t border-gray-200 pt-5">
+          <div className="text-sm text-gray-600 mb-3 font-light flex items-center gap-2">
+            <UploadIcon className="w-4 h-4 text-gray-500" />
+            <span>Or upload an image:</span>
+          </div>
+          <label className="relative group block w-full cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={uploading}
+              className="sr-only"
+            />
+            <div className="w-full px-4 py-3 bg-white border-2 border-dashed border-gray-300 rounded-xl hover:border-gray-500 transition-all duration-300 text-center group-hover:bg-gray-50">
+              <div className="flex items-center justify-center gap-2 text-sm font-light text-gray-700 group-hover:text-gray-900">
+                {uploading ? (
+                  <>
+                    <LoadingSpinner />
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <UploadIcon className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
+                    <span>Click to upload image</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </label>
+          {uploadError && (
+            <div className="mt-2 text-sm text-red-600 font-light p-3 bg-red-50 rounded-lg border border-red-200">
+              {uploadError}
+            </div>
+          )}
+          <p
+            className="mt-2 text-xs text-gray-500 font-light"
+            style={{ letterSpacing: "0.01em" }}
+          >
+            Uploaded image URL will auto-fill an inspiration link field.
+          </p>
+        </div>
+      </div>
+
+      {/* Artist Selection Cards */}
+      <div className="space-y-5 max-w-2xl mx-auto mb-8">
+        {artists.map((artist) => (
+          <div
+            key={artist.id}
+            className="group relative bg-white border border-gray-200 rounded-2xl p-6 transition-all duration-300 hover:border-gray-500 hover:shadow-md hover:-translate-y-0.5"
+          >
+            <div className="relative">
+              <div className="flex items-center justify-between mb-5">
+                <span
+                  className="text-lg font-normal text-gray-900"
+                  style={{ letterSpacing: "0.02em" }}
+                >
+                  <span className="text-gray-500 mr-2">{artist.icon}</span>
+                  {artist.name}
+                </span>
+                <span
+                  className="text-lg font-light text-gray-700"
+                  style={{ letterSpacing: "0.02em" }}
+                >
+                  Total: {formatCurrency(artist.price)} CAD
+                </span>
+              </div>
+
               <button
-                type="button"
-                onClick={() => removeInspirationField(index)}
-                className="px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 text-sm md:text-base font-light border border-red-200"
-                title="Remove this inspiration link"
+                onClick={() => handleArtistSelectWithInspiration(artist.id)}
+                disabled={isSubmitting}
+                className="relative w-full bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white py-3 rounded-xl font-light shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-600 overflow-hidden"
+                style={{ letterSpacing: "0.05em" }}
               >
-                Remove
+                {!isSubmitting && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+                )}
+                <span className="relative flex items-center justify-center gap-2.5">
+                  {isSubmitting ? (
+                    <>
+                      <LoadingSpinner />
+                      Processing...
+                    </>
+                  ) : (
+                    `Select ${artist.name}`
+                  )}
+                </span>
               </button>
-            )}
+            </div>
           </div>
         ))}
       </div>
 
-      <button
-        type="button"
-        onClick={addInspirationField}
-        className="mb-5 px-4 py-2.5 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition-all duration-300 flex items-center gap-2 text-sm font-light border border-gray-300 shadow-sm cursor-pointer"
-        style={{ letterSpacing: "0.01em" }}
-      >
-        <span className="text-gray-500 text-lg">+</span>
-        <span>Add Another Link</span>
-      </button>
-
-      {/* File Upload */}
-      <div className="border-t border-gray-200 pt-5">
-        <div className="text-sm text-gray-600 mb-3 font-light flex items-center gap-2">
-          <UploadIcon className="w-4 h-4 text-gray-500" />
-          <span>Or upload an image:</span>
-        </div>
-        <label className="relative group block w-full cursor-pointer">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            disabled={uploading}
-            className="sr-only"
-          />
-          <div className="w-full px-4 py-3 bg-white border-2 border-dashed border-gray-300 rounded-xl hover:border-gray-500 transition-all duration-300 text-center group-hover:bg-gray-50">
-            <div className="flex items-center justify-center gap-2 text-sm font-light text-gray-700 group-hover:text-gray-900">
-              {uploading ? (
-                <>
-                  <LoadingSpinner />
-                  <span>Uploading...</span>
-                </>
-              ) : (
-                <>
-                  <UploadIcon className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
-                  <span>Click to upload image</span>
-                </>
-              )}
-            </div>
-          </div>
-        </label>
-        {uploadError && (
-          <div className="mt-2 text-sm text-red-600 font-light p-3 bg-red-50 rounded-lg border border-red-200">
-            {uploadError}
-          </div>
-        )}
-        <p
-          className="mt-2 text-xs text-gray-500 font-light"
-          style={{ letterSpacing: "0.01em" }}
+      <div className="text-center">
+        <button
+          onClick={onBackToQuotes}
+          className="relative px-10 py-3.5 bg-gray-100 text-gray-800 rounded-xl font-light shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-100 transition-all duration-300 cursor-pointer border border-gray-300 overflow-hidden"
+          style={{ letterSpacing: "0.05em" }}
         >
-          Uploaded image URL will auto-fill an inspiration link field.
-        </p>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+          <span className="relative">Back to Quotes</span>
+        </button>
       </div>
     </div>
-
-    {/* Artist Selection Cards */}
-    <div className="space-y-5 max-w-2xl mx-auto mb-8">
-      {artists.map((artist) => (
-        <div
-          key={artist.id}
-          className="group relative bg-white border border-gray-200 rounded-2xl p-6 transition-all duration-300 hover:border-gray-500 hover:shadow-md hover:-translate-y-0.5"
-        >
-          <div className="relative">
-            <div className="flex items-center justify-between mb-5">
-              <span
-                className="text-lg font-normal text-gray-900"
-                style={{ letterSpacing: "0.02em" }}
-              >
-                <span className="text-gray-500 mr-2">{artist.icon}</span>
-                {artist.name}
-              </span>
-              <span
-                className="text-lg font-light text-gray-700"
-                style={{ letterSpacing: "0.02em" }}
-              >
-                Total: {formatCurrency(artist.price)} CAD
-              </span>
-            </div>
-
-            <button
-              onClick={() => handleArtistSelectWithInspiration(artist.id)}
-              disabled={isSubmitting}
-              className="relative w-full bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white py-3 rounded-xl font-light shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-600 overflow-hidden"
-              style={{ letterSpacing: "0.05em" }}
-            >
-              {!isSubmitting && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-              )}
-              <span className="relative flex items-center justify-center gap-2.5">
-                {isSubmitting ? (
-                  <>
-                    <LoadingSpinner />
-                    Processing...
-                  </>
-                ) : (
-                  `Select ${artist.name}`
-                )}
-              </span>
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
-
-    <div className="text-center">
-      <button
-        onClick={onBackToQuotes}
-        className="relative px-10 py-3.5 bg-gray-100 text-gray-800 rounded-xl font-light shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-100 transition-all duration-300 cursor-pointer border border-gray-300 overflow-hidden"
-        style={{ letterSpacing: "0.05em" }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-        <span className="relative">Back to Quotes</span>
-      </button>
-    </div>
-  </div>
-);
-
-
+  );
 }
 
 function AddressSelection({ onAddressSelect, onBack, initialAddress }) {
