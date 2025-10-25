@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+// API instance remains unchanged
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
 });
 
+// Icon for Error Messages
 const ErrorIcon = ({ className }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 20 20">
     <path
@@ -16,6 +18,7 @@ const ErrorIcon = ({ className }) => (
   </svg>
 );
 
+// Icon for Success Messages
 const SuccessIcon = ({ className }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 20 20">
     <path
@@ -37,8 +40,9 @@ export default function InteracUpload() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [step, setStep] = useState("lookup");
+  const [step, setStep] = useState("lookup"); // 'lookup', 'upload'
 
+  // --- LOGIC RETAINED ---
   useEffect(() => {
     const bookingIdFromUrl = searchParams.get("booking_id");
     if (bookingIdFromUrl) {
@@ -57,15 +61,23 @@ export default function InteracUpload() {
     setError("");
 
     try {
-      const remainingResponse = await api.get(`/interac/check-remaining/${bid}`);
+      // Check if booking has remaining payment
+      const remainingResponse = await api.get(
+        `/interac/check-remaining/${bid}`
+      );
+
       if (!remainingResponse.data.hasRemainingPayment) {
-        setError("This booking has no remaining payment or is already fully paid.");
+        setError(
+          "This booking has no remaining payment or is already fully paid."
+        );
         return;
       }
 
+      // Get booking details
       const bookingResponse = await api.get(`/quote/${bid}`);
       setBooking(bookingResponse.data);
 
+      // Get Interac payment info
       const interacResponse = await api.get(`/interac/payment-info/${bid}`);
       setInteracInfo(interacResponse.data);
 
@@ -79,15 +91,27 @@ export default function InteracUpload() {
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) return setError("Please select an image file");
-    if (file.size > 5 * 1024 * 1024) return setError("File must be less than 5MB");
-    setScreenshot(file);
-    setError("");
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError("Please select an image file");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setError("File size must be less than 5MB");
+        return;
+      }
+
+      setScreenshot(file);
+      setError("");
+    }
   };
 
   const uploadScreenshot = async () => {
-    if (!screenshot) return setError("Please select a screenshot to upload");
+    if (!screenshot) {
+      setError("Please select a screenshot to upload");
+      return;
+    }
 
     setUploading(true);
     setError("");
@@ -100,13 +124,20 @@ export default function InteracUpload() {
       formData.append("paymentType", determinePaymentType());
 
       await api.post("/interac/upload-screenshot", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      setSuccess("Screenshot uploaded successfully! Admin will verify shortly.");
+      setSuccess(
+        "Screenshot uploaded successfully! The admin will verify your payment shortly."
+      );
       setScreenshot(null);
 
-      const interacResponse = await api.get(`/interac/payment-info/${bookingId}`);
+      // Refresh Interac info
+      const interacResponse = await api.get(
+        `/interac/payment-info/${bookingId}`
+      );
       setInteracInfo(interacResponse.data);
     } catch (error) {
       setError(error.response?.data?.error || "Failed to upload screenshot");
@@ -117,24 +148,46 @@ export default function InteracUpload() {
 
   const determinePaymentType = () => {
     if (!interacInfo || !booking) return "deposit";
-    const s = booking.payment_status;
-    if (s === "pending") return "deposit";
-    if (s === "deposit_paid") return "final";
-    return "final";
+
+    // Check actual payment status from booking
+    const paymentStatus = booking.payment_status;
+
+    // If payment status is pending, user needs to pay deposit
+    if (paymentStatus === "pending") return "deposit";
+
+    // If deposit is paid, user needs to pay final amount
+    if (paymentStatus === "deposit_paid") return "final";
+
+    // If fully paid, shouldn't reach here but default to final
+    if (paymentStatus === "fully_paid") return "final";
+
+    // Fallback logic based on amounts
+    if (interacInfo.amountPaid === 0) return "deposit";
+    if (interacInfo.remainingAmount > 0) return "final";
+
+    return "deposit";
   };
 
-  const getPaymentTypeLabel = () =>
-    determinePaymentType() === "deposit" ? "Deposit Payment" : "Final Payment";
+  const getPaymentTypeLabel = () => {
+    const type = determinePaymentType();
+    return type === "deposit" ? "Deposit Payment" : "Final Payment";
+  };
 
   const getPaymentAmount = () => {
     if (!interacInfo) return 0;
-    return determinePaymentType() === "deposit"
+
+    const type = determinePaymentType();
+    return type === "deposit"
       ? interacInfo.depositAmount
       : interacInfo.remainingAmount;
   };
 
-  const formatDate = (d) => (d ? new Date(d).toLocaleDateString("en-CA") : "N/A");
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-CA");
+  };
 
+  
   const buttonBase =
     "relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden text-center";
   const activeButton =
