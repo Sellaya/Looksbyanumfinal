@@ -480,7 +480,7 @@ export default function QuotePage() {
     );
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl items-center mx-auto">
       <div className="bg-white p-6 sm:p-8">
         {/* Header */}
         <div className="mb-4 text-center">
@@ -530,7 +530,7 @@ export default function QuotePage() {
                 </div>
 
                 {/* Date Picker + Selected Date */}
-                <div className="flex flex-col sm:flex-row sm:items-center items-center gap-2 sm:gap-4 w-xs sm:w-[70%]">
+                <div className="flex flex-col sm:flex-row sm:items-center items-center gap-2 sm:gap-4 sm:w-[70%]">
                   <div className="flex-1 w-full">
                     <CustomDatePicker
                       label=""
@@ -719,7 +719,7 @@ function PackageBreakdown({
                   className="text-xl sm:text-2xl font-light text-gray-700 mb-4"
                   style={{ letterSpacing: "0.02em" }}
                 >
-                  {formatCurrency(pkg.price)} CAD
+                  ${formatCurrency(pkg.price)} CAD
                 </div>
 
                 {/* Services */}
