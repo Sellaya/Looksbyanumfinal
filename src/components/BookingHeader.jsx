@@ -1,4 +1,4 @@
-import Logo from "../assets/black(1).png";
+import Logo from "../assets/Black.png";
 
 export default function BookingHeader({ step, getTotalSteps, getStepTitle, isEditMode }) {
   // Logic remains strictly unchanged.
