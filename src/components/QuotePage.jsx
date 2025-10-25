@@ -7,8 +7,177 @@ import SignatureCanvas from "./SignatureCanvas";
 import DatePicker from "./DatePicker";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
 });
+
+const CustomDatePicker = ({ label, name, register, error, required, maxDate }) => {
+  const [isOpen, setIsOpen] = React.useState(false)
+  const [selectedDate, setSelectedDate] = React.useState("")
+  const [currentMonth, setCurrentMonth] = React.useState(new Date())
+  const dropdownRef = React.useRef(null)
+
+  const getMinimumDate = (minDaysAdvance = 2) => {
+    const today = new Date()
+    const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const minimumDate = new Date(localToday)
+    minimumDate.setDate(minimumDate.getDate() + minDaysAdvance)
+    return minimumDate
+  }
+
+  const minDate = getMinimumDate(2)
+  minDate.setHours(0, 0, 0, 0)
+
+  const formatDisplayDate = (dateString) => {
+    if (!dateString) return ""
+    const date = new Date(dateString + "T00:00:00")
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  }
+
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    return { daysInMonth: lastDay.getDate(), startingDayOfWeek: firstDay.getDay(), year, month }
+  }
+
+  const isDateDisabled = (date) => {
+    if (date < minDate) return true
+    if (maxDate && date > new Date(maxDate)) return true
+    return false
+  }
+
+  const handleDateSelect = (day, onChange) => {
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    const selectedDateObj = new Date(year, month, day)
+    if (isDateDisabled(selectedDateObj)) return
+
+    const formatted = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    setSelectedDate(formatted)
+    onChange({ target: { name, value: formatted } })
+    setIsOpen(false)
+  }
+
+  const handlePrevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
+  const handleNextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
+
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false)
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentMonth)
+  const monthName = currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  const { onChange, ...registerProps } = register(name)
+
+  const calendarDays = []
+  for (let i = 0; i < startingDayOfWeek; i++) calendarDays.push(<div key={`empty-${i}`} className="p-2" />)
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateObj = new Date(year, month, day)
+    const isDisabled = isDateDisabled(dateObj)
+    const isSelected = selectedDate === `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    calendarDays.push(
+      <button
+        key={day}
+        type="button"
+        onClick={() => !isDisabled && handleDateSelect(day, onChange)}
+        disabled={isDisabled}
+        className={`p-2.5 rounded-md text-sm font-light transition-all duration-200
+          ${
+            isSelected
+              ? "bg-gray-100 text-gray-50 border border-gray-400 shadow-sm"
+              : isDisabled
+              ? "bg-gray-50 border border-transparent text-gray-400 cursor-not-allowed"
+              : "bg-gray-100 text-gray-800 hover:bg-white hover:text-gray-900 border  hover:border-gray-300"
+          }`}
+      >
+        {day}
+      </button>
+    )
+  }
+
+  return (
+    <div>
+      <label htmlFor={name} className="block text-sm sm:text-base font-light text-gray-800 mb-2">
+        {label} {required}
+      </label>
+
+      <div className="relative" ref={dropdownRef}>
+        <input type="hidden" {...registerProps} onChange={onChange} />
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="group relative w-full p-3.5 sm:p-4 rounded-lg border border-gray-300 bg-white 
+          hover:border-gray-500 hover:bg-gray-50 text-left flex items-center justify-between transition-all duration-300"
+        >
+          <span className={selectedDate ? "text-gray-800" : "text-gray-400"}>
+            {selectedDate ? formatDisplayDate(selectedDate) : "Select date..."}
+          </span>
+          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+        </button>
+
+        {isOpen && (
+          <div className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-xl shadow-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={handlePrevMonth}
+                type="button"
+                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+              >
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              <h3 className="text-gray-800 font-medium text-sm sm:text-base">{monthName}</h3>
+
+              <button
+                onClick={handleNextMonth}
+                type="button"
+                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+              >
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
+                <div key={d} className="text-center text-xs text-gray-500 p-1.5">{d}</div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7 gap-1">{calendarDays}</div>
+          </div>
+        )}
+      </div>
+
+      {error && (
+        <div className="mt-3 p-3 bg-gray-50 border border-gray-300 rounded-md">
+          <p className="text-sm text-gray-700 font-light">{error}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 
 // Loading Spinner Component
 const LoadingSpinner = () => (
@@ -274,30 +443,31 @@ export default function QuotePage() {
 
         {/* Date Selector */}
         {step !== "review" && (
-          <div className="mb-[-3%] bg-white border border-gray-200 rounded-xl shadow-sm p-2 pl-4 pr-4">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="mb-[-3%] bg-white p-2 pl-4 pr-4">
+            <div className="flex flex-col md:flex-row mx-auto md:items-center md:justify-between gap-4">
               <div className="flex items-center gap-3">
                 <CalendarIcon className="w-5 h-5 text-gray-600" />
                 <span className="text-gray-800 font-light">
-                  Select your event date (optional)
+                  Select your event date
                 </span>
               </div>
-              <div className="flex items-center gap-3">
-                <DatePicker
-                  value={selectedDate || ""}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+              <div className="flex items-center mx-auto gap-3 w-[70%]">
+              <div className="flex-1">
+                <CustomDatePicker
+                  label="" // optional
+                  name="event_date"
+                  register={(name) => ({
+                    onChange: (e) => setSelectedDate(e.target.value),
+                    name,
+                  })}
+                  error={null}
+                  required={true}
                 />
-                {selectedDate && (
-                  <span className="text-gray-600 font-light text-sm">
-                    {new Date(selectedDate).toLocaleDateString("en-CA", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
-                )}
               </div>
+            </div>
+
+
+
             </div>
           </div>
         )}
@@ -636,7 +806,7 @@ function ArtistSelection({
       if (booking?.email) fd.append("email", booking.email);
       const res = await fetch(
         `${
-          import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api"
+          import.meta.env.VITE_API_URL || "http://localhost:4000/api"
         }/uploads/inspiration`,
         {
           method: "POST",

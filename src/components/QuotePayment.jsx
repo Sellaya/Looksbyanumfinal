@@ -9,7 +9,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE);
 
 // Create API client with base URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
 });
 
 // Loading Spinner Component

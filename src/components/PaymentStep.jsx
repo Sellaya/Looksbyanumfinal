@@ -18,7 +18,7 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
         if (window.paypal) {
           window.paypal.Buttons({
             createOrder: async () => {
-              const apiBase = import.meta.env.VITE_API_URL || 'https://looksbyanum-saqib.vercel.app/api';
+              const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
               const response = await fetch(`${apiBase}/paypal/create-order`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -28,7 +28,7 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
               return order.id;
             },
             onApprove: async (data) => {
-              const apiBase = import.meta.env.VITE_API_URL || 'https://looksbyanum-saqib.vercel.app/api';
+              const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
               const response = await fetch(`${apiBase}/paypal/capture-order/${data.orderID}`, {
                 method: 'POST'
               });
@@ -53,7 +53,7 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
         throw new Error('Stripe failed to load');
       }
 
-      const apiBase = import.meta.env.VITE_API_URL || 'https://looksbyanum-saqib.vercel.app/api';
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
       // 1) Persist the booking first so we have a booking_id
       const saveRes = await fetch(`${apiBase}/bookings`, {
@@ -103,7 +103,7 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
 
   const handleInteracVerification = async () => {
     try {
-      const apiBase = import.meta.env.VITE_API_URL || 'https://looksbyanum-saqib.vercel.app/api';
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
       const response = await fetch(`${apiBase}/interac/auth-url?bookingId=${savedBooking?.unique_id || booking.unique_id}`, {
         method: 'GET'
       });
