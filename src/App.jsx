@@ -677,7 +677,7 @@ export default function App() {
 
           // Existing timeout logic remains unchanged
           setTimeout(() => {
-            window.location.replace(`${import.meta.env.VITE_API_URL || ""}/quote/${bookingId}`);
+            window.location.replace(`${import.meta.env.VITE_FRONTEND_URL || ""}/quote/${bookingId}`);
           }, 1200);
         } else {
           // Standard error toast fallback (functionality remains unchanged)
