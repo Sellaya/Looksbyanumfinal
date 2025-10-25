@@ -5,6 +5,7 @@ import { getDynamicPackages, calculateBookingPrice } from "../lib/pricing";
 import { formatCurrency } from "../../lib/currencyFormat";
 import SignatureCanvas from "./SignatureCanvas";
 import DatePicker from "./DatePicker";
+import Logo from "../assets/Black.png";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api/",
@@ -411,7 +412,7 @@ export default function QuotePage() {
         <div className="mb-5">
           <div className="flex justify-center mb-4">
             <img
-              src="../src/assets/Black(1).png"
+              src={Logo}
               alt="Logo"
               className="w-[230px] mt-[-20px] sm:w-[180px] sm:mt-[-10px] md:w-[200px] lg:w-[280px] md:mt-[-40px]"
             />
