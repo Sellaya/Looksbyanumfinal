@@ -95,7 +95,7 @@ const CustomDatePicker = ({ label, name, register, error, required, maxDate }) =
         className={`p-2.5 rounded-md text-sm font-light transition-all duration-200
           ${
             isSelected
-              ? "bg-gray-100 text-gray-50 border border-gray-400 shadow-sm"
+              ? "bg-gray-900 text-gray-50 border border-gray-400 shadow-sm"
               : isDisabled
               ? "bg-gray-50 border border-transparent text-gray-400 cursor-not-allowed"
               : "bg-gray-100 text-gray-800 hover:bg-white hover:text-gray-900 border  hover:border-gray-300"
@@ -406,71 +406,78 @@ export default function QuotePage() {
     )
 
   return (
-    <div className="max-w-4xl w-max mx-auto px-2 sm:px-4 py-6 sm:py-4">
-      <div className="sm:p-8">
+    <div className="max-w-4xl mx-auto">
+      <div className="bg-white p-6 sm:p-8">
         {/* Header */}
-        <div className="mb-5">
-          <div className="flex justify-center mb-4">
-            <img
-              src={Logo}
-              alt="Logo"
-              className="w-[230px] mt-[-20px] sm:w-[180px] sm:mt-[-10px] md:w-[200px] lg:w-[280px] md:mt-[-40px]"
-            />
-          </div>
-          <p className="text-center text-gray-700 font-light text-sm sm:text-base">
+        <div className="mb-4 text-center">
+          <img
+            src={Logo}
+            alt="Logo"
+            className="w-[180px] sm:w-[220px] lg:w-[260px] mx-auto mb-3"
+          />
+          <p className="text-gray-700 font-light text-sm sm:text-base">
             View your personalised quote below and choose your next step.
           </p>
         </div>
 
         {/* Step Progress */}
-        <div className="flex justify-center gap-3 mb-5">
+        <div className="flex justify-center gap-3">
           {["1", "2", "3", "4"].map((num, idx) => {
-            const stepNames = ["packages", "artist", "address", "review"]
-            const currentStepIndex = stepNames.indexOf(step)
-            const isActive = idx <= currentStepIndex
+            const stepNames = ["packages", "artist", "address", "review"];
+            const currentStepIndex = stepNames.indexOf(step);
+            const isActive = idx <= currentStepIndex;
 
             return (
               <div
                 key={num}
                 className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium border transition-all duration-300 ${
                   isActive
-                    ? "bg-gray-800 text-white border-gray-700 shadow"
-                    : "bg-white text-gray-600 border-gray-300"
+                    ? "bg-gray-900 text-white border-gray-700 shadow-md shadow-gray-500/30"
+                    : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
                 }`}
               >
                 {num}
               </div>
-            )
+            );
           })}
         </div>
 
         {/* Date Selector */}
         {step !== "review" && (
-          <div className="mb-[-3%] bg-white p-2 pl-4 pr-4">
-            <div className="flex flex-col md:flex-row mx-auto md:items-center md:justify-between gap-4">
+          <div className="p-4 ">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <CalendarIcon className="w-5 h-5 text-gray-600" />
                 <span className="text-gray-800 font-light">
                   Select your event date
                 </span>
               </div>
-              <div className="flex items-center mx-auto gap-3 w-[70%]">
-              <div className="flex-1">
-                <CustomDatePicker
-                  label="" // optional
-                  name="event_date"
-                  register={(name) => ({
-                    onChange: (e) => setSelectedDate(e.target.value),
-                    name,
-                  })}
-                  error={null}
-                  required={true}
-                />
+
+              <div className="flex items-center gap-12 w-[70%] md:w-[70%]">
+                <div className="flex-1">
+                  <CustomDatePicker
+                    label=""
+                    name="event_date"
+                    register={(name) => ({
+                      onChange: (e) => setSelectedDate(e.target.value),
+                      name,
+                    })}
+                    error={null}
+                    required={true}
+                  />
+                </div>
+
+                {selectedDate && (
+                  <span className="text-gray-600 text-xs sm:text-sm font-light whitespace-nowrap">
+                    {new Date(selectedDate).toLocaleDateString("en-CA", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                )}
               </div>
-            </div>
-
-
-
             </div>
           </div>
         )}
@@ -486,12 +493,12 @@ export default function QuotePage() {
         )}
 
         {step === "consultation" && (
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8">
-            <h2 className="text-2xl font-normal text-gray-900 mb-6 text-left">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sm:p-8">
+            <h2 className="text-2xl font-normal text-gray-900 mb-3">
               Schedule Your Consultation
             </h2>
-            <p className="text-gray-700 font-light mb-6 text-left">
-              Choose a convenient time to discuss your needs
+            <p className="text-gray-700 font-light mb-6">
+              Choose a convenient time to discuss your needs.
             </p>
 
             <div className="overflow-hidden border border-gray-200 rounded-lg mb-8">
@@ -501,17 +508,16 @@ export default function QuotePage() {
                 height="700"
                 frameBorder="0"
                 allow="microphone; camera; payment; fullscreen; geolocation"
+                className="rounded-lg"
               />
             </div>
 
-            <div className="text-left">
-              <button
-                onClick={() => setStep("packages")}
-                className="px-8 py-3 rounded-lg bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white font-light shadow hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
-              >
-                Back to Quotes
-              </button>
-            </div>
+            <button
+              onClick={() => setStep("packages")}
+              className="px-8 py-3 rounded-lg bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white font-light shadow-md shadow-gray-700/20 hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
+            >
+              Back to Quotes
+            </button>
           </div>
         )}
 
@@ -551,7 +557,8 @@ export default function QuotePage() {
         )}
       </div>
     </div>
-  )
+  );
+
 }
 
 function PackageBreakdown({
@@ -587,201 +594,199 @@ function PackageBreakdown({
   };
 
   return (
-  <div className="text-gray-800 p-6 md:p-12 lg:p-16">
+  <div className="text-gray-800 p-4 sm:p-6">
+    {/* Header */}
     <h2
-      className="text-left text-3xl font-normal text-gray-900"
+      className="text-center text-2xl sm:text-3xl font-normal text-gray-900 mb-2"
       style={{ letterSpacing: "0.02em" }}
     >
       Available Packages
     </h2>
 
     <p
-      className="text-left text-gray-600 mb-8 text-base font-light"
+      className="text-center text-gray-600 mb-5 text-sm sm:text-base font-light"
       style={{ letterSpacing: "0.01em" }}
     >
-      Both packages are shown below — choose how you'd like to proceed.
+      Choose a package that fits your occasion.
     </p>
+
+    {/* Package Grid */}
     <div className="flex justify-center">
-      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-4">
-          {packages.map((pkg) => (
-            <div
-              key={pkg.id}
-              className="group relative bg-gray-50 border border-gray-300 rounded-2xl p-5 md:p-7 transition-all duration-300 hover:border-gray-500 hover:shadow-xl hover:shadow-gray-400/20 hover:-translate-y-0.5 overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-200/40 via-gray-100/30 to-gray-200/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4">
+        {packages.map((pkg) => (
+          <div
+            key={pkg.id}
+            className="group relative bg-gray-50 border border-gray-300 rounded-xl p-4 sm:p-5 transition-all duration-300 hover:border-gray-500 hover:shadow-md hover:shadow-gray-400/20 overflow-hidden"
+          >
+            {/* Hover shine effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-200/40 via-gray-100/30 to-gray-200/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-              <div className="relative">
-                <h3
-                  className="text-xl md:text-2xl font-light text-gray-900 mb-3"
-                  style={{ letterSpacing: "0.02em" }}
-                >
-                  {pkg.name}
-                </h3>
-                <p
-                  className="text-gray-600 mb-4 text-base md:text-lg font-light"
-                  style={{ letterSpacing: "0.01em" }}
-                >
-                  {pkg.description}
-                </p>
-                <div
-                  className="text-2xl md:text-3xl font-light text-gray-700 mb-6"
-                  style={{ letterSpacing: "0.02em" }}
-                >
-                  {formatCurrency(pkg.price)} CAD
-                </div>
+            <div className="relative">
+              {/* Title */}
+              <h3
+                className="text-lg sm:text-xl font-light text-gray-900 mb-1.5"
+                style={{ letterSpacing: "0.02em" }}
+              >
+                {pkg.name}
+              </h3>
 
-                <div className="mb-6">
+              <p
+                className="text-gray-600 mb-3 text-sm sm:text-base font-light leading-snug"
+                style={{ letterSpacing: "0.01em" }}
+              >
+                {pkg.description}
+              </p>
+
+              {/* Price */}
+              <div
+                className="text-xl sm:text-2xl font-light text-gray-700 mb-4"
+                style={{ letterSpacing: "0.02em" }}
+              >
+                {formatCurrency(pkg.price)} CAD
+              </div>
+
+              {/* Services */}
+              <div className="mb-4">
+                <h4
+                  className="text-xs sm:text-sm font-light text-gray-700 mb-2 uppercase"
+                  style={{ letterSpacing: "0.05em" }}
+                >
+                  What's Included
+                </h4>
+                <ul className="space-y-1.5 mb-4">
+                  {pkg.services
+                    .filter(
+                      (service) =>
+                        !service.includes("Subtotal:") &&
+                        !service.includes("HST (13%):") &&
+                        !service.includes("Total:") &&
+                        !service.includes("Deposit required")
+                    )
+                    .map((service, index) => (
+                      <li
+                        key={index}
+                        className="flex items-start text-xs sm:text-sm text-gray-600 transition-colors group-hover:text-gray-900 font-light"
+                        style={{ letterSpacing: "0.01em" }}
+                      >
+                        <svg
+                          className="w-3.5 h-3.5 mr-2 mt-0.5 flex-shrink-0 text-gray-600/60 group-hover:text-gray-800 transition-colors"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span className="flex-1">{service}</span>
+                      </li>
+                    ))}
+                </ul>
+
+                {/* Pricing Breakdown */}
+                <div className="border-t border-gray-300/70 pt-3">
                   <h4
-                    className="text-sm font-light text-gray-700 mb-4 uppercase"
+                    className="text-xs sm:text-sm font-light text-gray-700 mb-2 uppercase"
                     style={{ letterSpacing: "0.05em" }}
                   >
-                    What's Included
+                    Pricing Breakdown
                   </h4>
-                  <ul className="space-y-2.5 mb-6">
+                  <div className="space-y-1.5 text-xs sm:text-sm">
                     {pkg.services
                       .filter(
                         (service) =>
-                          !service.includes("Subtotal:") &&
-                          !service.includes("HST (13%):") &&
-                          !service.includes("Total:") &&
-                          !service.includes("Deposit required")
+                          service.includes("Subtotal:") ||
+                          service.includes("HST (13%):") ||
+                          service.includes("Total:") ||
+                          service.includes("Deposit required")
                       )
                       .map((service, index) => (
-                        <li
+                        <div
                           key={index}
-                          className="flex items-start text-sm text-gray-600 transition-colors group-hover:text-gray-900 font-light"
+                          className="flex justify-between font-light"
                           style={{ letterSpacing: "0.01em" }}
                         >
-                          <svg
-                            className="w-4 h-4 mr-2.5 mt-0.5 flex-shrink-0 text-gray-600/60 group-hover:text-gray-800 transition-colors"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
+                          <span
+                            className={
+                              service.includes("Total:")
+                                ? "text-gray-900"
+                                : service.includes("Deposit required")
+                                ? "text-gray-700"
+                                : "text-gray-600"
+                            }
                           >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          <span className="flex-1">{service}</span>
-                        </li>
+                            {service.split(":")[0]}:
+                          </span>
+                          <span
+                            className={
+                              service.includes("Total:")
+                                ? "font-medium text-gray-900"
+                                : service.includes("Deposit required")
+                                ? "font-medium text-gray-700"
+                                : "text-gray-600"
+                            }
+                          >
+                            {service.split(":")[1]}
+                          </span>
+                        </div>
                       ))}
-                  </ul>
-
-                  <div className="border-t border-gray-300/70 pt-5">
-                    <h4
-                      className="text-sm font-light text-gray-700 mb-4 uppercase"
-                      style={{ letterSpacing: "0.05em" }}
-                    >
-                      Pricing Breakdown
-                    </h4>
-                    <div className="space-y-2 text-sm">
-                      {pkg.services
-                        .filter(
-                          (service) =>
-                            service.includes("Subtotal:") ||
-                            service.includes("HST (13%):") ||
-                            service.includes("Total:") ||
-                            service.includes("Deposit required")
-                        )
-                        .map((service, index) => (
-                          <div
-                            key={index}
-                            className="flex justify-between font-light"
-                            style={{ letterSpacing: "0.01em" }}
-                          >
-                            <span
-                              className={
-                                service.includes("Total:")
-                                  ? "text-gray-900"
-                                  : service.includes("Deposit required")
-                                  ? "text-gray-700"
-                                  : "text-gray-600"
-                              }
-                            >
-                              {service.split(":")[0]}:
-                            </span>
-                            <span
-                              className={
-                                service.includes("Total:")
-                                  ? "font-medium text-gray-900"
-                                  : service.includes("Deposit required")
-                                  ? "font-medium text-gray-700"
-                                  : "text-gray-600"
-                              }
-                            >
-                              {service.split(":")[1]}
-                            </span>
-                          </div>
-                        ))}
-                    </div>
                   </div>
                 </div>
               </div>
-
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-400/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
-              </div>
             </div>
-          ))}
+          </div>
+        ))}
       </div>
     </div>
 
-    <div className="text-center mb-4 md:mb-4 px-4">
+    {/* Notes */}
+    <div className="text-center mb-3 px-3">
       <p
-        className="text-xs md:text-sm text-gray-500 font-light"
+        className="text-xs text-gray-500 font-light leading-snug"
         style={{ letterSpacing: "0.01em" }}
       >
-        Note: For multi-day event bookings, please contact us directly to
-        discuss your event details.
+        For multi-day event bookings, please contact us directly to discuss your event details.
       </p>
     </div>
 
-    <div className="text-center px-4">
-      <div className="space-y-4 max-w-lg mx-auto">
+    {/* Action Buttons */}
+    <div className="text-center px-3">
+      <div className="space-y-3 max-w-md mx-auto">
+        {/* Book Now */}
         <button
           onClick={handleBookNow}
           disabled={bookingLoading}
-          className="relative w-full bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white py-3.5 px-6 rounded-xl font-light shadow-md shadow-gray-700/30 hover:shadow-lg hover:shadow-gray-700/40 hover:scale-105 active:scale-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer border border-gray-600 overflow-hidden"
+          className="relative w-full bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white py-3 px-5 rounded-lg font-light shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-100 transition-all duration-300 disabled:opacity-50 border border-gray-600 overflow-hidden text-sm sm:text-base"
           style={{ letterSpacing: "0.05em" }}
         >
           {!bookingLoading && (
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
           )}
-          <span className="relative flex items-center justify-center gap-2.5">
+          <span className="relative flex items-center justify-center gap-2">
             {bookingLoading ? <LoadingSpinner /> : "📅"} Proceed to Booking
           </span>
         </button>
-        <p
-          className="text-xs md:text-sm text-gray-500 font-light"
-          style={{ letterSpacing: "0.01em" }}
-        >
-          Secure your date and proceed with booking
-        </p>
 
+        {/* Schedule Call */}
         <button
           onClick={handleScheduleCall}
           disabled={callLoading}
-          className="relative w-full bg-gray-200 text-gray-800 py-3.5 px-6 rounded-xl font-light shadow-sm hover:shadow-md border border-gray-300 hover:border-gray-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer overflow-hidden hover:scale-[1.02] active:scale-100"
+          className="relative w-full bg-gray-200 text-gray-800 py-3 px-5 rounded-lg font-light shadow-sm hover:shadow-md border border-gray-300 hover:border-gray-400 transition-all duration-300 disabled:opacity-50 text-sm sm:text-base"
           style={{ letterSpacing: "0.05em" }}
         >
           {!callLoading && (
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
           )}
-          <span className="relative flex items-center justify-center gap-2.5">
+          <span className="relative flex items-center justify-center gap-2">
             {callLoading ? <LoadingSpinner /> : "📞"} Schedule a Call
           </span>
         </button>
-        <p
-          className="text-xs md:text-sm text-gray-500 font-light"
-          style={{ letterSpacing: "0.01em" }}
-        >
-          Let's discuss your needs and answer questions
-        </p>
       </div>
     </div>
   </div>
 );
+
 
 }
 
