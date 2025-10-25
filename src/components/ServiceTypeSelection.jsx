@@ -1,13 +1,16 @@
 "use client"
 import { useState, useEffect } from "react"
+import BridalMakeupIcon from "../assets/Bridal-Makeup (2).png";
+import SemiBridalMakeupIcon from "../assets/Semi-Bridal-Makeup.png";
+
 
 // Icons
 const RingIcon = ({ className }) => (
-  <img src="/src/assets/Bridal-Makeup (2).png"></img>
+  <img src={BridalMakeupIcon}></img>
 )
 
 const MakeupIcon = ({ className }) => (
-  <img src="/src/assets/Semi-Bridal-Makeup.png" classname=""></img>
+  <img src={SemiBridalMakeupIcon} classname=""></img>
 )
 
 const CameraIcon = ({ className }) => (

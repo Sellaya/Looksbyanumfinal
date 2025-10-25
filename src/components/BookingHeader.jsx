@@ -1,4 +1,4 @@
-import Logo from "./Logo"
+import Logo from "../assets/black(1).png";
 
 export default function BookingHeader({ step, getTotalSteps, getStepTitle, isEditMode }) {
   // Logic remains strictly unchanged.
@@ -8,7 +8,7 @@ export default function BookingHeader({ step, getTotalSteps, getStepTitle, isEdi
     <div className="text-center px-2 sm:px-4 max-w-3xl mx-auto mb-5 lg:mb-0">
       <div className="flex justify-center mb-4">
         <img
-          src="/src/assets/Black(1).png"
+          src={Logo}
           alt="Logo"
           className="w-56 sm:w-44 md:w-52 lg:w-72 -mt-5 sm:-mt-2 md:-mt-3 lg:-mt-5"
         />
