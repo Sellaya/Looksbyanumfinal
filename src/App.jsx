@@ -669,8 +669,8 @@ export default function App() {
             // Rose Glow Spinner (Using w-12 h-12 size for prominence)
             '<div class="w-12 h-12 rounded-full border-4 border-gray-50 border-t-transparent animate-spin mx-auto mb-4"></div>' +
             // Loading Message Text (White/Rose Glow text)
-            '<div class="text-white font-light text-xl">Email sent! Please check your inbox...</div>' +
-            '<div class="text-gray-800 text-base mt-2 font-light">Redirecting to quote page...</div>' +
+            '<div class="text-gray-900 font-light text-xl">Email sent! Please check your inbox...</div>' +
+            '<div class="text-gray-600 text-base mt-2 font-light">Redirecting to quote page...</div>' +
             "</div>";
 
           document.body.appendChild(loader);
