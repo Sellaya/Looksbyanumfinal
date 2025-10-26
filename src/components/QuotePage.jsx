@@ -4,8 +4,8 @@ import axios from "axios";
 import { getDynamicPackages, calculateBookingPrice } from "../lib/pricing";
 import { formatCurrency } from "../../lib/currencyFormat";
 import SignatureCanvas from "./SignatureCanvas";
-import DatePicker from "./DatePicker";
 import Logo from "../assets/Black.png";
+import BookingHeader from "./BookingHeader";
 
 const api = axios.create({
   baseURL:
@@ -19,109 +19,94 @@ const CustomDatePicker = ({
   error,
   required,
   maxDate,
+  minDate: propMinDate, // 👈 allow passing minDate from parent
+  value, // 👈 add this
 }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [selectedDate, setSelectedDate] = React.useState("");
-  const [currentMonth, setCurrentMonth] = React.useState(new Date());
-  const dropdownRef = React.useRef(null);
+  const [isOpen, setIsOpen] = React.useState(false)
+  const [selectedDate, setSelectedDate] = React.useState(value || "")
+  
+  const [currentMonth, setCurrentMonth] = React.useState(new Date())
+  const dropdownRef = React.useRef(null)
 
-  const getMinimumDate = (minDaysAdvance = 2) => {
-    const today = new Date();
-    const localToday = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    );
-    const minimumDate = new Date(localToday);
-    minimumDate.setDate(minimumDate.getDate() + minDaysAdvance);
-    return minimumDate;
-  };
+  // ✅ Use today's date if no minDate prop is provided
+  const getMinimumDate = () => {
+    const now = new Date()
+    const offset = now.getTimezoneOffset()
+    // Convert to local midnight by removing offset
+    const localMidnight = new Date(now.getTime() - offset * 60 * 1000)
+    localMidnight.setHours(0, 0, 0, 0)
+    return propMinDate ? new Date(propMinDate) : localMidnight
+  }
 
-  const minDate = getMinimumDate(2);
-  minDate.setHours(0, 0, 0, 0);
+
+  const minDate = getMinimumDate()
+  minDate.setHours(0, 0, 0, 0)
 
   const formatDisplayDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString + "T00:00:00");
+    if (!dateString) return ""
+    const date = new Date(dateString + "T00:00:00")
     return date.toLocaleDateString("en-US", {
       weekday: "short",
       year: "numeric",
       month: "short",
       day: "numeric",
-    });
-  };
+    })
+  }
 
   const getDaysInMonth = (date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    return {
-      daysInMonth: lastDay.getDate(),
-      startingDayOfWeek: firstDay.getDay(),
-      year,
-      month,
-    };
-  };
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    return { daysInMonth: lastDay.getDate(), startingDayOfWeek: firstDay.getDay(), year, month }
+  }
 
   const isDateDisabled = (date) => {
-    if (date < minDate) return true;
-    if (maxDate && date > new Date(maxDate)) return true;
-    return false;
-  };
+    // ✅ allow current day and onwards
+    if (date < minDate) return true
+    if (maxDate && date > new Date(maxDate)) return true
+    return false
+  }
 
   const handleDateSelect = (day, onChange) => {
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
-    const selectedDateObj = new Date(year, month, day);
-    if (isDateDisabled(selectedDateObj)) return;
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    const selectedDateObj = new Date(year, month, day)
+    if (isDateDisabled(selectedDateObj)) return
 
-    const formatted = `${year}-${String(month + 1).padStart(2, "0")}-${String(
-      day
-    ).padStart(2, "0")}`;
-    setSelectedDate(formatted);
-    onChange({ target: { name, value: formatted } });
-    setIsOpen(false);
-  };
+    const formatted = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    setSelectedDate(formatted)
+    onChange({ target: { name, value: formatted } })
+    setIsOpen(false)
+  }
 
   const handlePrevMonth = () =>
-    setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
-    );
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
   const handleNextMonth = () =>
-    setCurrentMonth(
-      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1)
-    );
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
 
   React.useEffect(() => {
     const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target))
-        setIsOpen(false);
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false)
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
-  const { daysInMonth, startingDayOfWeek, year, month } =
-    getDaysInMonth(currentMonth);
-  const monthName = currentMonth.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-  const { onChange, ...registerProps } = register(name);
+  const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentMonth)
+  const monthName = currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  const { onChange, ...registerProps } = register(name)
 
-  const calendarDays = [];
+  const calendarDays = []
   for (let i = 0; i < startingDayOfWeek; i++)
-    calendarDays.push(<div key={`empty-${i}`} className="p-2" />);
+    calendarDays.push(<div key={`empty-${i}`} className="p-2" />)
+
   for (let day = 1; day <= daysInMonth; day++) {
-    const dateObj = new Date(year, month, day);
-    const isDisabled = isDateDisabled(dateObj);
+    const dateObj = new Date(year, month, day)
+    const isDisabled = isDateDisabled(dateObj)
     const isSelected =
-      selectedDate ===
-      `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(
-        2,
-        "0"
-      )}`;
+      selectedDate === `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+
     calendarDays.push(
       <button
         key={day}
@@ -131,16 +116,20 @@ const CustomDatePicker = ({
         className={`p-2.5 rounded-md text-sm font-light transition-all duration-200
           ${
             isSelected
-              ? "bg-gray-900 text-gray-50 border border-gray-400 shadow-sm"
+              ? "bg-gray-800 text-white border border-gray-600 shadow-sm"
               : isDisabled
-              ? "bg-gray-50 border border-transparent text-gray-400 cursor-not-allowed"
-              : "bg-gray-100 text-gray-800 hover:bg-white hover:text-gray-900 border  hover:border-gray-300"
+              ? "bg-gray-50 text-gray-400 border border-transparent cursor-not-allowed"
+              : "bg-gray-200 text-gray-800 hover:bg-gray-600 hover:text-gray-50 border border-transparent"
           }`}
       >
         {day}
       </button>
-    );
+    )
   }
+
+  React.useEffect(() => {
+    if (value) setSelectedDate(value)
+  }, [value])
 
   return (
     <div>
@@ -148,7 +137,7 @@ const CustomDatePicker = ({
         htmlFor={name}
         className="block text-sm sm:text-base font-light text-gray-800 mb-2"
       >
-        {label} {required}
+        {label} {required && <span className="text-gray-700">*</span>}
       </label>
 
       <div className="relative" ref={dropdownRef}>
@@ -183,54 +172,39 @@ const CustomDatePicker = ({
               <button
                 onClick={handlePrevMonth}
                 type="button"
-                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200"
               >
                 <svg
-                  className="w-4 h-4 text-gray-600"
+                  className="w-4 h-4 text-gray-800"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
 
-              <h3 className="text-gray-800 font-medium text-sm sm:text-base">
-                {monthName}
-              </h3>
+              <h3 className="text-gray-800 font-medium text-sm sm:text-base">{monthName}</h3>
 
               <button
                 onClick={handleNextMonth}
                 type="button"
-                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-700 transition-all duration-200"
               >
                 <svg
-                  className="w-4 h-4 text-gray-600"
+                  className="w-4 h-4 text-gray-800"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             </div>
 
             <div className="grid grid-cols-7 gap-1 mb-2">
               {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-                <div
-                  key={d}
-                  className="text-center text-xs text-gray-500 p-1.5"
-                >
+                <div key={d} className="text-center text-xs text-gray-500 p-1.5">
                   {d}
                 </div>
               ))}
@@ -247,13 +221,145 @@ const CustomDatePicker = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
+
+
+
+
+// Custom Time Picker (Light + Charcoalish Theme)
+const CustomTimePicker = ({ label, name, register, error, required, value }) => {
+  const [isOpen, setIsOpen] = React.useState(false)
+  const [selectedTime, setSelectedTime] = React.useState("")
+  const dropdownRef = React.useRef(null)
+
+  // Generate times like before
+  const generateTimeOptions = () => {
+    const times = []
+    const periods = ["AM", "PM"]
+    periods.forEach((period) => {
+      for (let hour = 12; hour <= 12; hour++) {
+        times.push({
+          label: `${hour}:00 ${period}`,
+          value: period === "AM" ? "00:00" : "12:00",
+        })
+        times.push({
+          label: `${hour}:30 ${period}`,
+          value: period === "AM" ? "00:30" : "12:30",
+        })
+      }
+      for (let hour = 1; hour <= 11; hour++) {
+        const value24 = period === "AM" ? hour : hour + 12
+        times.push({
+          label: `${hour}:00 ${period}`,
+          value: `${String(value24).padStart(2, "0")}:00`,
+        })
+        times.push({
+          label: `${hour}:30 ${period}`,
+          value: `${String(value24).padStart(2, "0")}:30`,
+        })
+      }
+    })
+    return times
+  }
+
+  const timeOptions = generateTimeOptions()
+  const { onChange, ...registerProps } = register(name)
+
+  // Convert "13:30" → "1:30 PM"
+  const formatTimeLabel = (timeValue) => {
+    if (!timeValue) return ""
+    const [hourStr, minute] = timeValue.split(":")
+    let hour = parseInt(hourStr, 10)
+    const period = hour >= 12 ? "PM" : "AM"
+    hour = hour % 12 || 12
+    return `${hour}:${minute} ${period}`
+  }
+
+  // Sync with external value (so it shows correctly when reloading)
+  React.useEffect(() => {
+    if (value) {
+      setSelectedTime(formatTimeLabel(value))
+    }
+  }, [value])
+
+  const handleTimeSelect = (time, onChange) => {
+    setSelectedTime(time.label)
+    onChange({ target: { name, value: time.value } })
+    setIsOpen(false)
+  }
+
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false)
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  return (
+    <div>
+      <label
+        htmlFor={name}
+        className="block text-sm sm:text-base font-light text-gray-800 mb-2"
+      >
+        {label} {required && <span className="text-gray-900">*</span>}
+      </label>
+
+      <div className="relative" ref={dropdownRef}>
+        <input type="hidden" {...registerProps} onChange={onChange} />
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="group relative w-full p-3.5 sm:p-4 rounded-lg border border-gray-300 bg-white 
+          hover:border-gray-500 hover:bg-gray-50 hover:shadow-sm text-left flex items-center justify-between transition-all duration-300"
+        >
+          <span className={selectedTime ? "text-gray-800" : "text-gray-400"}>
+            {selectedTime || "Select time..."}
+          </span>
+          <svg
+            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {isOpen && (
+          <div className="absolute z-50 w-full mt-2 bg-white border border-gray-300 rounded-xl shadow-lg overflow-hidden">
+            <div className="max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+              {timeOptions.map((t, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleTimeSelect(t, onChange)}
+                  className="w-full px-4 py-2 text-left text-gray-800 bg-gray-50 hover:bg-gray-400 hover:text-gray-50 border-b border-gray-100 text-sm font-light transition-all"
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {error && (
+        <div className="mt-3 p-3 bg-gray-50 border border-gray-300 rounded-md">
+          <p className="text-sm text-gray-700 font-light">{error}</p>
+        </div>
+      )}
+    </div>
+  )
+}
 
 // Loading Spinner Component
 const LoadingSpinner = () => (
   <svg
-    className="animate-spin h-5 w-5 text-rose-300"
+    className="animate-spin h-5 w-5 text-gray-800"
     fill="none"
     viewBox="0 0 24 24"
   >
@@ -318,7 +424,7 @@ const CalendarIcon = ({ className }) => (
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth={1.5}
+      strokeWidth={2}
       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
     />
   </svg>
@@ -341,6 +447,22 @@ const WarningIcon = ({ className }) => (
   </svg>
 );
 
+// Clock Icon
+const ClockIcon = ({ className }) => (
+  <svg
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    viewBox="0 0 24 24"
+  >
+    <circle cx="12" cy="12" r="9" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 1.5" />
+  </svg>
+);
+
+
 // Check Icon
 const CheckIcon = ({ className }) => (
   <svg
@@ -358,63 +480,116 @@ const CheckIcon = ({ className }) => (
   </svg>
 );
 
+
 export default function QuotePage() {
-  const { bookingId } = useParams();
-  const navigate = useNavigate();
-  const [booking, setBooking] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedPackage, setSelectedPackage] = useState("");
-  const [selectedArtist, setSelectedArtist] = useState("");
+  const { bookingId } = useParams()
+  const navigate = useNavigate()
+  const [booking, setBooking] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [selectedDate, setSelectedDate] = useState("")
+  const [selectedTime, setSelectedTime] = useState("")
+  const [trialDate, setTrialDate] = useState("")
+  const [trialTime, setTrialTime] = useState("")
   const [selectedService, setSelectedService] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
-  const [selectedAddress, setSelectedAddress] = useState("");
-  const [step, setStep] = useState("packages");
-  const [pricingReady, setPricingReady] = useState(false);
-  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [showModal, setShowModal] = useState(false)
+  const [step, setStep] = useState("packages")
+  const [pricingReady, setPricingReady] = useState(false)
+  const [paymentCompleted, setPaymentCompleted] = useState(false)
+  const [isBridal, setIsBridal] = useState(false)
+  const [selectedArtist, setSelectedArtist] = useState(null)
+  const [selectedAddress, setSelectedAddress] = useState(null)
+  const [selectedPackage, setSelectedPackage] = useState(null)
+
+  const handleAddressSelect = async (address) => {
+    try {
+      console.log("Saving address:", address);
+      const response = await api.put(`/bookings/${bookingId}/address`, {
+        venue_address: address.street,
+        venue_city: address.city,
+        venue_province: address.province,
+        venue_postal: address.postalCode,
+        venue_name: "",
+        event_date: selectedDate,
+      });
+      console.log("Address save response:", response.data);
+
+      setSelectedAddress(address);
+      setStep("review");
+    } catch (error) {
+      console.error("Failed to save address:", error);
+      if (window.showToast) {
+        window.showToast("Failed to save address. Please try again.", "error");
+      } else {
+        console.error("Failed to save address. Please try again.");
+      }
+    }
+  };
+
+  const handleBackToArtist = () => {
+    setStep("artist");
+  };
+  
 
   useEffect(() => {
-    if (bookingId) loadBooking();
-    else setLoading(false);
-  }, [bookingId]);
+    if (bookingId) loadBooking()
+    else setLoading(false)
+  }, [bookingId])
 
   useEffect(() => {
     if (booking) {
-      const paymentStatus =
-        booking.payment_status || booking.ops?.payment_status;
+      const paymentStatus = booking.payment_status || booking.ops?.payment_status
       if (paymentStatus === "deposit_paid" || paymentStatus === "fully_paid") {
-        setPaymentCompleted(true);
+        setPaymentCompleted(true)
       }
     }
-  }, [booking]);
+  }, [booking])
 
-  const loadBooking = async () => {
-    try {
-      const res = await api.get(`/quote/${bookingId}`);
-      console.log("🛰 baseURL:", api.defaults.baseURL);
-      console.log("🧾 Fetching:", `/quote/${bookingId}`);
-      const bk = res.data;
-      const paymentStatus = bk.payment_status || bk.ops?.payment_status;
+const loadBooking = async () => {
+  try {
+    const res = await api.get(`/quote/${bookingId}`);
+    const bk = res.data;
+    const paymentStatus = bk.payment_status || bk.ops?.payment_status;
 
-      if (paymentStatus === "deposit_paid" || paymentStatus === "fully_paid") {
-        setPaymentCompleted(true);
-        setPricingReady(true);
-        setLoading(false);
-        return;
-      }
-
-      setBooking(bk);
-      if (bk.event_date)
-        setSelectedDate(new Date(bk.event_date).toISOString().split("T")[0]);
-      if (bk.artist) setSelectedArtist(bk.artist);
-      if (bk.ready_time) setSelectedTime(bk.ready_time);
+    if (paymentStatus === "deposit_paid" || paymentStatus === "fully_paid") {
+      setPaymentCompleted(true);
       setPricingReady(true);
-    } catch (err) {
-      console.error("Failed to load booking:", err);
-    } finally {
       setLoading(false);
+      return;
     }
-  };
+
+    const brideService = bk.bride_service || bk.ops?.brideService;
+    const needsTrial = bk.needs_trial || bk.ops?.needs_trial;
+    const serviceType = bk.service_type || bk.ops?.service_type;
+
+    // ✅ check if it's a bridal booking
+    const isBridal =
+      serviceType?.toLowerCase() === "bridal" ||
+      brideService?.toLowerCase() === "bridal" ||
+      needsTrial?.toLowerCase() === "yes";
+
+    // set all states
+    setBooking(bk);
+    setIsBridal(isBridal); // ✅ added bridal state setter
+
+    if (bk.event_date)
+      setSelectedDate(new Date(bk.event_date).toISOString().split("T")[0]);
+    if (bk.ready_time) setSelectedTime(bk.ready_time);
+    if (bk.trial_date)
+      setTrialDate(new Date(bk.trial_date).toISOString().split("T")[0]);
+    if (bk.trial_time) setTrialTime(bk.trial_time);
+    if (bk.bride_service) {
+        const s = (bk.bride_service || "").toLowerCase();
+        setSelectedService(s.includes("bridal") ? "bridal" : "bridal");
+      }
+
+    setPricingReady(true);
+  } catch (err) {
+    console.error("Failed to load booking:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   if (!bookingId)
     return (
@@ -423,12 +598,9 @@ export default function QuotePage() {
           <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-6">
             <WarningIcon className="w-8 h-8 text-gray-600" />
           </div>
-          <h1 className="text-2xl font-normal text-gray-900 mb-3">
-            Invalid Quote Link
-          </h1>
+          <h1 className="text-2xl font-normal text-gray-900 mb-3">Invalid Quote Link</h1>
           <p className="text-gray-600 font-light mb-6">
-            This quote link is missing a booking ID. Please check your email for
-            the correct link.
+            This quote link is missing a booking ID. Please check your email for the correct link.
           </p>
           <button
             onClick={() => (window.location.href = "/")}
@@ -438,7 +610,7 @@ export default function QuotePage() {
           </button>
         </div>
       </div>
-    );
+    )
 
   if (loading || !pricingReady)
     return (
@@ -448,12 +620,10 @@ export default function QuotePage() {
             <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
             <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-gray-700 animate-spin"></div>
           </div>
-          <p className="text-gray-700 font-light">
-            Loading your personalized quote...
-          </p>
+          <p className="text-gray-700 font-light">Loading your personalized quote...</p>
         </div>
       </div>
-    );
+    )
 
   if (paymentCompleted)
     return (
@@ -462,9 +632,7 @@ export default function QuotePage() {
           <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-6">
             <CheckIcon className="w-8 h-8 text-green-600" />
           </div>
-          <h1 className="text-2xl font-normal text-gray-900 mb-3">
-            Payment Already Completed
-          </h1>
+          <h1 className="text-2xl font-normal text-gray-900 mb-3">Payment Already Completed</h1>
           <p className="text-gray-600 font-light mb-6">
             You have already paid the deposit for booking ID:
             <span className="text-gray-900 font-medium ml-1">{bookingId}</span>
@@ -477,30 +645,24 @@ export default function QuotePage() {
           </button>
         </div>
       </div>
-    );
+    )
 
   return (
-    <div className="max-w-4xl items-center w-[110%] mx-auto">
+    <div className="max-w-4xl items-center w-full mx-auto">
       <div className="bg-white p-6 sm:p-8">
         {/* Header */}
         <div className="mb-4 text-center">
-          <img
-            src={Logo}
-            alt="Logo"
-            className="w-[180px] sm:w-[220px] lg:w-[260px] mx-auto mb-3"
-          />
+          <img src={Logo} alt="Logo" className="w-[180px] sm:w-[220px] lg:w-[260px] mx-auto mb-3" />
           <p className="text-gray-700 font-light text-sm sm:text-base">
             View your personalised quote below and choose your next step.
           </p>
         </div>
-
         {/* Step Progress */}
         <div className="flex justify-center gap-3 mb-5 sm:mb-0">
           {["1", "2", "3", "4"].map((num, idx) => {
-            const stepNames = ["packages", "artist", "address", "review"];
-            const currentStepIndex = stepNames.indexOf(step);
-            const isActive = idx <= currentStepIndex;
-
+            const stepNames = ["packages", "artist", "address", "review"]
+            const currentStepIndex = stepNames.indexOf(step)
+            const isActive = idx <= currentStepIndex
             return (
               <div
                 key={num}
@@ -512,72 +674,238 @@ export default function QuotePage() {
               >
                 {num}
               </div>
-            );
+            )
           })}
         </div>
 
-        {/* Date Selector */}
-        {step !== "review" && (
-          <div className="p-4 ">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-6 w-full">
-                {/* Label */}
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <CalendarIcon className="w-5 h-5 text-gray-600" />
-                  <span className="text-gray-800 font-light text-sm sm:text-base">
-                    Select your event date
-                  </span>
-                </div>
+        
 
-                {/* Date Picker + Selected Date */}
-                <div className="flex flex-col sm:flex-row sm:items-center items-center gap-2 sm:gap-4 sm:w-[70%]">
-                  <div className="flex-1 w-full">
-                    <CustomDatePicker
-                      label=""
-                      name="event_date"
-                      register={(name) => ({
-                        onChange: (e) => setSelectedDate(e.target.value),
-                        name,
-                      })}
-                      error={null}
-                      required={true}
-                    />
-                  </div>
 
-                  {selectedDate && (
-                    <span className="text-gray-600 text-xs sm:text-sm font-light sm:whitespace-nowrap text-center sm:text-right">
-                      {new Date(selectedDate).toLocaleDateString("en-CA", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Steps */}
         {step === "packages" && (
           <PackageBreakdown
-            onBookNow={() => setStep("artist")}
+            onBookNow={(pkg) => {
+              setSelectedPackage(pkg)
+              setStep("artist")
+            }}
             onScheduleCall={() => setStep("consultation")}
             booking={booking}
             selectedDate={selectedDate}
           />
         )}
+        
+        {/* Event & Trial Dates Section */}
+          {step === "packages" && 
+          (
+            <div className="border border-gray-200 rounded-xl p-4 sm:p-5 mt-5 relative">
+              {/* Change Button */}
+                <div
+                  className="absolute top-3 right-3 cursor-pointer text-gray-600 hover:text-gray-900 transition-all"
+                  onClick={() => setShowModal(true)}
+                >
+                  <button className="flex items-center gap-1 bg-gray-700 hover:bg-gray-900 transition-all text-gray-50 px-2 py-1 rounded-lg border-gray-900">
+                    Edit
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-gray-50 transition-colors"
+                    >
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Two-column layout */}
+                
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2">
+                    {/* Event Details */}
+                    <div>
+                      <h3 className="text-gray-900 font-medium text-lg mb-2">Event Details</h3>
+
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <CalendarIcon className="w-5 h-5 text-gray-700" />
+                        <span className="font-light">
+                          {selectedDate
+                            ? new Date(selectedDate).toLocaleDateString("en-CA", {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })
+                            : "No event date selected"}
+                        </span>
+                      </div>
+
+                      {selectedTime && (
+                        <div className="flex items-center gap-2 text-gray-700 mt-1">
+                          <ClockIcon className="w-5 h-5 text-gray-700" />
+                          <span className="font-light">
+                            {selectedTime
+                              ? new Date(`1970-01-01T${selectedTime}`).toLocaleTimeString([], {
+                                  hour: "numeric",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                })
+                              : ""}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Trial Details (only show if bridal) */}
+                    {isBridal && (
+                      <div>
+                        <h3 className="text-gray-900 font-medium text-lg mb-2">Trial Details</h3>
+
+                        <div className="flex items-center gap-2 text-gray-700">
+                          <CalendarIcon className="w-5 h-5 text-gray-700" />
+                          <span className="font-light">
+                            {trialDate
+                              ? new Date(trialDate).toLocaleDateString("en-CA", {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })
+                              : "No trial date selected"}
+                          </span>
+                        </div>
+
+                        {trialTime && (
+                          <div className="flex items-center gap-2 text-gray-700 mt-1">
+                            <ClockIcon className="w-5 h-5 text-gray-700" />
+                            <span className="font-light">
+                              {trialTime
+                                ? new Date(`1970-01-01T${trialTime}`).toLocaleTimeString([], {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  })
+                                : ""}
+                            </span>
+
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+            </div>
+          )}
+
+
+        {/* Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-3xl space-y-8 relative overflow-y-auto max-h-[90vh]">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Edit Dates & Times</h3>
+
+              {/* Event Section */}
+              <div className="space-y-4">
+                <h4 className="text-gray-800 font-medium text-base">Event</h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <CustomDatePicker
+                    label="Event Date"
+                    name="event_date"
+                    register={(name) => ({
+                      onChange: (e) => 
+                      {
+                        if (trialDate >= e.target.value) {
+                          alert("Trial date must be before the event date.")
+                          return
+                        }
+                        else
+                          setSelectedDate(e.target.value)
+                      },
+                      name,
+                    })}
+                    value={selectedDate}
+                    minDate={new Date().toISOString().split("T")[0]}
+                  />
+                  <CustomTimePicker
+                    label="Event Time"
+                    name="event_time"
+                    register={(name) => ({
+                      onChange: (e) => setSelectedTime(e.target.value),
+                      name,
+                    })}
+                    value={selectedTime}
+                  />
+                </div>
+              </div>
+
+              {/* Trial Section (Bridal only) */}
+              {booking?.service_type?.toLowerCase() === "bridal" && (
+                <div className="space-y-4">
+                  <h4 className="text-gray-800 font-medium text-base">Trial</h4>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <CustomDatePicker
+                      label="Trial Date"
+                      name="trial_date"
+                      register={(name) => ({
+                        onChange: (e) => 
+                        {
+                          if (e.target.value >= selectedDate) {
+                            alert("Trial date must be before the event date.")
+                            return
+                          }
+                          else
+                            setTrialDate(e.target.value)
+                        },
+                        name,
+                      })}
+                      value={trialDate}
+                      minDate={new Date().toISOString().split("T")[0]}
+                      maxDate={
+                        selectedDate
+                        ? new Date(new Date(selectedDate).setDate(new Date(selectedDate).getDate() - 1))
+                        : null
+                      }
+                    />
+                    <CustomTimePicker
+                      label="Trial Time"
+                      name="trial_time"
+                      register={(name) => ({
+                        onChange: (e) => setTrialTime(e.target.value),
+                        name,
+                      })}
+                      value={trialTime}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-5 py-2 rounded-lg bg-gray-900 text-white hover:opacity-90 transition-all"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
 
         {step === "consultation" && (
           <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sm:p-8">
-            <h2 className="text-2xl font-normal text-gray-900 mb-3">
-              Schedule Your Consultation
-            </h2>
-            <p className="text-gray-700 font-light mb-6">
-              Choose a convenient time to discuss your needs.
-            </p>
+            <h2 className="text-2xl font-normal text-gray-900 mb-3">Schedule Your Consultation</h2>
+            <p className="text-gray-700 font-light mb-6">Choose a convenient time to discuss your needs.</p>
 
             <div className="overflow-hidden border border-gray-200 rounded-lg mb-8">
               <iframe
@@ -599,19 +927,24 @@ export default function QuotePage() {
           </div>
         )}
 
-        {step === "artist" && (
+       {step === "artist" && (
           <ArtistSelection
             booking={booking}
             selectedDate={selectedDate}
-            onArtistSelect={(artist) => setSelectedArtist(artist)}
+            selectedPackage={selectedPackage} // ✅ add this line
+            onArtistSelect={(artist) => {
+              setSelectedArtist(artist)
+              setStep("address") // ✅ move to next step
+            }}
             onBackToQuotes={() => setStep("packages")}
           />
         )}
 
+
         {step === "address" && (
           <AddressSelection
-            onAddressSelect={(address) => setSelectedAddress(address)}
-            onBack={() => setStep("artist")}
+            onAddressSelect={handleAddressSelect}
+            onBack={handleBackToArtist}
             initialAddress={selectedAddress}
           />
         )}
@@ -626,16 +959,14 @@ export default function QuotePage() {
             selectedAddress={selectedAddress}
             bookingId={bookingId}
             onProceedToPayment={(bookingId, depositAmount) =>
-              navigate("/payment", {
-                state: { bookingId, amount: depositAmount },
-              })
+              navigate("/payment", { state: { bookingId, amount: depositAmount } })
             }
             onBack={() => setStep("address")}
           />
         )}
       </div>
     </div>
-  );
+  )
 }
 
 function PackageBreakdown({
@@ -646,6 +977,10 @@ function PackageBreakdown({
 }) {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [callLoading, setCallLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false)
+  const [trialDate, setTrialDate] = useState("")
+  const [trialTime, setTrialTime] = useState("")
+
 
   const pricingBooking = selectedDate
     ? { ...booking, event_date: selectedDate }
@@ -690,44 +1025,43 @@ function PackageBreakdown({
       {/* Package Grid */}
       <div className="flex justify-center">
         <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5 mb-4">
-          {packages.map((pkg) => (
+
+
+          {packages.map((pkg, index) => (
             <div
               key={pkg.id}
-              className="group relative border border-gray-300 rounded-xl p-3.5 sm:p-5 transition-all duration-300 hover:border-gray-500 hover:shadow-md hover:shadow-gray-400/20 overflow-hidden"
-            >
-              {/* Subtle shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-100/5 via-gray-300/5 to-gray-600/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300 "></div>
+              className={`group relative rounded-2xl p-6 sm:p-7 transition-all duration-500 overflow-hidden hover:scale-[1.02] mb-5 ${
+                index === 0
+                  ? "border border-gray-300/80 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 text-gray-900 shadow-[0_6px_25px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_35px_rgba(0,0,0,0.18)] absolute inset-0  opacity-100 "
+                  : "border border-gray-200 bg-gradient-to-b from-white to-gray-50 shadow-sm hover:shadow-lg hover:from-gray-50 hover:to-white hover:border-gray-400/60"
+              }`}
+>
 
+              {/* Gradient Accent Bar */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-700 via-gray-900 to-gray-700 rounded-t-2xl opacity-70 "></div>
+
+              {/* Package Content */}
               <div className="relative">
-                {/* Title */}
-                <h3
-                  className="text-lg sm:text-xl font-light text-gray-900 mb-1.5"
-                  style={{ letterSpacing: "0.02em" }}
-                >
-                  {pkg.name}
-                </h3>
-
-                <p
-                  className="text-gray-600 mb-3 text-sm sm:text-base font-light leading-snug"
-                  style={{ letterSpacing: "0.01em" }}
-                >
-                  {pkg.description}
-                </p>
-
+                {/* Title & Description */}
+                <div className="flex flex-col h-25">
+                  <h3
+                    className="text-xl sm:text-2xl font-medium text-gray-900 mb-1.5 tracking-tight"
+                  >
+                    {pkg.name}
+                  </h3>
+                  <p className="text-gray-600 mb-4 text-sm sm:text-base font-light leading-snug">
+                    {pkg.description}
+                  </p>
+                </div>
                 {/* Price */}
-                <div
-                  className="text-xl sm:text-2xl font-light text-gray-700 mb-4"
-                  style={{ letterSpacing: "0.02em" }}
-                >
-                  ${formatCurrency(pkg.price)} CAD
+                <div className="text-3xl font-semibold text-gray-900 mb-5">
+                  ${formatCurrency(pkg.price)}{" "}
+                  <span className="text-sm font-normal text-gray-600">CAD</span>
                 </div>
 
-                {/* Services */}
+                {/* What's Included */}
                 <div className="mb-4">
-                  <h4
-                    className="text-xs sm:text-sm font-light text-gray-700 mb-2 uppercase"
-                    style={{ letterSpacing: "0.05em" }}
-                  >
+                  <h4 className="text-sm font-semibold text-gray-700 uppercase mb-2 tracking-wide">
                     What's Included
                   </h4>
                   <ul className="space-y-1.5 mb-4">
@@ -739,14 +1073,13 @@ function PackageBreakdown({
                           !service.includes("Total:") &&
                           !service.includes("Deposit required")
                       )
-                      .map((service, index) => (
+                      .map((service, i) => (
                         <li
-                          key={index}
-                          className="flex items-start text-xs sm:text-sm text-gray-600 transition-colors group-hover:text-gray-900 font-light"
-                          style={{ letterSpacing: "0.01em" }}
+                          key={i}
+                          className="flex items-start text-sm text-gray-700 font-light"
                         >
                           <svg
-                            className="w-3.5 h-3.5 mr-2 mt-0.5 flex-shrink-0 text-gray-600/60 group-hover:text-gray-800 transition-colors"
+                            className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0 text-gray-800/70"
                             fill="currentColor"
                             viewBox="0 0 20 20"
                           >
@@ -760,60 +1093,77 @@ function PackageBreakdown({
                         </li>
                       ))}
                   </ul>
+                </div>
 
-                  {/* Pricing Breakdown */}
-                  <div className="border-t border-gray-300/70 pt-3">
-                    <h4
-                      className="text-xs sm:text-sm font-light text-gray-700 mb-2 uppercase"
-                      style={{ letterSpacing: "0.05em" }}
-                    >
-                      Pricing Breakdown
-                    </h4>
-                    <div className="space-y-1.5 text-xs sm:text-sm">
-                      {pkg.services
-                        .filter(
-                          (service) =>
-                            service.includes("Subtotal:") ||
-                            service.includes("HST (13%):") ||
-                            service.includes("Total:") ||
-                            service.includes("Deposit required")
-                        )
-                        .map((service, index) => (
-                          <div
-                            key={index}
-                            className="flex justify-between font-light"
-                            style={{ letterSpacing: "0.01em" }}
+                {/* Pricing Breakdown */}
+                <div className="border-t border-gray-300/70 pt-3">
+                  <h4 className="text-sm font-semibold text-gray-700 uppercase mb-2 tracking-wide">
+                    Pricing Breakdown
+                  </h4>
+                  <div className="space-y-1.5 text-sm">
+                    {pkg.services
+                      .filter(
+                        (service) =>
+                          service.includes("Subtotal:") ||
+                          service.includes("HST (13%):") ||
+                          service.includes("Total:") ||
+                          service.includes("Deposit required")
+                      )
+                      .map((service, i) => (
+                        <div
+                          key={i}
+                          className="flex justify-between font-light"
+                        >
+                          <span
+                            className={`${
+                              service.includes("Total:")
+                                ? "text-gray-900 font-medium"
+                                : service.includes("Deposit required")
+                                ? "text-gray-800"
+                                : "text-gray-600"
+                            }`}
                           >
-                            <span
-                              className={
-                                service.includes("Total:")
-                                  ? "text-gray-900"
-                                  : service.includes("Deposit required")
-                                  ? "text-gray-700"
-                                  : "text-gray-600"
-                              }
-                            >
-                              {service.split(":")[0]}:
-                            </span>
-                            <span
-                              className={
-                                service.includes("Total:")
-                                  ? "font-medium text-gray-900"
-                                  : service.includes("Deposit required")
-                                  ? "font-medium text-gray-700"
-                                  : "text-gray-600"
-                              }
-                            >
-                              {service.split(":")[1]}
-                            </span>
-                          </div>
-                        ))}
-                    </div>
+                            {service.split(":")[0]}:
+                          </span>
+                          <span
+                            className={`${
+                              service.includes("Total:")
+                                ? "font-semibold text-gray-900"
+                                : service.includes("Deposit required")
+                                ? "font-medium text-gray-700"
+                                : "text-gray-600"
+                            }`}
+                          >
+                            {service.split(":")[1]}
+                          </span>
+                        </div>
+                      ))}
                   </div>
                 </div>
               </div>
+
+              {/* Select Package Button */}
+              <div className="mt-5 ">
+                <button
+                  onClick={() => handleBookNow(pkg)}
+                  disabled={bookingLoading}
+                  className="after:relative w-full bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white py-2.5 sm:py-3 px-4 rounded-lg font-light shadow-md hover:shadow-lg  active:scale-100 transition-all duration-300 disabled:opacity-50 border border-gray-600 overflow-hidden text-sm sm:text-base"
+                  style={{ letterSpacing: "0.05em" }}
+                >
+                  {!bookingLoading && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+                  )}
+                  <span className="relative flex items-center justify-center gap-2">
+                    {bookingLoading ? <LoadingSpinner /> : ""} Select Package
+                  </span>
+                </button>
+              </div>
+
+
+              
             </div>
           ))}
+
         </div>
       </div>
 
@@ -832,7 +1182,7 @@ function PackageBreakdown({
       <div className="text-center px-3">
         <div className="space-y-3 max-w-md mx-auto">
           {/* Book Now */}
-          <button
+          {/* <button
             onClick={handleBookNow}
             disabled={bookingLoading}
             className="relative w-full bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white py-3 px-5 rounded-lg font-light shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-100 transition-all duration-300 disabled:opacity-50 border border-gray-600 overflow-hidden text-sm sm:text-base"
@@ -844,7 +1194,7 @@ function PackageBreakdown({
             <span className="relative flex items-center justify-center gap-2">
               {bookingLoading ? <LoadingSpinner /> : "📅"} Proceed to Booking
             </span>
-          </button>
+          </button> */}
 
           {/* Schedule Call */}
           <button
@@ -871,6 +1221,7 @@ function ArtistSelection({
   selectedDate,
   onArtistSelect,
   onBackToQuotes,
+  selectedPackage, // ✅ new prop
 }) {
   const [inspirationLinks, setInspirationLinks] = useState(
     booking?.inspiration_link ? [booking.inspiration_link] : [""]
@@ -885,19 +1236,19 @@ function ArtistSelection({
       const file = e.target.files?.[0];
       if (!file) return;
       setUploading(true);
+
       const fd = new FormData();
       fd.append("image", file);
       if (booking?.email) fd.append("email", booking.email);
-      const res = await fetch(
-        `${
-          import.meta.env.VITE_API_URL ||
-          "https://looksbyanum-saqib.vercel.app/api/"
-        }/uploads/inspiration`,
-        {
-          method: "POST",
-          body: fd,
-        }
-      );
+
+      const baseUrl =
+        import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api";
+      const res = await fetch(`${baseUrl}/uploads/inspiration`, {
+        method: "POST",
+        body: fd,
+      });
+
+
       if (!res.ok) throw new Error("Upload failed");
       const data = await res.json();
 
@@ -920,21 +1271,15 @@ function ArtistSelection({
     }
   };
 
-  const addInspirationField = () => {
-    setInspirationLinks((prev) => [...prev, ""]);
-  };
-
-  const removeInspirationField = (index) => {
+  const addInspirationField = () => setInspirationLinks((prev) => [...prev, ""]);
+  const removeInspirationField = (index) =>
     setInspirationLinks((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const updateInspirationLink = (index, value) => {
+  const updateInspirationLink = (index, value) =>
     setInspirationLinks((prev) => {
       const newLinks = [...prev];
       newLinks[index] = value;
       return newLinks;
     });
-  };
 
   const handleArtistSelectWithInspiration = async (artist) => {
     setIsSubmitting(true);
@@ -948,7 +1293,6 @@ function ArtistSelection({
         const inspirationKey = `inspiration_${booking.booking_id}`;
         localStorage.setItem(inspirationKey, JSON.stringify(inspirationData));
       }
-
       await onArtistSelect(artist);
     } finally {
       setIsSubmitting(false);
@@ -958,35 +1302,20 @@ function ArtistSelection({
   const base = selectedDate
     ? { ...booking, event_date: selectedDate }
     : booking;
+
   const pricingAnum = calculateBookingPrice(base, "Lead");
   const pricingTeam = calculateBookingPrice(base, "Team");
   const artists = [
-    {
-      id: "Lead",
-      name: "Book with Anum",
-      price: pricingAnum?.total || 0,
-      icon: "👑",
-    },
-    {
-      id: "Team",
-      name: "Book with Team",
-      price: pricingTeam?.total || 0,
-      icon: "👥",
-    },
+    { id: "Lead", name: "Book with Anum", price: pricingAnum?.total || 0, icon: "👑" },
+    { id: "Team", name: "Book with Team", price: pricingTeam?.total || 0, icon: "👥" },
   ];
 
   return (
     <div className="p-8 md:p-16">
-      <h2
-        className="text-left text-3xl font-normal text-gray-900 mb-4"
-        style={{ letterSpacing: "0.02em" }}
-      >
+      <h2 className="text-left text-3xl font-normal text-gray-900 mb-4" style={{ letterSpacing: "0.02em" }}>
         Choose Your Artist
       </h2>
-      <p
-        className="text-left text-gray-600 mb-8 text-base font-light"
-        style={{ letterSpacing: "0.01em" }}
-      >
+      <p className="text-left text-gray-600 mb-8 text-base font-light" style={{ letterSpacing: "0.01em" }}>
         Select which artist you'd like to book with for your Bridal
       </p>
 
@@ -996,7 +1325,7 @@ function ArtistSelection({
           Inspiration (Optional)
         </label>
 
-        {/* Link inputs */}
+        {/* Inspiration Links */}
         <div className="space-y-3 mb-5">
           {inspirationLinks.map((link, index) => (
             <div key={index} className="flex flex-col md:flex-row gap-2">
@@ -1010,7 +1339,6 @@ function ArtistSelection({
                   onChange={(e) => updateInspirationLink(index, e.target.value)}
                   className="w-full pl-11 pr-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500/50 focus:border-gray-600 transition-all text-sm md:text-base text-gray-900 placeholder-gray-400 font-light"
                   placeholder="Paste inspiration link (Pinterest/Instagram/etc.)"
-                  style={{ letterSpacing: "0.01em" }}
                 />
               </div>
               {inspirationLinks.length > 1 && (
@@ -1018,7 +1346,6 @@ function ArtistSelection({
                   type="button"
                   onClick={() => removeInspirationField(index)}
                   className="px-4 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-300 text-sm md:text-base font-light border border-red-200"
-                  title="Remove this inspiration link"
                 >
                   Remove
                 </button>
@@ -1031,7 +1358,6 @@ function ArtistSelection({
           type="button"
           onClick={addInspirationField}
           className="mb-5 px-4 py-2.5 bg-gray-100 text-gray-800 rounded-xl hover:bg-gray-200 transition-all duration-300 flex items-center gap-2 text-sm font-light border border-gray-300 shadow-sm cursor-pointer"
-          style={{ letterSpacing: "0.01em" }}
         >
           <span className="text-gray-500 text-lg">+</span>
           <span>Add Another Link</span>
@@ -1072,16 +1398,16 @@ function ArtistSelection({
               {uploadError}
             </div>
           )}
-          <p
-            className="mt-2 text-xs text-gray-500 font-light"
-            style={{ letterSpacing: "0.01em" }}
-          >
+          <p className="mt-2 text-xs text-gray-500 font-light">
             Uploaded image URL will auto-fill an inspiration link field.
           </p>
         </div>
       </div>
 
-      {/* Artist Selection Cards */}
+      {/* Conditional content based on package selection */}
+
+      {/* Artist selection cards (only if no package selected yet) */}
+      {/* Artist selection cards */}
       <div className="space-y-5 max-w-2xl mx-auto mb-8">
         {artists.map((artist) => (
           <div
@@ -1137,12 +1463,13 @@ function ArtistSelection({
           style={{ letterSpacing: "0.05em" }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-          <span className="relative">Back to Quotes</span>
+          <span className="relative">← Back to Quotes</span>
         </button>
       </div>
     </div>
   );
 }
+
 
 function AddressSelection({ onAddressSelect, onBack, initialAddress }) {
   const [address, setAddress] = useState(
@@ -1187,31 +1514,25 @@ function AddressSelection({ onAddressSelect, onBack, initialAddress }) {
     address.street && address.city && address.province && address.postalCode;
 
   return (
-    <div className="bg-gray-800/40 backdrop-blur-sm rounded-2xl shadow-2xl shadow-gray-900/50 p-8 md:p-16 border border-gray-700/50">
-      <h2
-        className="text-3xl font-light text-white mb-6 text-center"
-        style={{ letterSpacing: "0.02em" }}
-      >
+    <div className="p-8 md:p-16">
+      <h2 className="text-left text-3xl font-normal text-gray-900 mb-4" style={{ letterSpacing: "0.02em" }}>
         Service Address
       </h2>
-      <p
-        className="text-center text-gray-400 mb-8 text-lg font-light"
-        style={{ letterSpacing: "0.01em" }}
-      >
+      <p className="text-left text-gray-600 mb-8 text-base font-light" style={{ letterSpacing: "0.01em" }}>
         Where should we provide the service?
       </p>
 
-      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-5 mb-6">
+      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto relative z-10">
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
           <div className="md:col-span-2">
-            <label className="block text-sm font-light text-rose-300 mb-2 uppercase tracking-wide">
+            <label className="block text-sm font-medium text-gray-800 mb-2 uppercase tracking-wide">
               Street Address
             </label>
             <input
               type="text"
               value={address.street}
               onChange={(e) => handleChange("street", e.target.value)}
-              className="w-full px-4 py-3 bg-neutral-900 border border-gray-700 rounded-xl focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-gray-200 placeholder-gray-500 font-light"
+              className="w-full px-4 py-3 bg-white/70 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-700/40 focus:border-gray-700 transition-all text-gray-900 placeholder-gray-500 font-light"
               placeholder="123 Main Street"
               style={{ letterSpacing: "0.01em" }}
               required
@@ -1219,14 +1540,14 @@ function AddressSelection({ onAddressSelect, onBack, initialAddress }) {
           </div>
 
           <div>
-            <label className="block text-sm font-light text-rose-300 mb-2 uppercase tracking-wide">
+            <label className="block text-sm font-medium text-gray-800 mb-2 uppercase tracking-wide">
               City
             </label>
             <input
               type="text"
               value={address.city}
               onChange={(e) => handleChange("city", e.target.value)}
-              className="w-full px-4 py-3 bg-neutral-900 border border-gray-700 rounded-xl focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-gray-200 placeholder-gray-500 font-light"
+              className="w-full px-4 py-3 bg-white/70 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-700/40 focus:border-gray-700 transition-all text-gray-900 placeholder-gray-500 font-light"
               placeholder="Toronto"
               style={{ letterSpacing: "0.01em" }}
               required
@@ -1234,63 +1555,35 @@ function AddressSelection({ onAddressSelect, onBack, initialAddress }) {
           </div>
 
           <div>
-            <label className="block text-sm font-light text-rose-300 mb-2 uppercase tracking-wide">
+            <label className="block text-sm font-medium text-gray-800 mb-2 uppercase tracking-wide">
               Province
             </label>
             <select
               value={address.province}
               onChange={(e) => handleChange("province", e.target.value)}
-              className="w-full px-4 py-3 bg-neutral-900 border border-gray-700 rounded-xl focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-gray-200 font-light"
+              className="w-full px-4 py-3 bg-white/70 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-700/40 focus:border-gray-700 transition-all text-gray-900 font-light"
               style={{ letterSpacing: "0.01em" }}
               required
             >
-              <option value="" className="bg-gray-800">
-                Select Province
-              </option>
-              <option value="ON" className="bg-gray-800">
-                Ontario
-              </option>
-              <option value="QC" className="bg-gray-800">
-                Quebec
-              </option>
-              <option value="BC" className="bg-gray-800">
-                British Columbia
-              </option>
-              <option value="AB" className="bg-gray-800">
-                Alberta
-              </option>
-              <option value="MB" className="bg-gray-800">
-                Manitoba
-              </option>
-              <option value="SK" className="bg-gray-800">
-                Saskatchewan
-              </option>
-              <option value="NS" className="bg-gray-800">
-                Nova Scotia
-              </option>
-              <option value="NB" className="bg-gray-800">
-                New Brunswick
-              </option>
-              <option value="NL" className="bg-gray-800">
-                Newfoundland and Labrador
-              </option>
-              <option value="PE" className="bg-gray-800">
-                Prince Edward Island
-              </option>
-              <option value="NT" className="bg-gray-800">
-                Northwest Territories
-              </option>
-              <option value="NU" className="bg-gray-800">
-                Nunavut
-              </option>
-              <option value="YT" className="bg-gray-800">
-                Yukon
-              </option>
+              <option value="">Select Province</option>
+              <option value="ON">Ontario</option>
+              <option value="QC">Quebec</option>
+              <option value="BC">British Columbia</option>
+              <option value="AB">Alberta</option>
+              <option value="MB">Manitoba</option>
+              <option value="SK">Saskatchewan</option>
+              <option value="NS">Nova Scotia</option>
+              <option value="NB">New Brunswick</option>
+              <option value="NL">Newfoundland and Labrador</option>
+              <option value="PE">Prince Edward Island</option>
+              <option value="NT">Northwest Territories</option>
+              <option value="NU">Nunavut</option>
+              <option value="YT">Yukon</option>
             </select>
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-light text-rose-300 mb-2 uppercase tracking-wide">
+            <label className="block text-sm font-medium text-gray-800 mb-2 uppercase tracking-wide">
               Postal Code
             </label>
             <input
@@ -1308,13 +1601,13 @@ function AddressSelection({ onAddressSelect, onBack, initialAddress }) {
                 }
                 handleChange("postalCode", value);
               }}
-              className="w-full px-4 py-3 bg-neutral-900 border border-gray-700 rounded-xl focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-gray-200 placeholder-gray-500 font-light"
+              className="w-full px-4 py-3 bg-white/70 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-700/40 focus:border-gray-700 transition-all text-gray-900 placeholder-gray-500 font-light"
               placeholder="M5V 3A8"
               style={{ letterSpacing: "0.01em" }}
               required
             />
             <p
-              className="text-xs text-gray-500 mt-2 font-light"
+              className="text-xs text-gray-600 mt-2 font-light"
               style={{ letterSpacing: "0.01em" }}
             >
               Canadian postal code format: A1A 1A1
@@ -1322,24 +1615,25 @@ function AddressSelection({ onAddressSelect, onBack, initialAddress }) {
           </div>
         </div>
 
-        <div className="flex gap-4 pt-6 md:pt-8 border-t border-gray-700/50 mt-8 md:mt-10">
+        {/* Action Buttons */}
+        <div className="flex gap-4 pt-6 md:pt-8 border-t border-gray-400/40 mt-8 md:mt-10">
           <button
             type="button"
             onClick={onBack}
-            className="relative flex-1 bg-gray-700/50 text-gray-200 py-3.5 rounded-xl font-light shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 transition-all duration-300 cursor-pointer border border-gray-600/30 overflow-hidden"
+            className="relative flex-1 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-800 py-3.5 rounded-xl font-light shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-100 transition-all duration-300 cursor-pointer border border-gray-400/60 overflow-hidden"
             style={{ letterSpacing: "0.05em" }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
             <span className="relative">← Back</span>
           </button>
 
           <button
             type="submit"
             disabled={isSubmitting || !isFormValid}
-            className={`relative flex-1 py-3.5 rounded-xl font-light shadow-lg transition-all duration-300 border overflow-hidden ${
+            className={`relative flex-1 py-3.5 rounded-xl font-light shadow-md transition-all duration-300 border overflow-hidden ${
               isSubmitting || !isFormValid
-                ? "bg-gray-700/50 text-gray-500 cursor-not-allowed border border-gray-600/30"
-                : "bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 text-white shadow-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/40 hover:scale-105 active:scale-100 cursor-pointer border border-rose-400/30"
+                ? "bg-gray-300/60 text-gray-500 cursor-not-allowed border border-gray-400/40"
+                : "bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white hover:shadow-xl hover:scale-[1.03] active:scale-100 border border-gray-700"
             }`}
             style={{ letterSpacing: "0.05em" }}
           >
@@ -1364,6 +1658,7 @@ function AddressSelection({ onAddressSelect, onBack, initialAddress }) {
     </div>
   );
 }
+
 
 function Review({
   booking,
@@ -1556,351 +1851,213 @@ function Review({
   };
 
   return (
-    <div className="bg-gray-800/40 backdrop-blur-sm rounded-2xl shadow-2xl shadow-gray-900/50 p-8 md:p-16 border border-gray-700/50">
+    <div className="bg-white px-6 sm:px-10 md:px-14 py-8 md:py-12 text-gray-800">
       <h2
-        className="text-2xl md:text-3xl font-light text-white mb-4 md:mb-6 text-center"
+        className="text-2xl md:text-3xl font-normal text-gray-900 mb-3 md:mb-4 text-center"
         style={{ letterSpacing: "0.02em" }}
       >
         Booking Summary
       </h2>
       <p
-        className="text-center text-gray-400 mb-6 md:mb-8 text-base md:text-lg font-light"
+        className="text-center text-gray-600 mb-8 text-sm md:text-base font-light"
         style={{ letterSpacing: "0.01em" }}
       >
         Please review your booking details below
       </p>
 
-      <div className="max-w-3xl mx-auto space-y-6 md:space-y-7">
-        {/* Service Details */}
-        <div className="border-b border-gray-700/50 pb-5">
-          <h3 className="text-lg font-light text-rose-300 mb-4 uppercase tracking-wide">
+      <div className="max-w-3xl mx-auto space-y-6 md:space-y-8">
+        {/* Section Template */}
+        <div className="space-y-3 border-b border-gray-200 pb-5">
+          <h3 className="text-base md:text-lg font-medium text-gray-800 uppercase tracking-wide">
             Service Details
           </h3>
-          <div className="space-y-2.5 text-sm">
-            <div
-              className="flex items-start font-light"
-              style={{ letterSpacing: "0.01em" }}
-            >
-              <span className="text-rose-400 mr-2">•</span>
-              <span className="text-gray-400 flex-shrink-0 w-24">Artist:</span>
-              <span className="text-white">{artistName}</span>
-            </div>
-            <div
-              className="flex items-start font-light"
-              style={{ letterSpacing: "0.01em" }}
-            >
-              <span className="text-rose-400 mr-2">•</span>
-              <span className="text-gray-400 flex-shrink-0 w-24">Service:</span>
-              <span className="text-white">{serviceName}</span>
-            </div>
-            <div
-              className="flex items-start font-light"
-              style={{ letterSpacing: "0.01em" }}
-            >
-              <span className="text-rose-400 mr-2">•</span>
-              <span className="text-gray-400 flex-shrink-0 w-24">
-                Event Date:
-              </span>
-              <span className="text-white">
-                {new Date(selectedDate).toLocaleDateString("en-CA", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
-            </div>
+          <div className="space-y-1.5 text-sm font-light text-gray-700">
+            <p>
+              <span className="font-medium">Artist:</span> {artistName}
+            </p>
+            <p>
+              <span className="font-medium">Service:</span> {serviceName}
+            </p>
+            <p>
+              <span className="font-medium">Event Date:</span>{" "}
+              {new Date(selectedDate).toLocaleDateString("en-CA", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
           </div>
         </div>
 
         {/* Appointment Schedule */}
-        <div className="border-b border-gray-700/50 pb-5">
-          <h3 className="text-lg font-light text-rose-300 mb-4 uppercase tracking-wide">
+        <div className="space-y-3 border-b border-gray-200 pb-5">
+          <h3 className="text-base md:text-lg font-medium text-gray-800 uppercase tracking-wide">
             Appointment Schedule
           </h3>
-          <div className="space-y-2.5 text-sm">
-            <div
-              className="flex items-start font-light"
-              style={{ letterSpacing: "0.01em" }}
-            >
-              <span className="text-rose-400 mr-2">•</span>
-              <span className="text-gray-400 flex-shrink-0 w-40">
-                📅 Appointment Start:
-              </span>
-              <span className="text-white">
-                {getAppointmentStartTime(selectedTime)}
-              </span>
-            </div>
-            <div
-              className="flex items-start font-light"
-              style={{ letterSpacing: "0.01em" }}
-            >
-              <span className="text-rose-400 mr-2">•</span>
-              <span className="text-gray-400 flex-shrink-0 w-40">
-                ⏰ Ready Time:
-              </span>
-              <span className="text-white">
-                {formatReadyTime(selectedTime)}
-              </span>
-            </div>
+          <div className="space-y-1.5 text-sm font-light text-gray-700">
+            <p>
+              <span className="font-medium">📅 Appointment Start:</span>{" "}
+              {getAppointmentStartTime(selectedTime)}
+            </p>
+            <p>
+              <span className="font-medium">⏰ Ready Time:</span>{" "}
+              {formatReadyTime(selectedTime)}
+            </p>
+            <p>
+              <span className="font-medium">📍 Location: </span>{" "} {selectedAddress.street}, {selectedAddress.city},{" "}
+              {selectedAddress.province} {selectedAddress.postalCode}
+            </p>
           </div>
-          <p
-            className="text-xs text-gray-500 mt-4 font-light leading-relaxed"
-            style={{ letterSpacing: "0.01em" }}
-          >
-            📍 Location: {selectedAddress.street}, {selectedAddress.city},{" "}
-            {selectedAddress.province} {selectedAddress.postalCode}
-          </p>
-          <p
-            className="text-xs text-gray-500 mt-2 font-light"
-            style={{ letterSpacing: "0.01em" }}
-          >
-            We'll start 2 hours before your ready time to ensure you're
-            completely finished on schedule.
+          
+          <p className="text-xs text-gray-500 font-light mt-1.5">
+            We’ll start 2 hours before your ready time to ensure you’re ready on schedule.
           </p>
         </div>
 
         {/* Pricing Summary */}
-        <div className="border-b border-gray-700/50 pb-5">
-          <h3 className="text-lg font-light text-rose-300 mb-4 uppercase tracking-wide">
+        <div className="space-y-3 border-b border-gray-200 pb-5">
+          <h3 className="text-base md:text-lg font-medium text-gray-800 uppercase tracking-wide">
             Pricing Summary
           </h3>
-          <div className="space-y-3">
-            <ul className="space-y-2.5 mb-5">
-              {services
-                .filter(
-                  (service) =>
-                    !service.includes("Subtotal:") &&
-                    !service.includes("HST (13%):") &&
-                    !service.includes("Total:") &&
-                    !service.includes("Deposit required")
-                )
-                .map((service, index) => (
-                  <li
-                    key={index}
-                    className="flex items-start text-sm text-gray-300 font-light"
-                    style={{ letterSpacing: "0.01em" }}
-                  >
-                    <span className="text-rose-400 mr-2">•</span>
-                    <span className="flex-1">{service.split(":")[0]}</span>
-                    <span className="text-white ml-2">
-                      {service.split(":")[1]}
-                    </span>
-                  </li>
-                ))}
-            </ul>
-
-            <div className="space-y-2.5 border-t border-gray-700/50 pt-4">
-              <div
-                className="flex items-start text-sm text-gray-300 font-light"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                <span className="text-rose-400 mr-2">•</span>
-                <span className="flex-1">Subtotal</span>
-                <span className="text-white ml-2">
-                  {formatCurrency(subtotal)}
-                </span>
-              </div>
-              <div
-                className="flex items-start text-sm text-gray-300 font-light"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                <span className="text-rose-400 mr-2">•</span>
-                <span className="flex-1">HST (13%)</span>
-                <span className="text-white ml-2">{formatCurrency(hst)}</span>
-              </div>
-              <div
-                className="flex items-start text-sm font-light text-white"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                <span className="text-rose-500 mr-2">•</span>
-                <span className="flex-1">Total (with 13% HST)</span>
-                <span className="text-lg text-rose-400 ml-2">
-                  {formatCurrency(total)} CAD
-                </span>
-              </div>
-              <div
-                className="flex items-start text-sm font-light text-fuchsia-400"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                <span className="text-fuchsia-500 mr-2">•</span>
-                <span className="flex-1">
-                  Amount to Pay ({depositPercentage}%)
-                </span>
-                <span className="text-fuchsia-400 ml-2">
-                  {formatCurrency(deposit)} CAD
-                </span>
-              </div>
+          <ul className="space-y-1.5 mb-4 text-sm font-light text-gray-700">
+            {services
+              .filter(
+                (s) =>
+                  !s.includes("Subtotal:") &&
+                  !s.includes("HST (13%):") &&
+                  !s.includes("Total:") &&
+                  !s.includes("Deposit required")
+              )
+              .map((service, i) => (
+                <li key={i} className="flex justify-between">
+                  <span>{service.split(":")[0]}</span>
+                  <span>{service.split(":")[1]}</span>
+                </li>
+              ))}
+          </ul>
+          <div className="space-y-2 pt-3 border-t border-gray-200 text-sm font-light text-gray-700">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{formatCurrency(subtotal)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>HST (13%)</span>
+              <span>{formatCurrency(hst)}</span>
+            </div>
+            <div className="flex justify-between font-medium text-gray-900">
+              <span>Total (with 13% HST)</span>
+              <span>{formatCurrency(total)} CAD</span>
+            </div>
+            <div className="flex justify-between font-medium text-fuchsia-600">
+              <span>Amount to Pay ({depositPercentage}%)</span>
+              <span>{formatCurrency(deposit)} CAD</span>
             </div>
           </div>
         </div>
 
         {/* Terms & Conditions */}
-        <div className="border-b border-gray-700/50 pb-5">
-          <h3 className="text-lg font-light text-rose-300 mb-4 uppercase tracking-wide">
+        <div className="space-y-3 border-b border-gray-200 pb-5">
+          <h3 className="text-base md:text-lg font-medium text-gray-800 uppercase tracking-wide">
             Terms & Conditions
           </h3>
-          <div
-            className="space-y-4 text-sm text-gray-300 max-h-64 overflow-y-auto font-light"
-            style={{ letterSpacing: "0.01em" }}
-          >
+          <div className="space-y-4 text-sm font-light text-gray-700 max-h-60 overflow-y-auto leading-relaxed">
             <div>
-              <strong className="text-white font-normal">
-                Client Responsibilities:
-              </strong>
-              <ul className="list-disc list-inside mt-2 space-y-1.5">
-                <li>
-                  Provide accurate and detailed information regarding the
-                  desired makeup and hair services.
-                </li>
-                <li>
-                  Ensure a suitable location with proper lighting and access to
-                  an electrical outlet.
-                </li>
-                <li>
-                  Arrive with clean, dry hair and a clean face, free of makeup
-                  or hair products.
-                </li>
-                <li>
-                  Client is responsible for any parking fees incurred at the
-                  event location.
-                </li>
+              <p className="font-medium">Client Responsibilities:</p>
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Provide accurate and detailed information.</li>
+                <li>Ensure proper lighting and accessible location.</li>
+                <li>Arrive with clean hair and face.</li>
+                <li>Client covers parking fees if any.</li>
               </ul>
             </div>
-
             <div>
-              <strong className="text-white font-normal">
-                Cancellation Policy:
-              </strong>
-              <ul className="list-disc list-inside mt-2 space-y-1.5">
-                <li>The deposit is non-refundable if the client cancels.</li>
-                <li>
-                  If the event is canceled less than 3 days before the scheduled
-                  date, the full remaining balance will still be due.
-                </li>
+              <p className="font-medium">Cancellation Policy:</p>
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Deposit is non-refundable if canceled.</li>
+                <li>If canceled within 3 days, full balance is due.</li>
               </ul>
             </div>
-
             <div>
-              <strong className="text-white font-normal">Liability:</strong>
-              <ul className="list-disc list-inside mt-2 space-y-1.5">
-                <li>
-                  Looks By Anum is not responsible for allergic reactions or
-                  injuries resulting from the services provided.
-                </li>
-                <li>
-                  The client must inform the artist of any allergies or
-                  sensitivities before the service begins.
-                </li>
-                <li>
-                  The client agrees to hold Looks By Anum harmless from any
-                  claims related to the services rendered.
-                </li>
+              <p className="font-medium">Liability:</p>
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>We’re not responsible for allergic reactions or injuries.</li>
+                <li>Inform artist of any allergies in advance.</li>
               </ul>
             </div>
-
             <div>
-              <strong className="text-white font-normal">Payment Terms:</strong>
-              <ul className="list-disc list-inside mt-2 space-y-1.5">
+              <p className="font-medium">Payment Terms:</p>
+              <ul className="list-disc list-inside mt-2 space-y-1">
                 <li>
-                  The total price for the makeup and hair services is{" "}
-                  {formatCurrency(total)} CAD. A non-refundable deposit of{" "}
-                  {depositPercentage}% is required to secure your booking.
+                  Total: {formatCurrency(total)} CAD. A {depositPercentage}% deposit is required.
                 </li>
+                <li>Remaining balance due on event day.</li>
                 <li>
-                  The remaining balance will be due on the day of the event.
-                </li>
-                <li>
-                  Once we receive the deposit, your booking will be confirmed,
-                  and the date will be reserved exclusively for you.
-                </li>
-                <li>
-                  Please note that availability cannot be guaranteed until the
-                  deposit is received.
+                  Booking confirmed only after deposit — date will be held exclusively for you.
                 </li>
               </ul>
             </div>
           </div>
         </div>
 
-        {/* Terms Agreement */}
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-5">
-            <div>
-              <label className="flex items-start space-x-3">
-                <input
-                  type="checkbox"
-                  checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="mt-1 w-4 h-4 text-rose-600 bg-neutral-900 border-gray-600 rounded focus:ring-rose-500/50 focus:ring-2"
-                  required
-                />
-                <span
-                  className="text-xs md:text-sm text-gray-300 font-light leading-relaxed"
-                  style={{ letterSpacing: "0.01em" }}
-                >
-                  I have read, understood, and agree to the terms and conditions
-                  outlined above. I acknowledge that by providing my digital
-                  signature below, I am entering into a legally binding
-                  contract.
-                </span>
-              </label>
-            </div>
+        {/* Agreement + Signature */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <label className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="mt-1 w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-500"
+              required
+            />
+            <span className="text-sm text-gray-700 font-light">
+              I have read and agree to the terms and conditions.
+            </span>
+          </label>
 
-            <div>
-              <label className="block text-sm font-light text-rose-300 mb-3 uppercase tracking-wide">
-                Digital Signature *
-              </label>
-              <p
-                className="text-xs text-gray-400 mb-3 font-light"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                Please sign below to confirm your agreement to the booking and
-                terms:
-              </p>
-              <div className="w-full max-w-lg mx-auto">
-                <SignatureCanvas
-                  onSignatureChange={handleSignatureChange}
-                  width={400}
-                  height={120}
-                />
-              </div>
+          {/* Signature */}
+          <div>
+            <label className="block text-sm font-medium text-gray-800 mb-2 uppercase tracking-wide">
+              Digital Signature *
+            </label>
+            <p className="text-xs text-gray-500 mb-2 font-light">
+              Please sign below to confirm your agreement:
+            </p>
+            <div className="w-full max-w-lg mx-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+              <SignatureCanvas
+                onSignatureChange={handleSignatureChange}
+                width={400}
+                height={100}
+              />
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 mt-8">
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
             <button
               type="button"
               onClick={onBack}
-              className="relative flex-1 bg-gray-700/50 text-gray-200 py-3.5 rounded-xl font-light shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 transition-all duration-300 cursor-pointer border border-gray-600/30 overflow-hidden"
-              style={{ letterSpacing: "0.05em" }}
+              className="flex-1 px-5 py-2.5 bg-gray-100 text-gray-800 rounded-lg border border-gray-300 hover:bg-gray-200 transition-all text-sm"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-              <span className="relative">← Edit Details</span>
+              Edit Details
             </button>
             <button
               type="submit"
               disabled={!agreedToTerms || !signature || isSubmitting}
-              className={`relative flex-1 py-3.5 rounded-xl font-light shadow-lg transition-all duration-300 border overflow-hidden ${
+              className={`flex-1 px-5 py-2.5 rounded-lg text-sm transition-all ${
                 agreedToTerms && signature && !isSubmitting
-                  ? "bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 text-white shadow-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/40 hover:scale-105 active:scale-100 cursor-pointer border-rose-400/30"
-                  : "bg-gray-700/50 text-gray-500 cursor-not-allowed border-gray-600/30"
+                  ? "bg-gray-900 text-white hover:opacity-90"
+                  : "bg-gray-100 border-gray-100 text-gray-400 cursor-not-allowed"
               }`}
-              style={{ letterSpacing: "0.05em" }}
             >
-              {agreedToTerms && signature && !isSubmitting && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-              )}
-              <span className="relative flex items-center justify-center gap-2.5">
-                {isSubmitting && <LoadingSpinner />}
-                Proceed to Payment
-              </span>
+              {isSubmitting ? <LoadingSpinner /> : "Proceed to Payment"}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
+
 }
 
 // import React, { useState, useEffect } from 'react';

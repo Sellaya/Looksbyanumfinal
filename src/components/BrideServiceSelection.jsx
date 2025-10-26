@@ -2,21 +2,34 @@
 import React from "react"
 
 // Custom Date Picker (Light + Charcoalish Theme)
-const DatePicker = ({ label, name, register, error, required, maxDate }) => {
+const DatePicker = ({
+  label,
+  name,
+  register,
+  error,
+  required,
+  maxDate,
+  minDate: propMinDate, // 👈 allow passing minDate from parent
+  value, // 👈 add this
+}) => {
   const [isOpen, setIsOpen] = React.useState(false)
-  const [selectedDate, setSelectedDate] = React.useState("")
+  const [selectedDate, setSelectedDate] = React.useState(value || "")
+  
   const [currentMonth, setCurrentMonth] = React.useState(new Date())
   const dropdownRef = React.useRef(null)
 
-  const getMinimumDate = (minDaysAdvance = 2) => {
-    const today = new Date()
-    const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-    const minimumDate = new Date(localToday)
-    minimumDate.setDate(minimumDate.getDate() + minDaysAdvance)
-    return minimumDate
+  // ✅ Use today's date if no minDate prop is provided
+  const getMinimumDate = () => {
+    const now = new Date()
+    const offset = now.getTimezoneOffset()
+    // Convert to local midnight by removing offset
+    const localMidnight = new Date(now.getTime() - offset * 60 * 1000)
+    localMidnight.setHours(0, 0, 0, 0)
+    return propMinDate ? new Date(propMinDate) : localMidnight
   }
 
-  const minDate = getMinimumDate(2)
+
+  const minDate = getMinimumDate()
   minDate.setHours(0, 0, 0, 0)
 
   const formatDisplayDate = (dateString) => {
@@ -39,6 +52,7 @@ const DatePicker = ({ label, name, register, error, required, maxDate }) => {
   }
 
   const isDateDisabled = (date) => {
+    // ✅ allow current day and onwards
     if (date < minDate) return true
     if (maxDate && date > new Date(maxDate)) return true
     return false
@@ -56,8 +70,10 @@ const DatePicker = ({ label, name, register, error, required, maxDate }) => {
     setIsOpen(false)
   }
 
-  const handlePrevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
-  const handleNextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
+  const handlePrevMonth = () =>
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
+  const handleNextMonth = () =>
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))
 
   React.useEffect(() => {
     const handleClickOutside = (e) => {
@@ -72,11 +88,15 @@ const DatePicker = ({ label, name, register, error, required, maxDate }) => {
   const { onChange, ...registerProps } = register(name)
 
   const calendarDays = []
-  for (let i = 0; i < startingDayOfWeek; i++) calendarDays.push(<div key={`empty-${i}`} className="p-2" />)
+  for (let i = 0; i < startingDayOfWeek; i++)
+    calendarDays.push(<div key={`empty-${i}`} className="p-2" />)
+
   for (let day = 1; day <= daysInMonth; day++) {
     const dateObj = new Date(year, month, day)
     const isDisabled = isDateDisabled(dateObj)
-    const isSelected = selectedDate === `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    const isSelected =
+      selectedDate === `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+
     calendarDays.push(
       <button
         key={day}
@@ -86,10 +106,10 @@ const DatePicker = ({ label, name, register, error, required, maxDate }) => {
         className={`p-2.5 rounded-md text-sm font-light transition-all duration-200
           ${
             isSelected
-              ? "bg-gray-500 text-gray-50 border border-gray-400 shadow-sm"
+              ? "bg-gray-800 text-white border border-gray-600 shadow-sm"
               : isDisabled
-              ? "bg-gray-50 border border-transparent text-gray-400 cursor-not-allowed"
-              : "bg-gray-100 text-gray-800 hover:bg-white hover:text-gray-900 border  hover:border-gray-300"
+              ? "bg-gray-50 text-gray-400 border border-transparent cursor-not-allowed"
+              : "bg-gray-200 text-gray-800 hover:bg-gray-600 hover:text-gray-50 border border-transparent"
           }`}
       >
         {day}
@@ -97,9 +117,16 @@ const DatePicker = ({ label, name, register, error, required, maxDate }) => {
     )
   }
 
+  React.useEffect(() => {
+    if (value) setSelectedDate(value)
+  }, [value])
+
   return (
     <div>
-      <label htmlFor={name} className="block text-sm sm:text-base font-light text-gray-800 mb-2">
+      <label
+        htmlFor={name}
+        className="block text-sm sm:text-base font-light text-gray-800 mb-2"
+      >
         {label} {required && <span className="text-gray-700">*</span>}
       </label>
 
@@ -108,13 +135,18 @@ const DatePicker = ({ label, name, register, error, required, maxDate }) => {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="group relative w-full p-3.5 sm:p-4 rounded-lg border border-gray-300 bg-gray-50 
-          hover:border-gray-400 hover:bg-white text-left flex items-center justify-between transition-all duration-300 shadow-sm"
+          className="group relative w-full p-3.5 sm:p-4 rounded-lg border border-gray-300 bg-white 
+          hover:border-gray-500 hover:bg-gray-50 text-left flex items-center justify-between transition-all duration-300"
         >
           <span className={selectedDate ? "text-gray-800" : "text-gray-400"}>
             {selectedDate ? formatDisplayDate(selectedDate) : "Select date..."}
           </span>
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-5 h-5 text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -130,9 +162,14 @@ const DatePicker = ({ label, name, register, error, required, maxDate }) => {
               <button
                 onClick={handlePrevMonth}
                 type="button"
-                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200"
               >
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4 text-gray-800"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
@@ -142,9 +179,14 @@ const DatePicker = ({ label, name, register, error, required, maxDate }) => {
               <button
                 onClick={handleNextMonth}
                 type="button"
-                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-700 transition-all duration-200"
               >
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4 text-gray-800"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -152,7 +194,9 @@ const DatePicker = ({ label, name, register, error, required, maxDate }) => {
 
             <div className="grid grid-cols-7 gap-1 mb-2">
               {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
-                <div key={d} className="text-center text-xs text-gray-500 p-1.5">{d}</div>
+                <div key={d} className="text-center text-xs text-gray-500 p-1.5">
+                  {d}
+                </div>
               ))}
             </div>
 
@@ -171,24 +215,39 @@ const DatePicker = ({ label, name, register, error, required, maxDate }) => {
 }
 
 
+
+
 // Custom Time Picker (Light + Charcoalish Theme)
-const TimePicker = ({ label, name, register, error, required }) => {
+const TimePicker = ({ label, name, register, error, required, value }) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const [selectedTime, setSelectedTime] = React.useState("")
   const dropdownRef = React.useRef(null)
 
+  // Generate times like before
   const generateTimeOptions = () => {
     const times = []
     const periods = ["AM", "PM"]
     periods.forEach((period) => {
       for (let hour = 12; hour <= 12; hour++) {
-        times.push({ label: `${hour}:00 ${period}`, value: period === "AM" ? "00:00" : "12:00" })
-        times.push({ label: `${hour}:30 ${period}`, value: period === "AM" ? "00:30" : "12:30" })
+        times.push({
+          label: `${hour}:00 ${period}`,
+          value: period === "AM" ? "00:00" : "12:00",
+        })
+        times.push({
+          label: `${hour}:30 ${period}`,
+          value: period === "AM" ? "00:30" : "12:30",
+        })
       }
       for (let hour = 1; hour <= 11; hour++) {
         const value24 = period === "AM" ? hour : hour + 12
-        times.push({ label: `${hour}:00 ${period}`, value: `${String(value24).padStart(2, "0")}:00` })
-        times.push({ label: `${hour}:30 ${period}`, value: `${String(value24).padStart(2, "0")}:30` })
+        times.push({
+          label: `${hour}:00 ${period}`,
+          value: `${String(value24).padStart(2, "0")}:00`,
+        })
+        times.push({
+          label: `${hour}:30 ${period}`,
+          value: `${String(value24).padStart(2, "0")}:30`,
+        })
       }
     })
     return times
@@ -196,6 +255,23 @@ const TimePicker = ({ label, name, register, error, required }) => {
 
   const timeOptions = generateTimeOptions()
   const { onChange, ...registerProps } = register(name)
+
+  // Convert "13:30" → "1:30 PM"
+  const formatTimeLabel = (timeValue) => {
+    if (!timeValue) return ""
+    const [hourStr, minute] = timeValue.split(":")
+    let hour = parseInt(hourStr, 10)
+    const period = hour >= 12 ? "PM" : "AM"
+    hour = hour % 12 || 12
+    return `${hour}:${minute} ${period}`
+  }
+
+  // Sync with external value (so it shows correctly when reloading)
+  React.useEffect(() => {
+    if (value) {
+      setSelectedTime(formatTimeLabel(value))
+    }
+  }, [value])
 
   const handleTimeSelect = (time, onChange) => {
     setSelectedTime(time.label)
@@ -213,7 +289,10 @@ const TimePicker = ({ label, name, register, error, required }) => {
 
   return (
     <div>
-      <label htmlFor={name} className="block text-sm sm:text-base font-light text-gray-800 mb-2">
+      <label
+        htmlFor={name}
+        className="block text-sm sm:text-base font-light text-gray-800 mb-2"
+      >
         {label} {required && <span className="text-gray-900">*</span>}
       </label>
 
@@ -228,7 +307,14 @@ const TimePicker = ({ label, name, register, error, required }) => {
           <span className={selectedTime ? "text-gray-800" : "text-gray-400"}>
             {selectedTime || "Select time..."}
           </span>
-          <svg className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
@@ -241,7 +327,7 @@ const TimePicker = ({ label, name, register, error, required }) => {
                   key={i}
                   type="button"
                   onClick={() => handleTimeSelect(t, onChange)}
-                  className="w-full px-4 py-2 text-left text-gray-800 bg-gray-50 hover:bg-gray-800 hover:text-gray-50 border-b border-gray-100 text-sm font-light transition-all"
+                  className="w-full px-4 py-2 text-left text-gray-800 bg-gray-50 hover:bg-gray-400 hover:text-gray-50 border-b border-gray-100 text-sm font-light transition-all"
                 >
                   {t.label}
                 </button>
@@ -425,6 +511,7 @@ export default function BrideServiceSelection({ register, watch, errors, onNext,
                   name="trial_date"
                   register={register}
                   error={errors.trial_date?.message}
+                  value={watchedFields.trial_date}
                   required
                   minDaysAdvance={2}
                   maxDate={
@@ -444,6 +531,7 @@ export default function BrideServiceSelection({ register, watch, errors, onNext,
                   name="trial_time"
                   register={register}
                   error={errors.trial_time?.message}
+                  value={watchedFields.trial_time}
                   required
                 />
               </div>

@@ -18,7 +18,7 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
         if (window.paypal) {
           window.paypal.Buttons({
             createOrder: async () => {
-              const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+              const apiBase = import.meta.env.VITE_API_URL || 'https://looksbyanum-saqib.vercel.app/api';
               const response = await fetch(`${apiBase}/paypal/create-order`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -103,7 +103,7 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
 
   const handleInteracVerification = async () => {
     try {
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+      const apiBase = import.meta.env.VITE_API_URL || 'https://looksbyanum-saqib.vercel.app/api';
       const response = await fetch(`${apiBase}/interac/auth-url?bookingId=${savedBooking?.unique_id || booking.unique_id}`, {
         method: 'GET'
       });

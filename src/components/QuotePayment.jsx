@@ -3,19 +3,20 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { loadStripe } from "@stripe/stripe-js";
 import { formatCurrency } from "../../lib/currencyFormat";
+import Logo from "../assets/Black.png";
 
 // Load Stripe with the publishable key
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE);
 
 // Create API client with base URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000/api",
+  baseURL: import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api",
 });
 
 // Loading Spinner Component
 const LoadingSpinner = () => (
   <svg
-    className="animate-spin h-5 w-5 text-rose-300"
+    className="animate-spin h-5 w-5 text-gray-800"
     fill="none"
     viewBox="0 0 24 24"
   >
@@ -184,25 +185,25 @@ function InteracPaymentSection({
   return (
     <div className="flex-1 space-y-5">
       {/* Interac Payment Instructions */}
-      <div className="bg-gray-900/60 border border-gray-700/50 rounded-xl p-5">
-        <h4 className="font-light text-rose-300 mb-4 uppercase tracking-wide text-sm">
+      <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-sm">
+        <h4 className="font-medium text-gray-800 mb-4 uppercase tracking-wide text-sm">
           Interac E-Transfer Payment
         </h4>
-        <div className="space-y-3 text-sm text-gray-300 font-light">
+        <div className="space-y-3 text-sm text-gray-700 font-light">
           <div className="flex justify-between">
             <span>Send payment to:</span>
-            <span className="text-white">{interacInfo.interacEmail}</span>
+            <span className="text-gray-900 font-medium">{interacInfo.interacEmail}</span>
           </div>
           <div className="flex justify-between">
             <span>Amount:</span>
-            <span className="text-rose-400">
+            <span className="text-gray-900 font-semibold">
               ${depositAmount.toFixed(2)} CAD
             </span>
           </div>
         </div>
-        <div className="mt-4 p-3 bg-gray-800/60 border border-gray-700/50 rounded-lg">
-          <p className="text-xs text-gray-400 font-light leading-relaxed">
-            <strong className="text-gray-300">Instructions:</strong> Send the
+        <div className="mt-4 p-3 bg-gray-100 border border-gray-300 rounded-lg">
+          <p className="text-xs text-blue-800 font-light leading-relaxed">
+            <strong className="text-gray-900">Instructions:</strong> Send the
             deposit amount via Interac e-transfer to the email above, then
             upload a screenshot of the payment confirmation below.
           </p>
@@ -211,7 +212,7 @@ function InteracPaymentSection({
 
       {/* Screenshot Upload */}
       <div className="space-y-3">
-        <label className="block text-sm font-light text-rose-300 uppercase tracking-wide">
+        <label className="block text-sm font-medium text-gray-800 mb-2 uppercase tracking-wide">
           Upload Payment Screenshot
         </label>
         <label className="relative group block w-full cursor-pointer">
@@ -221,15 +222,15 @@ function InteracPaymentSection({
             onChange={handleFileChange}
             className="sr-only"
           />
-          <div className="w-full px-4 py-3 bg-neutral-900 border-2 border-dashed border-gray-700 rounded-xl hover:border-rose-400 transition-all duration-300 text-center group-hover:bg-gray-800/70">
-            <div className="flex items-center justify-center gap-2 text-sm font-light text-gray-300 group-hover:text-rose-300">
-              <UploadIcon className="w-5 h-5 text-gray-400 group-hover:text-rose-400" />
+          <div className="w-full px-4 py-3 bg-white border-2 border-dashed border-gray-300 rounded-xl hover:border-gray-500 transition-all duration-300 text-center group-hover:bg-gray-50">
+            <div className="flex items-center justify-center gap-2 text-sm font-light text-gray-700 group-hover:text-gray-900">
+              <UploadIcon className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
               <span>Click to upload screenshot</span>
             </div>
           </div>
         </label>
         {screenshot && (
-          <p className="text-xs text-gray-400 font-light">
+          <p className="text-xs text-gray-600 font-light">
             Selected: {screenshot.name}
           </p>
         )}
@@ -239,10 +240,10 @@ function InteracPaymentSection({
       <button
         onClick={uploadScreenshot}
         disabled={uploading || !screenshot}
-        className={`relative w-full py-3.5 rounded-xl font-light shadow-lg transition-all duration-300 border overflow-hidden ${
+        className={`relative w-full py-3.5 rounded-xl font-light shadow-md transition-all duration-300 border overflow-hidden ${
           uploading || !screenshot
-            ? "bg-gray-700/50 text-gray-500 cursor-not-allowed border-gray-600/30"
-            : "bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 text-white shadow-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/40 hover:scale-105 active:scale-100 cursor-pointer border-rose-400/30"
+            ? "bg-gray-200 text-gray-500 cursor-not-allowed border-gray-300"
+            : "bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white hover:shadow-lg hover:scale-[1.02] active:scale-100 cursor-pointer border-gray-600"
         }`}
         style={{ letterSpacing: "0.05em" }}
       >
@@ -264,7 +265,7 @@ function InteracPaymentSection({
       {/* Previously Uploaded Screenshots */}
       {interacInfo.screenshots && interacInfo.screenshots.length > 0 && (
         <div className="mt-6">
-          <h5 className="text-sm font-light text-rose-300 mb-3 uppercase tracking-wide">
+          <h5 className="text-sm font-medium text-gray-800 mb-3 uppercase tracking-wide">
             Uploaded Screenshots
           </h5>
           <div className="space-y-3">
@@ -273,16 +274,16 @@ function InteracPaymentSection({
                 key={index}
                 className={`p-4 rounded-xl text-sm border font-light ${
                   screenshot.admin_verified
-                    ? "bg-green-900/30 border-green-700/50"
-                    : "bg-yellow-900/30 border-yellow-700/50"
+                    ? "bg-green-50 border-green-200"
+                    : "bg-yellow-50 border-yellow-200"
                 }`}
               >
                 <div className="flex justify-between items-center mb-2">
                   <span
-                    className={`font-light ${
+                    className={`font-medium ${
                       screenshot.admin_verified
-                        ? "text-green-300"
-                        : "text-yellow-300"
+                        ? "text-green-800"
+                        : "text-yellow-800"
                     }`}
                   >
                     {screenshot.payment_type === "deposit"
@@ -291,10 +292,10 @@ function InteracPaymentSection({
                     Payment
                   </span>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-light ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
                       screenshot.admin_verified
-                        ? "bg-green-500/20 text-green-300"
-                        : "bg-yellow-500/20 text-yellow-300"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
                     {screenshot.admin_verified
@@ -305,8 +306,8 @@ function InteracPaymentSection({
                 <p
                   className={`text-xs ${
                     screenshot.admin_verified
-                      ? "text-green-400"
-                      : "text-yellow-400"
+                      ? "text-green-700"
+                      : "text-yellow-700"
                   }`}
                 >
                   Uploaded:{" "}
@@ -400,49 +401,6 @@ export default function QuotePayment() {
       setLoading(false);
     }
   }, [finalBookingId, numericDepositAmount, bookingIdFromUrl]);
-
-  React.useEffect(() => {
-    if (paymentMethod === "paypal" && !paypalLoaded) {
-      const script = document.createElement("script");
-      script.src = `https://www.paypal.com/sdk/js?client-id=${
-        import.meta.env.VITE_PAYPAL_CLIENT_ID ||
-        "AZDxjDScFpQtjWTOUtWKbyN_bDt4OgqaF4eYXlewfBP4-8aqX3PiV8e1GWU6liB2CUXlkA59kJXE7M6R"
-      }&currency=CAD&components=buttons&disable-funding=paylater`;
-      script.onload = () => {
-        setPaypalLoaded(true);
-        if (window.paypal) {
-          window.paypal
-            .Buttons({
-              createOrder: async () => {
-                const response = await api.post("/paypal/create-order", {
-                  booking: {
-                    unique_id: finalBookingId,
-                  },
-                  paymentType: "deposit",
-                });
-                const order = await response.data;
-                return order.id;
-              },
-              onApprove: async (data) => {
-                const response = await api.post(
-                  `/paypal/capture-order/${data.orderID}`
-                );
-                const result = await response.data;
-                if (result.success) {
-                  navigate(
-                    `/success?paid=1&session_id=${result.sessionId}&booking_id=${bookingId}`
-                  );
-                } else {
-                  setError("Payment failed");
-                }
-              },
-            })
-            .render("#paypal-button-container");
-        }
-      };
-      document.body.appendChild(script);
-    }
-  }, [paymentMethod, paypalLoaded, booking, finalBookingId, navigate]);
 
   const loadBooking = async () => {
     try {
@@ -561,44 +519,15 @@ export default function QuotePayment() {
     }
   };
 
-  const handleInteracVerification = async () => {
-    if (!booking) return;
-
-    setProcessing(true);
-    setError("");
-
-    try {
-      const response = await api.get(
-        `/interac/auth-url?bookingId=${finalBookingId}`
-      );
-
-      if (!response.data.authUrl) {
-        throw new Error("Failed to get Interac auth URL");
-      }
-
-      window.location.href = response.data.authUrl;
-    } catch (error) {
-      console.error("Interac verification error:", error);
-      setError(error.message || "Verification failed. Please try again.");
-      setProcessing(false);
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="relative w-16 h-16 mx-auto mb-6">
-            <div className="absolute inset-0 rounded-full border-4 border-gray-700"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-rose-400 animate-spin"></div>
-            <div className="absolute inset-2 rounded-full bg-gray-900"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-gray-700 animate-spin"></div>
           </div>
-          <p
-            className="text-gray-300 font-light"
-            style={{ letterSpacing: "0.01em" }}
-          >
-            Loading payment details...
-          </p>
+          <p className="text-gray-700 font-light">Loading payment details...</p>
         </div>
       </div>
     );
@@ -606,28 +535,21 @@ export default function QuotePayment() {
 
   if (error && !booking) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md mx-auto text-center">
-          <div className="bg-gray-800/40 backdrop-blur-sm rounded-2xl shadow-2xl shadow-gray-900/50 p-8 border border-gray-700/50">
-            <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-red-500/20 to-rose-500/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-red-400/30">
-              <WarningIcon className="w-8 h-8 text-red-400" />
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-md p-8">
+            <div className="w-16 h-16 mx-auto mb-6 bg-red-50 rounded-xl flex items-center justify-center border border-red-200">
+              <WarningIcon className="w-8 h-8 text-red-600" />
             </div>
-            <h1
-              className="text-xl font-light text-white mb-4"
-              style={{ letterSpacing: "0.02em" }}
-            >
+            <h1 className="text-xl font-normal text-gray-900 mb-4">
               Error
             </h1>
-            <p
-              className="text-gray-400 mb-6 font-light leading-relaxed"
-              style={{ letterSpacing: "0.01em" }}
-            >
+            <p className="text-gray-600 mb-6 font-light leading-relaxed">
               {error}
             </p>
             <button
               onClick={() => navigate("/quote/" + finalBookingId)}
-              className="relative w-full px-10 py-3.5 bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 text-white rounded-xl font-light shadow-lg shadow-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/40 hover:scale-105 active:scale-100 transition-all duration-300 cursor-pointer border border-rose-400/30 overflow-hidden"
-              style={{ letterSpacing: "0.05em" }}
+              className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
               <span className="relative">Back to Quote</span>
@@ -639,25 +561,24 @@ export default function QuotePayment() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 py-8 md:py-12">
-      <div className="max-w-sm md:max-w-2xl mx-auto px-4">
+    <div className="min-h-screen py-8 md:py-12">
+      <div className="max-w-3xl mx-auto px-4">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <img src={Logo} alt="Logo" className="w-[180px] sm:w-[220px] lg:w-[260px] mx-auto mb-4" />
+        </div>
+
         {interacVerified && (
-          <div className="mb-6 bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-xl p-5 shadow-lg shadow-green-500/10">
+          <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-5 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <CheckIcon className="w-6 h-6 text-green-400" />
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <CheckIcon className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p
-                  className="font-light text-green-300"
-                  style={{ letterSpacing: "0.01em" }}
-                >
+                <p className="font-medium text-green-800">
                   Identity Verified Successfully!
                 </p>
-                <p
-                  className="text-sm text-green-400/80 font-light"
-                  style={{ letterSpacing: "0.01em" }}
-                >
+                <p className="text-sm text-green-700 font-light">
                   You can now proceed with your payment.
                 </p>
               </div>
@@ -665,96 +586,62 @@ export default function QuotePayment() {
           </div>
         )}
 
-        <div className="bg-gray-800/40 backdrop-blur-sm rounded-2xl shadow-2xl shadow-gray-900/50 p-6 md:p-8 border border-gray-700/50">
+        <div className="bg-white p-6 md:p-8">
           <div className="text-center mb-6 md:mb-8">
-            <h1
-              className="text-2xl md:text-3xl font-light text-white mb-3"
-              style={{ letterSpacing: "0.02em" }}
-            >
+            <h1 className="text-2xl md:text-3xl font-normal text-gray-900 mb-3">
               Secure Payment
             </h1>
-            <div className="h-0.5 w-20 bg-gradient-to-r from-rose-400 via-pink-400 to-fuchsia-400 rounded-full mx-auto mb-4 opacity-80"></div>
-            <p
-              className="text-gray-400 font-light"
-              style={{ letterSpacing: "0.01em" }}
-            >
+            <div className="h-0.5 w-20 bg-gray-800 rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600 font-light">
               Complete your booking with a secure deposit payment
             </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-gradient-to-br from-red-500/20 to-rose-500/20 backdrop-blur-sm border border-red-400/30 rounded-xl shadow-lg shadow-red-500/10">
-              <p
-                className="text-red-300 text-sm font-light"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                {error}
-              </p>
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl shadow-sm">
+              <p className="text-red-700 text-sm font-light">{error}</p>
             </div>
           )}
 
           {success && (
-            <div className="mb-6 p-4 bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/30 rounded-xl shadow-lg shadow-green-500/10">
-              <p
-                className="text-green-300 text-sm font-light"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                {success}
-              </p>
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl shadow-sm">
+              <p className="text-green-700 text-sm font-light">{success}</p>
             </div>
           )}
 
           {/* Booking Summary */}
-          <div className="bg-gray-900/60 rounded-xl p-6 mb-8 border border-gray-700/50">
-            <h2
-              className="text-xl font-light text-white mb-5"
-              style={{ letterSpacing: "0.02em" }}
-            >
+          <div className="bg-gray-50 rounded-xl p-6 mb-8 border border-gray-200">
+            <h2 className="text-xl font-medium text-gray-900 mb-5">
               Booking Summary
             </h2>
 
             <div className="space-y-3">
-              <div
-                className="flex justify-between font-light"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                <span className="text-gray-400">Booking ID:</span>
-                <span className="text-white">{bookingId}</span>
+              <div className="flex justify-between font-light">
+                <span className="text-gray-600">Booking ID:</span>
+                <span className="text-gray-900">{bookingId}</span>
               </div>
-              <div
-                className="flex justify-between font-light"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                <span className="text-gray-400">Service:</span>
-                <span className="text-white">{booking.service_type}</span>
+              <div className="flex justify-between font-light">
+                <span className="text-gray-600">Service:</span>
+                <span className="text-gray-900">{booking.service_type}</span>
               </div>
-              <div
-                className="flex justify-between font-light"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                <span className="text-gray-400">Client:</span>
-                <span className="text-white">{booking.name}</span>
+              <div className="flex justify-between font-light">
+                <span className="text-gray-600">Client:</span>
+                <span className="text-gray-900">{booking.name}</span>
               </div>
-              <div
-                className="flex justify-between font-light"
-                style={{ letterSpacing: "0.01em" }}
-              >
-                <span className="text-gray-400">Event Date:</span>
-                <span className="text-white">
+              <div className="flex justify-between font-light">
+                <span className="text-gray-600">Event Date:</span>
+                <span className="text-gray-900">
                   {booking.event_date
                     ? new Date(booking.event_date).toLocaleDateString("en-CA")
                     : "N/A"}
                 </span>
               </div>
 
-              <div className="border-t border-gray-700/50 my-4"></div>
+              <div className="border-t border-gray-200 my-4"></div>
 
-              <div
-                className="flex justify-between text-lg font-light"
-                style={{ letterSpacing: "0.02em" }}
-              >
-                <span className="text-white">Deposit Amount:</span>
-                <span className="text-fuchsia-400">
+              <div className="flex justify-between text-lg font-medium">
+                <span className="text-gray-900">Deposit Amount:</span>
+                <span className="text-gray-900 font-semibold">
                   ${depositAmount.toFixed(2)} CAD
                 </span>
               </div>
@@ -763,30 +650,21 @@ export default function QuotePayment() {
 
           {/* Payment Method Selection */}
           <div className="mb-8">
-            <h3
-              className="text-lg font-light text-white mb-5"
-              style={{ letterSpacing: "0.02em" }}
-            >
+            <h3 className="text-lg font-medium text-gray-900 mb-5">
               Choose Payment Method
             </h3>
 
             {/* Coupon Discount Notice */}
-            <div className="bg-gradient-to-br from-fuchsia-500/20 via-pink-500/20 to-rose-500/20 backdrop-blur-sm border border-fuchsia-400/30 rounded-xl p-5 mb-6 shadow-lg shadow-fuchsia-500/10">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-fuchsia-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <StarIcon className="w-6 h-6 text-fuchsia-300" />
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <StarIcon className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <p
-                    className="font-light text-fuchsia-200 text-lg"
-                    style={{ letterSpacing: "0.02em" }}
-                  >
+                  <p className="font-medium text-blue-900 text-lg">
                     Coupon Discounts Available!
                   </p>
-                  <p
-                    className="text-fuchsia-300/90 font-light text-sm"
-                    style={{ letterSpacing: "0.01em" }}
-                  >
+                  <p className="text-blue-800 font-light text-sm">
                     Apply coupon codes only through Credit/Debit Card (Stripe)
                     payments
                   </p>
@@ -797,38 +675,34 @@ export default function QuotePayment() {
             <div className="grid grid-cols-1 gap-4 mb-6">
               {/* Stripe Option */}
               <div
-                className={`group relative border-2 rounded-xl p-5 cursor-pointer transition-all duration-300 overflow-hidden ${
+                className={`border-2 rounded-xl p-5 cursor-pointer transition-all duration-300 ${
                   paymentMethod === "stripe"
-                    ? "border-rose-400/50 bg-gradient-to-br from-rose-500/20 via-pink-500/20 to-fuchsia-500/20 backdrop-blur-sm shadow-lg shadow-rose-500/20"
-                    : "border-gray-700/50 bg-gray-900/40 hover:border-rose-400/30"
+                    ? "border-gray-600 bg-gray-50 shadow-md"
+                    : "border-gray-200 bg-white hover:border-gray-400"
                 }`}
                 onClick={() => setPaymentMethod("stripe")}
               >
-                {paymentMethod === "stripe" && (
-                  <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 via-pink-500/10 to-fuchsia-500/10 blur-xl"></div>
-                )}
-
-                <div className="relative flex items-center gap-4">
+                <div className="flex items-center gap-4">
                   <input
                     type="radio"
                     name="paymentMethod"
                     value="stripe"
                     checked={paymentMethod === "stripe"}
                     onChange={() => setPaymentMethod("stripe")}
-                    className="text-rose-500 focus:ring-rose-500/50 focus:ring-2 bg-neutral-900 border-gray-600"
+                    className="text-gray-800 focus:ring-gray-500 focus:ring-2 bg-white border-gray-300"
                   />
                   <div
                     className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
                       paymentMethod === "stripe"
-                        ? "bg-rose-500/30 border border-rose-400/30"
-                        : "bg-gray-700/50 border border-gray-600/30"
+                        ? "bg-gray-800 border border-gray-600"
+                        : "bg-gray-100 border border-gray-300"
                     }`}
                   >
                     <svg
                       className={`w-6 h-6 ${
                         paymentMethod === "stripe"
-                          ? "text-rose-300"
-                          : "text-gray-400"
+                          ? "text-white"
+                          : "text-gray-600"
                       }`}
                       viewBox="0 0 24 24"
                       fill="currentColor"
@@ -838,22 +712,20 @@ export default function QuotePayment() {
                   </div>
                   <div>
                     <p
-                      className={`font-light ${
+                      className={`${
                         paymentMethod === "stripe"
-                          ? "text-white"
-                          : "text-gray-300"
+                          ? "text-gray-900 font-medium"
+                          : "text-gray-700"
                       }`}
-                      style={{ letterSpacing: "0.02em" }}
                     >
                       Credit/Debit Card
                     </p>
                     <p
                       className={`text-sm font-light ${
                         paymentMethod === "stripe"
-                          ? "text-rose-300"
+                          ? "text-gray-700"
                           : "text-gray-500"
                       }`}
-                      style={{ letterSpacing: "0.01em" }}
                     >
                       Powered by Stripe
                     </p>
@@ -863,47 +735,52 @@ export default function QuotePayment() {
 
               {/* Interac Option */}
               <div
-                className={`group relative border-2 rounded-xl p-5 cursor-pointer transition-all duration-300 overflow-hidden ${
+                className={`border-2 rounded-xl p-5 cursor-pointer transition-all duration-300 ${
                   paymentMethod === "interac"
-                    ? "border-rose-400/50 bg-gradient-to-br from-rose-500/20 via-pink-500/20 to-fuchsia-500/20 backdrop-blur-sm shadow-lg shadow-rose-500/20"
-                    : "border-gray-700/50 bg-gray-900/40 hover:border-rose-400/30"
+                    ? "border-gray-600 bg-gray-50 shadow-md"
+                    : "border-gray-200 bg-white hover:border-gray-400"
                 }`}
                 onClick={() => setPaymentMethod("interac")}
               >
-                {paymentMethod === "interac" && (
-                  <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 via-pink-500/10 to-fuchsia-500/10 blur-xl"></div>
-                )}
-
-                <div className="relative flex items-center gap-4">
+                <div className="flex items-center gap-4">
                   <input
                     type="radio"
                     name="paymentMethod"
                     value="interac"
                     checked={paymentMethod === "interac"}
                     onChange={() => setPaymentMethod("interac")}
-                    className="text-rose-500 focus:ring-rose-500/50 focus:ring-2 bg-neutral-900 border-gray-600"
+                    className="text-gray-800 focus:ring-gray-500 focus:ring-2 bg-white border-gray-300"
                   />
                   <div
                     className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
                       paymentMethod === "interac"
-                        ? "bg-rose-500/30 border border-rose-400/30"
-                        : "bg-gray-700/50 border border-gray-600/30"
+                        ? "bg-gray-800 border border-gray-600"
+                        : "bg-gray-100 border border-gray-300"
                     }`}
                   >
                     <CheckIcon
                       className={`w-6 h-6 ${
                         paymentMethod === "interac"
-                          ? "text-rose-300"
+                          ? "text-white"
+                          : "text-gray-600"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <p
+                      className={`font-medium ${
+                        paymentMethod === "interac"
+                          ? "text-gray-900"
                           : "text-gray-400"
                       }`}
                     />
                   </div>
                   <div>
                     <p
-                      className={`font-light ${
+                      className={`${
                         paymentMethod === "interac"
-                          ? "text-white"
-                          : "text-gray-300"
+                          ? "text-gray-900 font-medium"
+                          : "text-gray-700"
                       }`}
                       style={{ letterSpacing: "0.02em" }}
                     >
@@ -912,7 +789,7 @@ export default function QuotePayment() {
                     <p
                       className={`text-sm font-light ${
                         paymentMethod === "interac"
-                          ? "text-rose-300"
+                          ? "text-gray-700"
                           : "text-gray-500"
                       }`}
                       style={{ letterSpacing: "0.01em" }}
@@ -926,11 +803,11 @@ export default function QuotePayment() {
 
             {/* Payment Method Details */}
             {paymentMethod === "stripe" && (
-              <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 backdrop-blur-sm border border-blue-400/30 p-5 rounded-xl shadow-lg shadow-blue-500/10">
+              <div className="bg-gradient-to-br from-green-300 to-green-500 backdrop-blur-sm border border-gray-800/30 p-5 rounded-xl shadow-lg shadow-blue-500/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
                     <svg
-                      className="w-6 h-6 text-blue-300"
+                      className="w-6 h-6 text-gray-800"
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
@@ -939,13 +816,13 @@ export default function QuotePayment() {
                   </div>
                   <div>
                     <p
-                      className="text-lg font-light text-blue-200"
+                      className="text-lg font-medium text-gray-800"
                       style={{ letterSpacing: "0.02em" }}
                     >
                       Secure Card Payment
                     </p>
                     <p
-                      className="text-sm text-blue-300/80 font-light"
+                      className="text-sm text-gray-800 font-light"
                       style={{ letterSpacing: "0.01em" }}
                     >
                       Your payment information is secure and encrypted
@@ -956,58 +833,30 @@ export default function QuotePayment() {
             )}
 
             {paymentMethod === "interac" && (
-              <div
-                className={`border p-5 rounded-xl backdrop-blur-sm ${
-                  interacVerified
-                    ? "bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-400/30"
-                    : "bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border-blue-400/30"
-                }`}
-              >
+              <div className="bg-gradient-to-br from-green-300 to-green-500 backdrop-blur-sm border border-gray-800/30 p-5 rounded-xl shadow-lg shadow-blue-500/10">
                 <div className="flex items-center gap-3">
-                  <div
-                    className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      interacVerified ? "bg-green-500/20" : "bg-blue-500/20"
-                    }`}
-                  >
-                    <CheckIcon
-                      className={`w-6 h-6 ${
-                        interacVerified ? "text-green-300" : "text-blue-300"
-                      }`}
-                    />
+                  <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg
+                      className="w-6 h-6 text-gray-800"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v2h16V6H4zm0 4v8h16v-8H4z" />
+                    </svg>
                   </div>
                   <div>
-                    {interacVerified ? (
-                      <>
-                        <p
-                          className="font-light text-green-200"
-                          style={{ letterSpacing: "0.02em" }}
-                        >
-                          ✓ Identity Verified
-                        </p>
-                        <p
-                          className="text-sm text-green-300/80 font-light"
-                          style={{ letterSpacing: "0.01em" }}
-                        >
-                          Proceed with payment using Stripe or PayPal
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p
-                          className="font-light text-blue-200"
-                          style={{ letterSpacing: "0.02em" }}
-                        >
-                          Interac Identity Verification
-                        </p>
-                        <p
-                          className="text-sm text-blue-300/80 font-light"
-                          style={{ letterSpacing: "0.01em" }}
-                        >
-                          Verify your identity using Interac Hub for enhanced
-                          security
-                        </p>
-                      </>
-                    )}
+                    <p
+                      className="text-lg font-medium text-gray-800"
+                      style={{ letterSpacing: "0.02em" }}
+                    >
+                    Interac Identity Verification
+                    </p>
+                    <p
+                      className="text-sm text-gray-800 font-light"
+                      style={{ letterSpacing: "0.01em" }}
+                    >
+                      Verify your identity using Interac Hub for enhanced security
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1015,12 +864,12 @@ export default function QuotePayment() {
           </div>
 
           {/* Terms Reminder */}
-          <div className="bg-gradient-to-br from-yellow-500/20 to-amber-500/20 backdrop-blur-sm border border-yellow-400/30 rounded-xl p-5 mb-8 shadow-lg shadow-yellow-500/10">
+          <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-500/20 backdrop-blur-sm border border-yellow-600/30 rounded-xl p-5 mb-8 shadow-lg shadow-yellow-500/10">
             <p
-              className="text-sm text-yellow-200 font-light leading-relaxed"
+              className="text-sm text-yellow-500 font-light leading-relaxed"
               style={{ letterSpacing: "0.01em" }}
             >
-              <strong className="text-yellow-100 font-normal">
+              <strong className="text-yellow-600 font-normal">
                 Important:
               </strong>{" "}
               This deposit secures your booking date and is non-refundable. You
@@ -1030,11 +879,11 @@ export default function QuotePayment() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4">
+          <div className="flex gap-4 justify-between">
             <button
               onClick={() => navigate("/quote/" + finalBookingId)}
               disabled={processing}
-              className="relative flex-1 bg-gray-700/50 text-gray-200 py-3.5 rounded-xl font-light shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer border border-gray-600/30 overflow-hidden"
+              className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
               style={{ letterSpacing: "0.05em" }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
@@ -1045,10 +894,7 @@ export default function QuotePayment() {
               <button
                 onClick={handlePayment}
                 disabled={processing || loading || !booking}
-                className={`relative flex-1 py-3.5 rounded-xl font-light shadow-lg transition-all duration-300 border overflow-hidden ${
-                  processing || loading || !booking
-                    ? "bg-gray-700/50 text-gray-500 cursor-not-allowed border-gray-600/30"
-                    : "bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 text-white shadow-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/40 hover:scale-105 active:scale-100 cursor-pointer border-rose-400/30"
+                className={`px-5 py-2 rounded-lg bg-gray-900 text-white hover:opacity-90 transition-all"
                 }`}
                 style={{ letterSpacing: "0.05em" }}
               >
@@ -1070,11 +916,7 @@ export default function QuotePayment() {
               <button
                 onClick={() => setShowInteracModal(true)}
                 disabled={processing || loading || !booking}
-                className={`relative flex-1 py-3.5 rounded-xl font-light shadow-lg transition-all duration-300 border overflow-hidden ${
-                  processing || loading || !booking
-                    ? "bg-gray-700/50 text-gray-500 cursor-not-allowed border-gray-600/30"
-                    : "bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-500 text-white shadow-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/40 hover:scale-105 active:scale-100 cursor-pointer border-rose-400/30"
-                }`}
+                className={"px-5 py-2 rounded-lg bg-gray-900 text-white hover:opacity-90 transition-all"}
                 style={{ letterSpacing: "0.05em" }}
               >
                 {!(processing || loading || !booking) && (
@@ -1091,12 +933,12 @@ export default function QuotePayment() {
 
       {/* Interac Payment Modal */}
       {showInteracModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-800/95 backdrop-blur-xl rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700/50 shadow-2xl shadow-gray-900/50">
+        <div className="fixed inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-50 backdrop-blur-xl rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700/50 shadow-2xl shadow-gray-900/50">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2
-                  className="text-xl font-light text-white"
+                  className="text-xl font-medium text-grey-800 mx-auto"
                   style={{ letterSpacing: "0.02em" }}
                 >
                   Interac E-Transfer Payment

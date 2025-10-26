@@ -1,30 +1,35 @@
 import React from "react"
 
 // Reusable Custom Date Picker (Charcoalish theme)
-const CustomDatePicker = ({ label, name, register, error, required, minDate: propMinDate, maxDate }) => {
+const CustomDatePicker = ({
+  label,
+  name,
+  register,
+  error,
+  required,
+  maxDate,
+  minDate: propMinDate, // 👈 allow passing minDate from parent
+  value, // 👈 add this
+}) => {
   const [isOpen, setIsOpen] = React.useState(false)
-  const [selectedDate, setSelectedDate] = React.useState("")
+  const [selectedDate, setSelectedDate] = React.useState(value || "")
+  
   const [currentMonth, setCurrentMonth] = React.useState(new Date())
   const dropdownRef = React.useRef(null)
 
-  // ✅ Use prop minDate if provided, otherwise today
+  // ✅ Use today's date if no minDate prop is provided
   const getMinimumDate = () => {
-    const today = new Date()
-    const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-    return propMinDate ? new Date(propMinDate) : localToday
+    const now = new Date()
+    const offset = now.getTimezoneOffset()
+    // Convert to local midnight by removing offset
+    const localMidnight = new Date(now.getTime() - offset * 60 * 1000)
+    localMidnight.setHours(0, 0, 0, 0)
+    return propMinDate ? new Date(propMinDate) : localMidnight
   }
+
 
   const minDate = getMinimumDate()
   minDate.setHours(0, 0, 0, 0)
-
-  const isDateDisabled = (date) => {
-    if (date < minDate) return true
-    if (maxDate && date > new Date(maxDate)) return true
-    return false
-  }
-
-  const internalMinDate = getMinimumDate(2)
-  internalMinDate.setHours(0, 0, 0, 0)
 
   const formatDisplayDate = (dateString) => {
     if (!dateString) return ""
@@ -43,6 +48,13 @@ const CustomDatePicker = ({ label, name, register, error, required, minDate: pro
     const firstDay = new Date(year, month, 1)
     const lastDay = new Date(year, month + 1, 0)
     return { daysInMonth: lastDay.getDate(), startingDayOfWeek: firstDay.getDay(), year, month }
+  }
+
+  const isDateDisabled = (date) => {
+    // ✅ allow current day and onwards
+    if (date < minDate) return true
+    if (maxDate && date > new Date(maxDate)) return true
+    return false
   }
 
   const handleDateSelect = (day, onChange) => {
@@ -75,7 +87,9 @@ const CustomDatePicker = ({ label, name, register, error, required, minDate: pro
   const { onChange, ...registerProps } = register(name)
 
   const calendarDays = []
-  for (let i = 0; i < startingDayOfWeek; i++) calendarDays.push(<div key={`empty-${i}`} className="p-2" />)
+  for (let i = 0; i < startingDayOfWeek; i++)
+    calendarDays.push(<div key={`empty-${i}`} className="p-2" />)
+
   for (let day = 1; day <= daysInMonth; day++) {
     const dateObj = new Date(year, month, day)
     const isDisabled = isDateDisabled(dateObj)
@@ -91,10 +105,10 @@ const CustomDatePicker = ({ label, name, register, error, required, minDate: pro
         className={`p-2.5 rounded-md text-sm font-light transition-all duration-200
           ${
             isSelected
-              ? "bg-gray-800 text-gray-50 border border-gray-400 shadow-sm"
+              ? "bg-gray-800 text-white border border-gray-600 shadow-sm"
               : isDisabled
-              ? "bg-gray-50 text-gray-400 cursor-not-allowed border border-transparent"
-              : "bg-gray-100 text-gray-800 hover:bg-white hover:text-gray-900 border hover:border-gray-300"
+              ? "bg-gray-50 text-gray-400 border border-transparent cursor-not-allowed"
+              : "bg-gray-200 text-gray-800 hover:bg-gray-600 hover:text-gray-50 border border-transparent"
           }`}
       >
         {day}
@@ -102,9 +116,16 @@ const CustomDatePicker = ({ label, name, register, error, required, minDate: pro
     )
   }
 
+  React.useEffect(() => {
+    if (value) setSelectedDate(value)
+  }, [value])
+
   return (
     <div>
-      <label htmlFor={name} className="block text-sm sm:text-base font-light text-gray-800 mb-2">
+      <label
+        htmlFor={name}
+        className="block text-sm sm:text-base font-light text-gray-800 mb-2"
+      >
         {label} {required && <span className="text-gray-700">*</span>}
       </label>
 
@@ -119,7 +140,12 @@ const CustomDatePicker = ({ label, name, register, error, required, minDate: pro
           <span className={selectedDate ? "text-gray-800" : "text-gray-400"}>
             {selectedDate ? formatDisplayDate(selectedDate) : "Select date..."}
           </span>
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-5 h-5 text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -135,9 +161,14 @@ const CustomDatePicker = ({ label, name, register, error, required, minDate: pro
               <button
                 onClick={handlePrevMonth}
                 type="button"
-                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200"
               >
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4 text-gray-800"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
@@ -147,9 +178,14 @@ const CustomDatePicker = ({ label, name, register, error, required, minDate: pro
               <button
                 onClick={handleNextMonth}
                 type="button"
-                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-700 transition-all duration-200"
               >
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4 text-gray-800"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -176,6 +212,8 @@ const CustomDatePicker = ({ label, name, register, error, required, minDate: pro
     </div>
   )
 }
+
+
 
 export default function DestinationEventDates({ onNext, onBack, register, errors, watch }) {
   const watchedValues = watch()
@@ -217,6 +255,7 @@ export default function DestinationEventDates({ onNext, onBack, register, errors
               label="Event Starting Date"
               required={true}
               error={errors.event_start_date?.message}
+              value={watchedValues.event_start_date} // 👈 syncs with form state
               minDate={new Date().toISOString().split("T")[0]} // allow today onwards
             />
 
@@ -226,6 +265,7 @@ export default function DestinationEventDates({ onNext, onBack, register, errors
               label="Event Ending Date"
               required={true}
               error={errors.event_end_date?.message}
+              value={watchedValues.event_end_date} // 👈 syncs with form state
               minDate={
                 watchedValues.event_start_date
                   ? new Date(new Date(watchedValues.event_start_date).setDate(new Date(watchedValues.event_start_date).getDate() + 1))

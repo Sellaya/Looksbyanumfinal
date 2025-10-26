@@ -9,18 +9,24 @@ const CustomDatePicker = ({
   required,
   maxDate,
   minDate: propMinDate, // 👈 allow passing minDate from parent
+  value, // 👈 add this
 }) => {
   const [isOpen, setIsOpen] = React.useState(false)
-  const [selectedDate, setSelectedDate] = React.useState("")
+  const [selectedDate, setSelectedDate] = React.useState(value || "")
+  
   const [currentMonth, setCurrentMonth] = React.useState(new Date())
   const dropdownRef = React.useRef(null)
 
   // ✅ Use today's date if no minDate prop is provided
   const getMinimumDate = () => {
-    const today = new Date()
-    const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-    return propMinDate ? new Date(propMinDate) : localToday
+    const now = new Date()
+    const offset = now.getTimezoneOffset()
+    // Convert to local midnight by removing offset
+    const localMidnight = new Date(now.getTime() - offset * 60 * 1000)
+    localMidnight.setHours(0, 0, 0, 0)
+    return propMinDate ? new Date(propMinDate) : localMidnight
   }
+
 
   const minDate = getMinimumDate()
   minDate.setHours(0, 0, 0, 0)
@@ -102,13 +108,17 @@ const CustomDatePicker = ({
               ? "bg-gray-800 text-white border border-gray-600 shadow-sm"
               : isDisabled
               ? "bg-gray-50 text-gray-400 border border-transparent cursor-not-allowed"
-              : "bg-gray-100 text-gray-800 hover:bg-white hover:text-gray-900 border hover:border-gray-300"
+              : "bg-gray-200 text-gray-800 hover:bg-gray-600 hover:text-gray-50 border border-transparent"
           }`}
       >
         {day}
       </button>
     )
   }
+
+  React.useEffect(() => {
+    if (value) setSelectedDate(value)
+  }, [value])
 
   return (
     <div>
@@ -151,10 +161,10 @@ const CustomDatePicker = ({
               <button
                 onClick={handlePrevMonth}
                 type="button"
-                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200"
               >
                 <svg
-                  className="w-4 h-4 text-gray-600"
+                  className="w-4 h-4 text-gray-800"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -168,10 +178,10 @@ const CustomDatePicker = ({
               <button
                 onClick={handleNextMonth}
                 type="button"
-                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+                className="p-2.5 rounded-md border border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-gray-700 transition-all duration-200"
               >
                 <svg
-                  className="w-4 h-4 text-gray-600"
+                  className="w-4 h-4 text-gray-800"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -207,23 +217,36 @@ const CustomDatePicker = ({
 
 
 // Custom Time Picker (Light + Charcoalish Theme)
-const CustomTimePicker = ({ label, name, register, error, required }) => {
+const CustomTimePicker = ({ label, name, register, error, required, value }) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const [selectedTime, setSelectedTime] = React.useState("")
   const dropdownRef = React.useRef(null)
 
+  // Generate times like before
   const generateTimeOptions = () => {
     const times = []
     const periods = ["AM", "PM"]
     periods.forEach((period) => {
       for (let hour = 12; hour <= 12; hour++) {
-        times.push({ label: `${hour}:00 ${period}`, value: period === "AM" ? "00:00" : "12:00" })
-        times.push({ label: `${hour}:30 ${period}`, value: period === "AM" ? "00:30" : "12:30" })
+        times.push({
+          label: `${hour}:00 ${period}`,
+          value: period === "AM" ? "00:00" : "12:00",
+        })
+        times.push({
+          label: `${hour}:30 ${period}`,
+          value: period === "AM" ? "00:30" : "12:30",
+        })
       }
       for (let hour = 1; hour <= 11; hour++) {
         const value24 = period === "AM" ? hour : hour + 12
-        times.push({ label: `${hour}:00 ${period}`, value: `${String(value24).padStart(2, "0")}:00` })
-        times.push({ label: `${hour}:30 ${period}`, value: `${String(value24).padStart(2, "0")}:30` })
+        times.push({
+          label: `${hour}:00 ${period}`,
+          value: `${String(value24).padStart(2, "0")}:00`,
+        })
+        times.push({
+          label: `${hour}:30 ${period}`,
+          value: `${String(value24).padStart(2, "0")}:30`,
+        })
       }
     })
     return times
@@ -231,6 +254,23 @@ const CustomTimePicker = ({ label, name, register, error, required }) => {
 
   const timeOptions = generateTimeOptions()
   const { onChange, ...registerProps } = register(name)
+
+  // Convert "13:30" → "1:30 PM"
+  const formatTimeLabel = (timeValue) => {
+    if (!timeValue) return ""
+    const [hourStr, minute] = timeValue.split(":")
+    let hour = parseInt(hourStr, 10)
+    const period = hour >= 12 ? "PM" : "AM"
+    hour = hour % 12 || 12
+    return `${hour}:${minute} ${period}`
+  }
+
+  // Sync with external value (so it shows correctly when reloading)
+  React.useEffect(() => {
+    if (value) {
+      setSelectedTime(formatTimeLabel(value))
+    }
+  }, [value])
 
   const handleTimeSelect = (time, onChange) => {
     setSelectedTime(time.label)
@@ -248,7 +288,10 @@ const CustomTimePicker = ({ label, name, register, error, required }) => {
 
   return (
     <div>
-      <label htmlFor={name} className="block text-sm sm:text-base font-light text-gray-800 mb-2">
+      <label
+        htmlFor={name}
+        className="block text-sm sm:text-base font-light text-gray-800 mb-2"
+      >
         {label} {required && <span className="text-gray-900">*</span>}
       </label>
 
@@ -263,7 +306,14 @@ const CustomTimePicker = ({ label, name, register, error, required }) => {
           <span className={selectedTime ? "text-gray-800" : "text-gray-400"}>
             {selectedTime || "Select time..."}
           </span>
-          <svg className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </button>
@@ -276,7 +326,7 @@ const CustomTimePicker = ({ label, name, register, error, required }) => {
                   key={i}
                   type="button"
                   onClick={() => handleTimeSelect(t, onChange)}
-                  className="w-full px-4 py-2 text-left text-gray-800 bg-gray-50 hover:bg-gray-800 hover:text-gray-50 border-b border-gray-100 text-sm font-light transition-all"
+                  className="w-full px-4 py-2 text-left text-gray-800 bg-gray-50 hover:bg-gray-400 hover:text-gray-50 border-b border-gray-100 text-sm font-light transition-all"
                 >
                   {t.label}
                 </button>
@@ -294,6 +344,7 @@ const CustomTimePicker = ({ label, name, register, error, required }) => {
     </div>
   )
 }
+
 
 export default function EventDetails({ onNext, onBack, register, errors, handleSubmit, watch }) {
   const watchedValues = watch()
@@ -334,8 +385,8 @@ export default function EventDetails({ onNext, onBack, register, errors, handleS
               name="event_date"
               label="What's your event date?"
               required={true}
+              value={watchedValues.event_date}
               error={errors.event_date?.message}
-              minDate={new Date().toISOString().split("T")[0]} // allow today onwards
             />
 
             <CustomTimePicker
@@ -343,6 +394,7 @@ export default function EventDetails({ onNext, onBack, register, errors, handleS
               name="ready_time"
               label="What is your get ready time?"
               required={true}
+              value={watchedValues.ready_time}
               error={errors.ready_time?.message}
             />
 

@@ -39,9 +39,8 @@ export default function DestinationDetails({ onNext, onBack, register, errors })
                 {...register("destination_details", { required: true })}
                 rows={6}
                 placeholder="Please share any additional details about your destination wedding, such as location, venue, special requirements, or any other information that would help us serve you better..."
-                className={`w-full px-4 py-3 rounded-xl transition-all duration-200 text-gray-800 
-                  bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500/40 focus:border-gray-500
-                  resize-none placeholder-gray-500 font-light text-base
+                className={`group relative w-full p-3.5 sm:p-4 rounded-lg border border-gray-300 bg-white 
+          hover:border-gray-500 hover:bg-gray-50 text-left flex items-center justify-between transition-all duration-300 resize-none
                   ${errors.destination_details ? "border-red-500 focus:border-red-500 focus:ring-red-400/40" : ""}`}
               />
               {errors.destination_details && (
