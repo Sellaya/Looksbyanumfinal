@@ -1,6 +1,5 @@
 "use client"
 import { useState, useEffect } from "react"
-import BookingActionDropdown from "./BookingActionDropdown"
 
 // Professional Studio Icon
 const StudioIcon = ({ className }) => (
@@ -199,8 +198,13 @@ export default function ServiceModeSelection({ onNext, register, setValue, getVa
         </div>
 
         {/* Booking Options Dropdown */}
-        <div className="mt-8">
-          <BookingActionDropdown />
+        <div className="mt-8 flex justify-center">
+          <div>
+            <p className="inline-block">
+              Already Booked? 
+            </p>
+            <a href="/interac-upload" className="pl-2 text-blue-700">Upload Interac Screenshot</a>
+          </div>
         </div>
 
             

@@ -1,11 +1,89 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+
+// Create API client with base URL
+const api = axios.create({
+  baseURL:
+    import.meta.env.VITE_API_URL || "https://looksbyanum-saqib.vercel.app/api/",
+});
 
 export default function DestinationSummary({ onNext, onBack, getValues }) {
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleConfirmBooking = () => {
-    // For destination weddings, just show confirmation since consultation is already scheduled
-    setBookingConfirmed(true);
+  const handleConfirmBooking = async () => {
+    setIsProcessing(true);
+    
+    try {
+      const data = getValues();
+      
+      // Create booking with destination wedding details
+      const bookingData = {
+        // Basic contact info
+        name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+        email: data.email,
+        phone: data.phone,
+
+        // Region and service type
+        region: data.region,
+        subRegion: data.subRegion,
+        service_type: data.service_type,
+        service_mode: data.service_mode,
+
+        // Destination wedding specific fields
+        event_start_date: data.event_start_date,
+        event_end_date: data.event_end_date,
+        destination_details: data.destination_details,
+
+        // Pricing set to 0 for destination weddings (custom quote to be sent later)
+        pricing: {
+          quote_total: 0,
+          deposit_amount: 0,
+          deposit_percentage: 0,
+          remaining_amount: 0,
+          amount_paid: 0,
+        },
+
+        // Status
+        status: "lead",
+        payment_status: "pending",
+
+        // Inspiration
+        inspiration_link: data.inspiration_link || "",
+        inspiration_images: Array.isArray(data.inspiration_images)
+          ? data.inspiration_images
+          : [],
+      };
+
+      console.log("Creating destination wedding booking with data:", bookingData);
+      
+      const response = await api.post("/bookings", bookingData);
+      console.log("Destination wedding booking created:", response.data);
+
+      // Show success message
+      setBookingConfirmed(true);
+      
+      // Show toast notification
+      if (window.showToast) {
+        window.showToast(
+          "Thank you! Your destination wedding consultation has been scheduled. We'll contact you soon with a custom quote.",
+          "success"
+        );
+      }
+      
+    } catch (error) {
+      console.error("Failed to create destination wedding booking:", error);
+      console.error("Error details:", error.response?.data || error.message);
+      
+      if (window.showToast) {
+        window.showToast(
+          "Failed to confirm booking. Please try again or contact support.",
+          "error"
+        );
+      }
+      
+      setIsProcessing(false);
+    }
   };
 
   if (bookingConfirmed) {
@@ -33,7 +111,7 @@ export default function DestinationSummary({ onNext, onBack, getValues }) {
         <div className="space-y-4">
           <button
             onClick={() => window.location.href = '/'}
-            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200"
+            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 bg-gray-900 text-white hover:bg-gray-700 focus:ring-4 focus:ring-indigo-200"
           >
             Return to Home
           </button>
@@ -43,14 +121,12 @@ export default function DestinationSummary({ onNext, onBack, getValues }) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
-      <div className="sm:p-8">
-        <h2 className="text-left sm:text-3xl font-normal text-gray-900 mb-1 tracking-wide">
-          Booking Summary
-        </h2>
-      </div>
+    <div className="max-w-sm md:max-w-2xl mx-auto p-4 md:p-8 glass-card">
+      <h2 className="text-2xl font-bold text-gray-900 mb-8 text-left">
+        Booking Summary
+      </h2>
 
-      <div className="bg-gray-50 p-6 rounded-lg mb-8 border-2 border-gray-200 max-w-2xl mx-auto">
+      <div className="bg-gray-50 p-6 rounded-lg mb-8 border-2 border-gray-200">
         <div className="space-y-4 text-gray-800">
           <div className="flex justify-between">
             <span className="font-semibold">Service Type:</span>
@@ -87,7 +163,7 @@ export default function DestinationSummary({ onNext, onBack, getValues }) {
         </div>
       </div>
 
-      <div className="bg-blue-50 p-4 rounded-lg mb-8 border border-blue-200 max-w-2xl mx-auto">
+      <div className="bg-blue-50 p-4 rounded-lg mb-8 border border-blue-200">
         <p className="text-blue-800 text-sm">
           We'll contact you with a custom quote for destination wedding services.
         </p>
@@ -103,6 +179,7 @@ export default function DestinationSummary({ onNext, onBack, getValues }) {
 
           <button
             type="submit"
+            onClick={handleConfirmBooking}
             className="relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden
             bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white
             shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30
@@ -111,6 +188,16 @@ export default function DestinationSummary({ onNext, onBack, getValues }) {
             Continue
           </button>
         </div>
+        <div className="mt-8 flex justify-center">
+            <div>
+            <p className="inline-block">
+                Want to start Over?
+            </p>
+            <a href="/" className="pl-2 text-blue-700">Go to First Step</a>
+            </div>
+        </div>
     </div>
   );
 }
+
+

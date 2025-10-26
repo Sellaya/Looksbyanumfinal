@@ -155,6 +155,14 @@ export default function ClientDetails({
             )}
           </button>
         </div>
+        <div className="mt-8 flex justify-center">
+            <div>
+            <p className="inline-block">
+                Want to start Over?
+            </p>
+            <a href="/" className="pl-2 text-blue-700">Go to First Step</a>
+            </div>
+        </div>
       </div>
     </div>
   )
