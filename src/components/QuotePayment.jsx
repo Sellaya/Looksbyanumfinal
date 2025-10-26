@@ -2,11 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { loadStripe } from "@stripe/stripe-js";
-import { formatCurrency } from "../../lib/currencyFormat";
 import Logo from "../assets/Black.png";
 
 // Load Stripe with the publishable key
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE);
+const stripePromise = loadStripe(import.meta.env.str);
 
 // Create API client with base URL
 const api = axios.create({
@@ -451,6 +450,8 @@ export default function QuotePayment() {
     }
   };
 
+  // Replace the handlePayment function (around line 440-490) with this:
+
   const handlePayment = async () => {
     if (!booking) return;
 
@@ -480,10 +481,7 @@ export default function QuotePayment() {
         return;
       }
 
-      const stripe = await stripePromise;
-      if (!stripe) {
-        throw new Error("Stripe failed to load");
-      }
+      console.log("Creating Stripe checkout session...");
 
       const response = await api.post("/stripe/create-checkout-session", {
         booking: {
@@ -501,17 +499,15 @@ export default function QuotePayment() {
         },
       });
 
-      if (!response.data.id) {
-        throw new Error("Failed to create payment session");
+      if (!response.data.url) {
+        throw new Error("Failed to create payment session - no URL received");
       }
 
-      const { error } = await stripe.redirectToCheckout({
-        sessionId: response.data.id,
-      });
+      console.log("Redirecting to Stripe Checkout:", response.data.url);
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      // Use direct URL redirect instead of redirectToCheckout
+      window.location.href = response.data.url;
+
     } catch (error) {
       console.error("Payment error:", error);
       setError(error.message || "Payment failed. Please try again.");
