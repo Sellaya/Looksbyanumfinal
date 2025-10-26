@@ -17,12 +17,6 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
     setIsProcessing(true);
     
     try {
-      const stripe = await stripePromise;
-      
-      if (!stripe) {
-        throw new Error('Stripe failed to load');
-      }
-
       console.log('Creating/updating booking...');
       
       // 1) Persist the booking first so we have a booking_id
@@ -61,15 +55,13 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
 
       const session = await response.json();
       
-      console.log('Stripe session created:', session.id);
+      console.log('Stripe session created, redirecting to:', session.url);
 
-      // Redirect to Stripe Checkout
-      const { error } = await stripe.redirectToCheckout({
-        sessionId: session.id
-      });
-
-      if (error) {
-        throw new Error(error.message);
+      // Use the session URL directly instead of redirectToCheckout
+      if (session.url) {
+        window.location.href = session.url;
+      } else {
+        throw new Error('No checkout URL received from server');
       }
 
     } catch (error) {
