@@ -55,9 +55,9 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
 
       const session = await response.json();
       
-      console.log('Stripe session created, redirecting to:', session.url);
+      console.log('Stripe session created:', session);
 
-      // Use the session URL directly instead of redirectToCheckout
+      // Redirect using the session URL directly (modern method)
       if (session.url) {
         window.location.href = session.url;
       } else {
