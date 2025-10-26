@@ -500,30 +500,231 @@ export default function QuotePage() {
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [selectedPackage, setSelectedPackage] = useState(null)
 
-  const handleAddressSelect = async (address) => {
-    try {
-      console.log("Saving address:", address);
-      const response = await api.put(`/bookings/${bookingId}/address`, {
-        venue_address: address.street,
-        venue_city: address.city,
-        venue_province: address.province,
-        venue_postal: address.postalCode,
-        venue_name: "",
-        event_date: selectedDate,
-      });
-      console.log("Address save response:", response.data);
+  // Also update the handleAddressSelect in QuotePage:
+const handleAddressSelect = async (address) => {
+  try {
+    console.log("Saving address:", address);
+    const response = await api.put(`/bookings/${bookingId}/address`, {
+      venue_address: address.street,
+      venue_city: address.city,
+      venue_province: address.province,
+      venue_postal: address.postalCode,
+      venue_name: "",
+      event_date: selectedDate,
+    });
+    console.log("Address save response:", response.data);
 
-      setSelectedAddress(address);
-      setStep("review");
-    } catch (error) {
-      console.error("Failed to save address:", error);
-      if (window.showToast) {
-        window.showToast("Failed to save address. Please try again.", "error");
-      } else {
-        console.error("Failed to save address. Please try again.");
-      }
+    setSelectedAddress(address);
+    setStep("review");
+  } catch (error) {
+    console.error("Failed to save address:", error);
+    // Re-throw the error so AddressSelection can handle it
+    throw new Error("Failed to save address. Please try again.");
+  }
+};
+
+function AddressSelection({ onAddressSelect, onBack, initialAddress }) {
+  const [address, setAddress] = useState(
+    initialAddress || {
+      street: "",
+      city: "",
+      province: "",
+      postalCode: "",
+      notes: "",
+    }
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (initialAddress) {
+      setAddress(initialAddress);
+    }
+  }, [initialAddress]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate form
+    if (!address.street || !address.city || !address.province || !address.postalCode) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError("");
+    
+    try {
+      console.log("Submitting address:", address);
+      await onAddressSelect(address);
+    } catch (err) {
+      console.error("Error submitting address:", err);
+      setError(err.message || "Failed to save address. Please try again.");
+      setIsSubmitting(false);
     }
   };
+
+  const handleChange = (field, value) => {
+    setAddress((prev) => ({ ...prev, [field]: value }));
+    setError(""); // Clear error when user makes changes
+  };
+
+  const isFormValid =
+    address.street && address.city && address.province && address.postalCode;
+
+  return (
+    <div className="p-8 md:p-16">
+      <h2 className="text-left text-3xl font-normal text-gray-900 mb-4" style={{ letterSpacing: "0.02em" }}>
+        Service Address
+      </h2>
+      <p className="text-left text-gray-600 mb-8 text-base font-light" style={{ letterSpacing: "0.01em" }}>
+        Where should we provide the service?
+      </p>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+          <p className="text-sm text-red-600 font-light">{error}</p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto relative z-10">
+        <div className="grid md:grid-cols-2 gap-6 mb-6">
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-800 mb-2 uppercase tracking-wide">
+              Street Address *
+            </label>
+            <input
+              type="text"
+              value={address.street}
+              onChange={(e) => handleChange("street", e.target.value)}
+              className="w-full px-4 py-3 bg-white/70 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-700/40 focus:border-gray-700 transition-all text-gray-900 placeholder-gray-500 font-light"
+              placeholder="123 Main Street"
+              style={{ letterSpacing: "0.01em" }}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-800 mb-2 uppercase tracking-wide">
+              City *
+            </label>
+            <input
+              type="text"
+              value={address.city}
+              onChange={(e) => handleChange("city", e.target.value)}
+              className="w-full px-4 py-3 bg-white/70 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-700/40 focus:border-gray-700 transition-all text-gray-900 placeholder-gray-500 font-light"
+              placeholder="Toronto"
+              style={{ letterSpacing: "0.01em" }}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-800 mb-2 uppercase tracking-wide">
+              Province *
+            </label>
+            <select
+              value={address.province}
+              onChange={(e) => handleChange("province", e.target.value)}
+              className="w-full px-4 py-3 bg-white/70 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-700/40 focus:border-gray-700 transition-all text-gray-900 font-light"
+              style={{ letterSpacing: "0.01em" }}
+              required
+            >
+              <option value="">Select Province</option>
+              <option value="ON">Ontario</option>
+              <option value="QC">Quebec</option>
+              <option value="BC">British Columbia</option>
+              <option value="AB">Alberta</option>
+              <option value="MB">Manitoba</option>
+              <option value="SK">Saskatchewan</option>
+              <option value="NS">Nova Scotia</option>
+              <option value="NB">New Brunswick</option>
+              <option value="NL">Newfoundland and Labrador</option>
+              <option value="PE">Prince Edward Island</option>
+              <option value="NT">Northwest Territories</option>
+              <option value="NU">Nunavut</option>
+              <option value="YT">Yukon</option>
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-800 mb-2 uppercase tracking-wide">
+              Postal Code *
+            </label>
+            <input
+              type="text"
+              maxLength="7"
+              pattern="^[A-Za-z]\d[A-Za-z] \d[A-Za-z]\d$"
+              title="Invalid postal code format. Must be A1A 1A1"
+              value={address.postalCode}
+              onChange={(e) => {
+                let value = e.target.value
+                  .replace(/[^A-Za-z0-9]/g, "")
+                  .toUpperCase();
+                if (value.length === 6) {
+                  value = value.slice(0, 3) + " " + value.slice(3);
+                }
+                handleChange("postalCode", value);
+              }}
+              className="w-full px-4 py-3 bg-white/70 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-700/40 focus:border-gray-700 transition-all text-gray-900 placeholder-gray-500 font-light"
+              placeholder="M5V 3A8"
+              style={{ letterSpacing: "0.01em" }}
+              required
+            />
+            <p
+              className="text-xs text-gray-600 mt-2 font-light"
+              style={{ letterSpacing: "0.01em" }}
+            >
+              Canadian postal code format: A1A 1A1
+            </p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-4 pt-6 md:pt-8 border-t border-gray-400/40 mt-8 md:mt-10">
+          <button
+            type="button"
+            onClick={onBack}
+            disabled={isSubmitting}
+            className="relative flex-1 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-800 py-3.5 rounded-xl font-light shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-100 transition-all duration-300 cursor-pointer border border-gray-400/60 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ letterSpacing: "0.05em" }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+            <span className="relative">← Back</span>
+          </button>
+
+          <button
+            type="submit"
+            disabled={isSubmitting || !isFormValid}
+            className={`relative flex-1 py-3.5 rounded-xl font-light shadow-md transition-all duration-300 border overflow-hidden ${
+              isSubmitting || !isFormValid
+                ? "bg-gray-300/60 text-gray-500 cursor-not-allowed border border-gray-400/40"
+                : "bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white hover:shadow-xl hover:scale-[1.03] active:scale-100 border border-gray-700"
+            }`}
+            style={{ letterSpacing: "0.05em" }}
+          >
+            {isSubmitting ? (
+              <span className="relative flex items-center justify-center gap-2.5">
+                <LoadingSpinner />
+                Processing...
+              </span>
+            ) : (
+              <>
+                {isFormValid && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out"></div>
+                )}
+                <span className="relative flex items-center justify-center gap-2.5">
+                  Review Booking
+                </span>
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
 
   const handleBackToArtist = () => {
     setStep("artist");
@@ -1221,7 +1422,7 @@ function ArtistSelection({
   selectedDate,
   onArtistSelect,
   onBackToQuotes,
-  selectedPackage, // ✅ new prop
+  selectedPackage,
 }) {
   const [inspirationLinks, setInspirationLinks] = useState(
     booking?.inspiration_link ? [booking.inspiration_link] : [""]
@@ -1247,7 +1448,6 @@ function ArtistSelection({
         method: "POST",
         body: fd,
       });
-
 
       if (!res.ok) throw new Error("Upload failed");
       const data = await res.json();
@@ -1281,7 +1481,8 @@ function ArtistSelection({
       return newLinks;
     });
 
-  const handleArtistSelectWithInspiration = async (artist) => {
+  // ✅ Fixed: Handle continue with a default artist
+  const handleContinue = async () => {
     setIsSubmitting(true);
     try {
       const validLinks = inspirationLinks.filter((link) => link && link.trim());
@@ -1293,30 +1494,22 @@ function ArtistSelection({
         const inspirationKey = `inspiration_${booking.booking_id}`;
         localStorage.setItem(inspirationKey, JSON.stringify(inspirationData));
       }
-      await onArtistSelect(artist);
+      
+      // ✅ Pass "Team" as default artist (or use booking.artist if it exists)
+      const defaultArtist = booking?.artist || "Team";
+      await onArtistSelect(defaultArtist);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const base = selectedDate
-    ? { ...booking, event_date: selectedDate }
-    : booking;
-
-  const pricingAnum = calculateBookingPrice(base, "Lead");
-  const pricingTeam = calculateBookingPrice(base, "Team");
-  const artists = [
-    { id: "Lead", name: "Book with Anum", price: pricingAnum?.total || 0, icon: "👑" },
-    { id: "Team", name: "Book with Team", price: pricingTeam?.total || 0, icon: "👥" },
-  ];
-
   return (
     <div className="p-8 md:p-16">
       <h2 className="text-left text-3xl font-normal text-gray-900 mb-4" style={{ letterSpacing: "0.02em" }}>
-        Choose Your Artist
+        Add Inspiration
       </h2>
       <p className="text-left text-gray-600 mb-8 text-base font-light" style={{ letterSpacing: "0.01em" }}>
-        Select which artist you'd like to book with for your Bridal
+        Share your vision with us (optional)
       </p>
 
       {/* Inspiration Section */}
@@ -1404,66 +1597,28 @@ function ArtistSelection({
         </div>
       </div>
 
-      {/* Conditional content based on package selection */}
-
-      {/* Artist selection cards (only if no package selected yet) */}
-      {/* Artist selection cards */}
-      <div className="space-y-5 max-w-2xl mx-auto mb-8">
-        {artists.map((artist) => (
-          <div
-            key={artist.id}
-            className="group relative bg-white border border-gray-200 rounded-2xl p-6 transition-all duration-300 hover:border-gray-500 hover:shadow-md hover:-translate-y-0.5"
-          >
-            <div className="relative">
-              <div className="flex items-center justify-between mb-5">
-                <span
-                  className="text-lg font-normal text-gray-900"
-                  style={{ letterSpacing: "0.02em" }}
-                >
-                  <span className="text-gray-500 mr-2">{artist.icon}</span>
-                  {artist.name}
-                </span>
-                <span
-                  className="text-lg font-light text-gray-700"
-                  style={{ letterSpacing: "0.02em" }}
-                >
-                  Total: {formatCurrency(artist.price)} CAD
-                </span>
-              </div>
-
-              <button
-                onClick={() => handleArtistSelectWithInspiration(artist.id)}
-                disabled={isSubmitting}
-                className="relative w-full bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white py-3 rounded-xl font-light shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-100 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-600 overflow-hidden"
-                style={{ letterSpacing: "0.05em" }}
-              >
-                {!isSubmitting && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-                )}
-                <span className="relative flex items-center justify-center gap-2.5">
-                  {isSubmitting ? (
-                    <>
-                      <LoadingSpinner />
-                      Processing...
-                    </>
-                  ) : (
-                    `Select ${artist.name}`
-                  )}
-                </span>
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="text-center">
+      {/* Navigation Buttons */}
+      <div className="flex justify-between mt-6">
         <button
           onClick={onBackToQuotes}
-          className="relative px-10 py-3.5 bg-gray-100 text-gray-800 rounded-xl font-light shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-100 transition-all duration-300 cursor-pointer border border-gray-300 overflow-hidden"
-          style={{ letterSpacing: "0.05em" }}
+          disabled={isSubmitting}
+          className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-          <span className="relative">← Back to Quotes</span>
+          Back
+        </button>
+        <button
+          onClick={handleContinue}
+          disabled={isSubmitting}
+          className="px-6 py-2 rounded-lg bg-gray-900 text-white hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          {isSubmitting ? (
+            <>
+              <LoadingSpinner />
+              <span>Processing...</span>
+            </>
+          ) : (
+            "Continue"
+          )}
         </button>
       </div>
     </div>
