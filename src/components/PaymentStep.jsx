@@ -1,51 +1,21 @@
 import { loadStripe } from '@stripe/stripe-js';
 import React, { useState } from 'react';
-import { formatCurrency } from '../../lib/currencyFormat';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE);
 
 export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }) {
   const [paymentMethod, setPaymentMethod] = useState('stripe');
-  const [paypalLoaded, setPaypalLoaded] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [savedBooking, setSavedBooking] = useState(null);
 
-  // Load PayPal script
-  React.useEffect(() => {
-    if (paymentMethod === 'paypal' && !paypalLoaded) {
-      const script = document.createElement('script');
-      script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID || 'AZDxjDScFpQtjWTOUtWKbyN_bDt4OgqaF4eYXlewfBP4-8aqX3PiV8e1GWU6liB2CUXlkA59kJXE7M6R'}&currency=CAD&components=buttons`;
-      script.onload = () => {
-        setPaypalLoaded(true);
-        if (window.paypal) {
-          window.paypal.Buttons({
-            createOrder: async () => {
-              const apiBase = import.meta.env.VITE_API_URL || 'https://looksbyanum-saqib.vercel.app/api';
-              const response = await fetch(`${apiBase}/paypal/create-order`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ booking, paymentType: 'deposit' })
-              });
-              const order = await response.json();
-              return order.id;
-            },
-            onApprove: async (data) => {
-              const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
-              const response = await fetch(`${apiBase}/paypal/capture-order/${data.orderID}`, {
-                method: 'POST'
-              });
-              const result = await response.json();
-              if (result.success) {
-                onPaymentSuccess && onPaymentSuccess();
-              } else {
-                window.showToast('Payment failed', 'error');
-              }
-            }
-          }).render('#paypal-button-container');
-        }
-      };
-      document.body.appendChild(script);
-    }
-  }, [paymentMethod, paypalLoaded, booking, onPaymentSuccess]);
+  // Get consistent API base URL
+  const apiBase = import.meta.env.VITE_API_URL || 'https://looksbyanum-saqib.vercel.app/api';
+
   const handlePayment = async () => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
+    
     try {
       const stripe = await stripePromise;
       
@@ -53,22 +23,27 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
         throw new Error('Stripe failed to load');
       }
 
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
-
+      console.log('Creating/updating booking...');
+      
       // 1) Persist the booking first so we have a booking_id
       const saveRes = await fetch(`${apiBase}/bookings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(booking)
       });
+      
       if (!saveRes.ok) {
         const err = await saveRes.json().catch(() => ({}));
-        // Show a readable message from zod errors if present
         const message = err?.error || err?.details?.formErrors?.join?.(', ') || 'Failed to save booking';
         throw new Error(message);
       }
+      
       const saved = await saveRes.json();
-      const savedBooking = saved.booking || booking;
+      const bookingToUse = saved.booking || booking;
+      setSavedBooking(bookingToUse);
+      
+      console.log('Booking saved:', bookingToUse);
+      console.log('Creating Stripe checkout session...');
 
       // 2) Create checkout session using saved booking (includes booking_id)
       const response = await fetch(`${apiBase}/stripe/create-checkout-session`, {
@@ -76,15 +51,17 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ booking: savedBooking })
+        body: JSON.stringify({ booking: bookingToUse })
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.details || 'Payment session creation failed');
+        throw new Error(errorData.details || errorData.error || 'Payment session creation failed');
       }
 
       const session = await response.json();
+      
+      console.log('Stripe session created:', session.id);
 
       // Redirect to Stripe Checkout
       const { error } = await stripe.redirectToCheckout({
@@ -98,13 +75,25 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
     } catch (error) {
       console.error('Payment error:', error);
       window.showToast(`Payment failed: ${error.message}`, 'error');
+      setIsProcessing(false);
     }
   };
 
   const handleInteracVerification = async () => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
+    
     try {
-      const apiBase = import.meta.env.VITE_API_URL || 'https://looksbyanum-saqib.vercel.app/api';
-      const response = await fetch(`${apiBase}/interac/auth-url?bookingId=${savedBooking?.unique_id || booking.unique_id}`, {
+      // Use the saved booking or original booking
+      const bookingToUse = savedBooking || booking;
+      const bookingId = bookingToUse?.unique_id || bookingToUse?.booking_id;
+      
+      if (!bookingId) {
+        throw new Error('Booking ID not found');
+      }
+      
+      const response = await fetch(`${apiBase}/interac/auth-url?bookingId=${bookingId}`, {
         method: 'GET'
       });
 
@@ -117,6 +106,7 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
     } catch (error) {
       console.error('Interac verification error:', error);
       window.showToast(`Verification failed: ${error.message}`, 'error');
+      setIsProcessing(false);
     }
   };
 
@@ -212,70 +202,40 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
             </div>
           </div>
 
-          {/* PayPal Option */}
-          {/* <div 
+          {/* Interac Option */}
+          <div 
             className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-              paymentMethod === 'paypal' 
+              paymentMethod === 'interac' 
                 ? 'border-blue-500 bg-blue-50' 
                 : 'border-gray-200 hover:border-blue-300'
             }`}
-            onClick={() => setPaymentMethod('paypal')}
+            onClick={() => setPaymentMethod('interac')}
           >
             <div className="flex items-center gap-3">
               <input
                 type="radio"
                 name="paymentMethod"
-                value="paypal"
-                checked={paymentMethod === 'paypal'}
-                onChange={() => setPaymentMethod('paypal')}
+                value="interac"
+                checked={paymentMethod === 'interac'}
+                onChange={() => setPaymentMethod('interac')}
                 className="text-blue-600 focus:ring-blue-500"
               />
               <div className="text-blue-600">
                 <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.622 1.566 1.035.974 1.481 2.408 1.34 3.948-.013.104-.023.208-.033.31l.196 1.42c.043.31.068.625.084.94.263 5.224-1.835 8.167-6.704 8.167h-2.128c-.492 0-.889.322-.983.796l-.553 2.628c-.054.257-.226.44-.491.47zm1.425-16.53H6.77c-.813 0-1.428.183-1.865.547-.416.347-.683.895-.683 1.605 0 .406.063.74.187 1.004.122.26.344.438.645.534.302.096.668.143 1.092.143h.75c.875 0 1.591-.221 2.14-.662.545-.441.817-1.028.817-1.756 0-.72-.269-1.314-.807-1.76-.544-.448-1.257-.67-2.125-.67z"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                 </svg>
               </div>
               <div>
-                <p className="font-medium text-gray-900">PayPal</p>
-                <p className="text-sm text-gray-600">Pay with PayPal account</p>
+                <p className="font-medium text-gray-900">Interac Verification</p>
+                <p className="text-sm text-gray-600">Identity verification</p>
               </div>
-            </div>
-          </div> */}
-        </div>
-
-        {/* Interac Option */}
-        <div 
-          className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-            paymentMethod === 'interac' 
-              ? 'border-blue-500 bg-blue-50' 
-              : 'border-gray-200 hover:border-blue-300'
-          }`}
-          onClick={() => setPaymentMethod('interac')}
-        >
-          <div className="flex items-center gap-3">
-            <input
-              type="radio"
-              name="paymentMethod"
-              value="interac"
-              checked={paymentMethod === 'interac'}
-              onChange={() => setPaymentMethod('interac')}
-              className="text-blue-600 focus:ring-blue-500"
-            />
-            <div className="text-blue-600">
-              <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-              </svg>
-            </div>
-            <div>
-              <p className="font-medium text-gray-900">Interac Verification</p>
-              <p className="text-sm text-gray-600">Identity verification</p>
             </div>
           </div>
         </div>
 
         {/* Payment Method Details */}
         {paymentMethod === 'stripe' && (
-          <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+          <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mt-4">
             <div className="flex items-center gap-3">
               <div className="text-blue-600">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -290,24 +250,8 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
           </div>
         )}
 
-        {/* {paymentMethod === 'paypal' && (
-          <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="text-blue-600">
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.622 1.566 1.035.974 1.481 2.408 1.34 3.948-.013.104-.023.208-.033.31l.196 1.42c.043.31.068.625.084.94.263 5.224-1.835 8.167-6.704 8.167h-2.128c-.492 0-.889.322-.983.796l-.553 2.628c-.054.257-.226.44-.491.47zm1.425-16.53H6.77c-.813 0-1.428.183-1.865.547-.416.347-.683.895-.683 1.605 0 .406.063.74.187 1.004.122.26.344.438.645.534.302.096.668.143 1.092.143h.75c.875 0 1.591-.221 2.14-.662.545-.441.817-1.028.817-1.756 0-.72-.269-1.314-.807-1.76-.544-.448-1.257-.67-2.125-.67z"/>
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium text-blue-900">PayPal Payment</p>
-                <p className="text-sm text-blue-700">Pay securely with your PayPal account</p>
-              </div>
-            </div>
-          </div>
-        )} */}
-
         {paymentMethod === 'interac' && (
-          <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+          <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mt-4">
             <div className="flex items-center gap-3">
               <div className="text-blue-600">
                 <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -354,7 +298,8 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
         <button
           type="button"
           onClick={onBack}
-          className="px-3 py-1.5 md:px-8 md:py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200"
+          disabled={isProcessing}
+          className="px-3 py-1.5 md:px-8 md:py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Back
         </button>
@@ -363,19 +308,19 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
           <button
             type="button"
             onClick={handlePayment}
-            className="px-3 py-1.5 md:px-8 md:py-4 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 transition-all duration-200 text-sm md:text-lg"
+            disabled={isProcessing}
+            className="px-3 py-1.5 md:px-8 md:py-4 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 transition-all duration-200 text-sm md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Pay Deposit ${quote.deposit_amount?.toFixed(2) || '0.00'}
+            {isProcessing ? 'Processing...' : `Pay Deposit $${quote.deposit_amount?.toFixed(2) || '0.00'}`}
           </button>
-        ) : /* paymentMethod === 'paypal' ? (
-          <div id="paypal-button-container" className="paypal-button-container"></div>
-        ) : */ paymentMethod === 'interac' ? (
+        ) : paymentMethod === 'interac' ? (
           <button
             type="button"
             onClick={handleInteracVerification}
-            className="px-3 py-1.5 md:px-8 md:py-4 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 transition-all duration-200 text-sm md:text-lg"
+            disabled={isProcessing}
+            className="px-3 py-1.5 md:px-8 md:py-4 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 transition-all duration-200 text-sm md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Start Identity Verification
+            {isProcessing ? 'Processing...' : 'Start Identity Verification'}
           </button>
         ) : null}
       </div>

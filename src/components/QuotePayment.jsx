@@ -560,157 +560,423 @@ export default function QuotePayment() {
     );
   }
 
-  // Update the main return statement in QuotePage component:
+  return (
+    <div className="min-h-screen py-8 md:py-12">
+      <div className="max-w-3xl mx-auto px-4">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <img src={Logo} alt="Logo" className="w-[180px] sm:w-[220px] lg:w-[260px] mx-auto mb-4" />
+        </div>
 
-return (
-  <div className="w-full mx-auto"> {/* Changed from max-w-4xl to w-full */}
-    <div className="bg-white p-4 sm:p-6 md:p-8"> {/* Reduced mobile padding */}
-      {/* Header */}
-      <div className="mb-4 text-center">
-        <img src={Logo} alt="Logo" className="w-[160px] sm:w-[200px] lg:w-[260px] mx-auto mb-3" />
-        <p className="text-gray-700 font-light text-sm sm:text-base px-2">
-          View your personalised quote below and choose your next step.
-        </p>
-      </div>
-      
-      {/* Step Progress */}
-      <div className="flex justify-center gap-2 sm:gap-3 mb-5 px-2"> {/* Reduced gap on mobile */}
-        {["1", "2", "3", "4"].map((num, idx) => {
-          const stepNames = ["packages", "artist", "address", "review"]
-          const currentStepIndex = stepNames.indexOf(step)
-          const isActive = idx <= currentStepIndex
-          return (
-            <div
-              key={num}
-              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-sm font-medium border transition-all duration-300 ${
-                isActive
-                  ? "bg-gray-900 text-white border-gray-700 shadow-md shadow-gray-500/30"
-                  : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
-              }`}
-            >
-              {num}
+        {interacVerified && (
+          <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <CheckIcon className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <p className="font-medium text-green-800">
+                  Identity Verified Successfully!
+                </p>
+                <p className="text-sm text-green-700 font-light">
+                  You can now proceed with your payment.
+                </p>
+              </div>
             </div>
-          )
-        })}
-      </div>
-
-      {/* Rest of your content... */}
-    </div>
-  </div>
-)
-
-// Also update PackageBreakdown component padding:
-
-return (
-  <div className="text-gray-800 px-2 sm:px-6 py-4 sm:py-6"> {/* Reduced mobile padding */}
-    {/* Header */}
-    <h2
-      className="text-center text-xl sm:text-2xl md:text-3xl font-normal text-gray-900 mb-2 px-2"
-      style={{ letterSpacing: "0.02em" }}
-    >
-      Available Packages
-    </h2>
-
-    <p
-      className="text-center text-gray-600 mb-5 text-sm sm:text-base font-light px-2"
-      style={{ letterSpacing: "0.01em" }}
-    >
-      Choose a package that fits your occasion.
-    </p>
-
-    {/* Package Grid */}
-    <div className="flex justify-center px-2"> {/* Added horizontal padding */}
-      <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5 mb-4">
-        {/* Package cards... */}
-      </div>
-    </div>
-    
-    {/* Rest of content... */}
-  </div>
-);
-
-// Update ArtistSelection component:
-
-return (
-  <div className="p-4 sm:p-8 md:p-16"> {/* Reduced mobile padding */}
-    <h2 className="text-left text-2xl sm:text-3xl font-normal text-gray-900 mb-4" style={{ letterSpacing: "0.02em" }}>
-      Add Inspiration
-    </h2>
-    <p className="text-left text-gray-600 mb-8 text-sm sm:text-base font-light" style={{ letterSpacing: "0.01em" }}>
-      Share your vision with us (optional)
-    </p>
-
-    {/* Inspiration Section */}
-    <div className="mb-10 p-4 sm:p-6 md:p-7 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm">
-      {/* Content... */}
-    </div>
-    
-    {/* Navigation Buttons */}
-    <div className="flex justify-between mt-6 gap-3"> {/* Added gap */}
-      <button
-        onClick={onBackToQuotes}
-        disabled={isSubmitting}
-        className="px-4 sm:px-6 py-2 rounded-lg border border-gray-300 text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-      >
-        Back
-      </button>
-      <button
-        onClick={handleContinue}
-        disabled={isSubmitting}
-        className="px-4 sm:px-6 py-2 rounded-lg bg-gray-900 text-white hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm sm:text-base"
-      >
-        {isSubmitting ? (
-          <>
-            <LoadingSpinner />
-            <span>Processing...</span>
-          </>
-        ) : (
-          "Continue"
+          </div>
         )}
-      </button>
+
+        <div className="bg-white p-6 md:p-8">
+          <div className="text-center mb-6 md:mb-8">
+            <h1 className="text-2xl md:text-3xl font-normal text-gray-900 mb-3">
+              Secure Payment
+            </h1>
+            <div className="h-0.5 w-20 bg-gray-800 rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600 font-light">
+              Complete your booking with a secure deposit payment
+            </p>
+          </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl shadow-sm">
+              <p className="text-red-700 text-sm font-light">{error}</p>
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl shadow-sm">
+              <p className="text-green-700 text-sm font-light">{success}</p>
+            </div>
+          )}
+
+          {/* Booking Summary */}
+          <div className="bg-gray-50 rounded-xl p-6 mb-8 border border-gray-200">
+            <h2 className="text-xl font-medium text-gray-900 mb-5">
+              Booking Summary
+            </h2>
+
+            <div className="space-y-3">
+              <div className="flex justify-between font-light">
+                <span className="text-gray-600">Booking ID:</span>
+                <span className="text-gray-900">{bookingId}</span>
+              </div>
+              <div className="flex justify-between font-light">
+                <span className="text-gray-600">Service:</span>
+                <span className="text-gray-900">{booking.service_type}</span>
+              </div>
+              <div className="flex justify-between font-light">
+                <span className="text-gray-600">Client:</span>
+                <span className="text-gray-900">{booking.name}</span>
+              </div>
+              <div className="flex justify-between font-light">
+                <span className="text-gray-600">Event Date:</span>
+                <span className="text-gray-900">
+                  {booking.event_date
+                    ? new Date(booking.event_date).toLocaleDateString("en-CA")
+                    : "N/A"}
+                </span>
+              </div>
+
+              <div className="border-t border-gray-200 my-4"></div>
+
+              <div className="flex justify-between text-lg font-medium">
+                <span className="text-gray-900">Deposit Amount:</span>
+                <span className="text-gray-900 font-semibold">
+                  ${depositAmount.toFixed(2)} CAD
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Method Selection */}
+          <div className="mb-8">
+            <h3 className="text-lg font-medium text-gray-900 mb-5">
+              Choose Payment Method
+            </h3>
+
+            {/* Coupon Discount Notice */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <StarIcon className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-blue-900 text-lg">
+                    Coupon Discounts Available!
+                  </p>
+                  <p className="text-blue-800 font-light text-sm">
+                    Apply coupon codes only through Credit/Debit Card (Stripe)
+                    payments
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 mb-6">
+              {/* Stripe Option */}
+              <div
+                className={`border-2 rounded-xl p-5 cursor-pointer transition-all duration-300 ${
+                  paymentMethod === "stripe"
+                    ? "border-gray-600 bg-gray-50 shadow-md"
+                    : "border-gray-200 bg-white hover:border-gray-400"
+                }`}
+                onClick={() => setPaymentMethod("stripe")}
+              >
+                <div className="flex items-center gap-4">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="stripe"
+                    checked={paymentMethod === "stripe"}
+                    onChange={() => setPaymentMethod("stripe")}
+                    className="text-gray-800 focus:ring-gray-500 focus:ring-2 bg-white border-gray-300"
+                  />
+                  <div
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+                      paymentMethod === "stripe"
+                        ? "bg-gray-800 border border-gray-600"
+                        : "bg-gray-100 border border-gray-300"
+                    }`}
+                  >
+                    <svg
+                      className={`w-6 h-6 ${
+                        paymentMethod === "stripe"
+                          ? "text-white"
+                          : "text-gray-600"
+                      }`}
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v2h16V6H4zm0 4v8h16v-8H4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p
+                      className={`${
+                        paymentMethod === "stripe"
+                          ? "text-gray-900 font-medium"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      Credit/Debit Card
+                    </p>
+                    <p
+                      className={`text-sm font-light ${
+                        paymentMethod === "stripe"
+                          ? "text-gray-700"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      Powered by Stripe
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Interac Option */}
+              <div
+                className={`border-2 rounded-xl p-5 cursor-pointer transition-all duration-300 ${
+                  paymentMethod === "interac"
+                    ? "border-gray-600 bg-gray-50 shadow-md"
+                    : "border-gray-200 bg-white hover:border-gray-400"
+                }`}
+                onClick={() => setPaymentMethod("interac")}
+              >
+                <div className="flex items-center gap-4">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="interac"
+                    checked={paymentMethod === "interac"}
+                    onChange={() => setPaymentMethod("interac")}
+                    className="text-gray-800 focus:ring-gray-500 focus:ring-2 bg-white border-gray-300"
+                  />
+                  <div
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+                      paymentMethod === "interac"
+                        ? "bg-gray-800 border border-gray-600"
+                        : "bg-gray-100 border border-gray-300"
+                    }`}
+                  >
+                    <CheckIcon
+                      className={`w-6 h-6 ${
+                        paymentMethod === "interac"
+                          ? "text-white"
+                          : "text-gray-600"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <p
+                      className={`font-medium ${
+                        paymentMethod === "interac"
+                          ? "text-gray-900"
+                          : "text-gray-400"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <p
+                      className={`${
+                        paymentMethod === "interac"
+                          ? "text-gray-900 font-medium"
+                          : "text-gray-700"
+                      }`}
+                      style={{ letterSpacing: "0.02em" }}
+                    >
+                      Interac E-Transfer
+                    </p>
+                    <p
+                      className={`text-sm font-light ${
+                        paymentMethod === "interac"
+                          ? "text-gray-700"
+                          : "text-gray-500"
+                      }`}
+                      style={{ letterSpacing: "0.01em" }}
+                    >
+                      Send payment via Interac
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Method Details */}
+            {paymentMethod === "stripe" && (
+              <div className="bg-gradient-to-br from-green-300 to-green-500 backdrop-blur-sm border border-gray-800/30 p-5 rounded-xl shadow-lg shadow-blue-500/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg
+                      className="w-6 h-6 text-gray-800"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v2h16V6H4zm0 4v8h16v-8H4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p
+                      className="text-lg font-medium text-gray-800"
+                      style={{ letterSpacing: "0.02em" }}
+                    >
+                      Secure Card Payment
+                    </p>
+                    <p
+                      className="text-sm text-gray-800 font-light"
+                      style={{ letterSpacing: "0.01em" }}
+                    >
+                      Your payment information is secure and encrypted
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {paymentMethod === "interac" && (
+              <div className="bg-gradient-to-br from-green-300 to-green-500 backdrop-blur-sm border border-gray-800/30 p-5 rounded-xl shadow-lg shadow-blue-500/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg
+                      className="w-6 h-6 text-gray-800"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v2h16V6H4zm0 4v8h16v-8H4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p
+                      className="text-lg font-medium text-gray-800"
+                      style={{ letterSpacing: "0.02em" }}
+                    >
+                    Interac Identity Verification
+                    </p>
+                    <p
+                      className="text-sm text-gray-800 font-light"
+                      style={{ letterSpacing: "0.01em" }}
+                    >
+                      Verify your identity using Interac Hub for enhanced security
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Terms Reminder */}
+          <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-500/20 backdrop-blur-sm border border-yellow-600/30 rounded-xl p-5 mb-8 shadow-lg shadow-yellow-500/10">
+            <p
+              className="text-sm text-yellow-500 font-light leading-relaxed"
+              style={{ letterSpacing: "0.01em" }}
+            >
+              <strong className="text-yellow-600 font-normal">
+                Important:
+              </strong>{" "}
+              This deposit secures your booking date and is non-refundable. You
+              will receive a confirmation email with payment details and
+              remaining balance information.
+            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-4 justify-between">
+            <button
+              onClick={() => navigate("/quote/" + finalBookingId)}
+              disabled={processing}
+              className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all"
+              style={{ letterSpacing: "0.05em" }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+              <span className="relative">← Back to Quote</span>
+            </button>
+
+            {paymentMethod === "stripe" ? (
+              <button
+                onClick={handlePayment}
+                disabled={processing || loading || !booking}
+                className={`px-5 py-2 rounded-lg bg-gray-900 text-white hover:opacity-90 transition-all"
+                }`}
+                style={{ letterSpacing: "0.05em" }}
+              >
+                {!(processing || loading || !booking) && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+                )}
+                <span className="relative flex items-center justify-center gap-2.5">
+                  {processing ? (
+                    <>
+                      <LoadingSpinner />
+                      Processing...
+                    </>
+                  ) : (
+                    `Pay Deposit $${depositAmount.toFixed(2)}`
+                  )}
+                </span>
+              </button>
+            ) : paymentMethod === "interac" ? (
+              <button
+                onClick={() => setShowInteracModal(true)}
+                disabled={processing || loading || !booking}
+                className={"px-5 py-2 rounded-lg bg-gray-900 text-white hover:opacity-90 transition-all"}
+                style={{ letterSpacing: "0.05em" }}
+              >
+                {!(processing || loading || !booking) && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+                )}
+                <span className="relative">
+                  Proceed with Interac E-Transfer
+                </span>
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      {/* Interac Payment Modal */}
+      {showInteracModal && (
+        <div className="fixed inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-50 backdrop-blur-xl rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-700/50 shadow-2xl shadow-gray-900/50">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2
+                  className="text-xl font-medium text-grey-800 mx-auto"
+                  style={{ letterSpacing: "0.02em" }}
+                >
+                  Interac E-Transfer Payment
+                </h2>
+                <button
+                  onClick={() => setShowInteracModal(false)}
+                  className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <InteracPaymentSection
+                bookingId={finalBookingId}
+                depositAmount={depositAmount}
+                processing={processing}
+                setProcessing={setProcessing}
+                setError={setError}
+                setSuccess={setSuccess}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-);
-
-// Update AddressSelection component:
-
-return (
-  <div className="p-4 sm:p-8 md:p-16"> {/* Reduced mobile padding */}
-    <h2 className="text-left text-2xl sm:text-3xl font-normal text-gray-900 mb-4" style={{ letterSpacing: "0.02em" }}>
-      Service Address
-    </h2>
-    <p className="text-left text-gray-600 mb-8 text-sm sm:text-base font-light" style={{ letterSpacing: "0.01em" }}>
-      Where should we provide the service?
-    </p>
-
-    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto relative z-10">
-      {/* Form content... */}
-    </form>
-  </div>
-);
-
-// Update Review component:
-
-return (
-  <div className="bg-white px-4 sm:px-6 md:px-14 py-6 sm:py-8 md:py-12 text-gray-800"> {/* Reduced mobile padding */}
-    <h2
-      className="text-xl sm:text-2xl md:text-3xl font-normal text-gray-900 mb-3 md:mb-4 text-center"
-      style={{ letterSpacing: "0.02em" }}
-    >
-      Booking Summary
-    </h2>
-    <p
-      className="text-center text-gray-600 mb-6 sm:mb-8 text-sm md:text-base font-light px-2"
-      style={{ letterSpacing: "0.01em" }}
-    >
-      Please review your booking details below
-    </p>
-
-    <div className="max-w-3xl mx-auto space-y-5 sm:space-y-6 md:space-y-8">
-      {/* Content... */}
-    </div>
-  </div>
-);
+  );
 }
 
 // import React, { useState, useEffect } from 'react';
