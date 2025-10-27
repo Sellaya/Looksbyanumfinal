@@ -1,11 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import Logo from '../assets/Black.png';
 
 // Create API client with base URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://looksbyanum-saqib.verce.app/api'
+  baseURL: import.meta.env.VITE_API_URL || 'https://looksbyanum-saqib.vercel.app/api'
 });
+
+// Loading Spinner Component
+const LoadingSpinner = () => (
+  <svg className="animate-spin h-5 w-5 text-gray-800" fill="none" viewBox="0 0 24 24">
+    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+  </svg>
+);
+
+// Upload Icon
+const UploadIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+  </svg>
+);
+
+// Star Icon
+const StarIcon = ({ className }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </svg>
+);
 
 // Interac Payment Section Component
 function InteracPaymentSection({ bookingId, remainingAmount, processing, setProcessing, setError, setSuccess }) {
@@ -58,7 +81,7 @@ function InteracPaymentSection({ bookingId, remainingAmount, processing, setProc
       const formData = new FormData();
       formData.append('screenshot', screenshot);
       formData.append('bookingId', bookingId);
-      formData.append('paymentType', 'final'); // Always final for remaining payments
+      formData.append('paymentType', 'final');
 
       await api.post('/interac/upload-screenshot', formData, {
         headers: {
@@ -68,7 +91,7 @@ function InteracPaymentSection({ bookingId, remainingAmount, processing, setProc
 
       setSuccess('Screenshot uploaded successfully! Your payment is being reviewed by our team.');
       setScreenshot(null);
-      loadInteracInfo(); // Refresh info
+      loadInteracInfo();
     } catch (error) {
       setError(error.response?.data?.error || 'Failed to upload screenshot');
     } finally {
@@ -78,100 +101,121 @@ function InteracPaymentSection({ bookingId, remainingAmount, processing, setProc
 
   if (!interacInfo) {
     return (
-      <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-        <div className="animate-pulse">
-          <div className="h-4 bg-blue-200 rounded w-3/4 mb-2"></div>
-          <div className="h-4 bg-blue-200 rounded w-1/2"></div>
-        </div>
+      <div className="flex items-center justify-center py-8">
+        <LoadingSpinner />
       </div>
     );
   }
 
   return (
-    <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+    <div className="space-y-5">
       {/* Interac Payment Instructions */}
-      <div className="mb-4">
-        <h4 className="font-medium text-gray-900 mb-3">Interac E-Transfer Payment Instructions</h4>
-        <div className="bg-white p-3 rounded border mb-3">
-          <p className="text-sm text-gray-600 mb-2">
-            Send <strong>${remainingAmount?.toFixed(2) || '0.00'}</strong> via Interac e-transfer to:
-          </p>
-          <p className="font-mono text-sm bg-gray-100 p-2 rounded text-black">
-            {interacInfo.interacEmail}
-          </p>
+      <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-sm">
+        <h4 className="font-medium text-gray-800 mb-4 uppercase tracking-wide text-sm">
+          Interac E-Transfer Payment
+        </h4>
+        <div className="space-y-3 text-sm text-gray-700 font-light">
+          <div className="flex justify-between">
+            <span>Send payment to:</span>
+            <span className="text-gray-900 font-medium">{interacInfo.interacEmail}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Amount:</span>
+            <span className="text-gray-900 font-semibold">${remainingAmount?.toFixed(2) || '0.00'} CAD</span>
+          </div>
         </div>
-        <div className="text-sm text-gray-600">
-          <strong>Instructions:</strong> Send the remaining balance via Interac e-transfer to the email above, 
-          include your booking ID ({bookingId}) in the message. After sending, upload a screenshot below for verification.
+        <div className="mt-4 p-3 bg-gray-100 border border-gray-300 rounded-lg">
+          <p className="text-xs text-gray-700 font-light leading-relaxed">
+            <strong className="text-gray-900">Instructions:</strong> Send the remaining balance via Interac e-transfer to the email above, 
+            include your booking ID ({bookingId}) in the message, then upload a screenshot of the payment confirmation below.
+          </p>
         </div>
       </div>
 
-      {/* Screenshot Upload - Only show if there is remaining balance */}
+      {/* Screenshot Upload */}
       {remainingAmount > 0 && (
-        <div className="border-t border-blue-200 pt-4">
-          <h5 className="font-medium text-gray-900 mb-3">Upload Payment Screenshot</h5>
-          
-          <div className="space-y-3">
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-gray-800 uppercase tracking-wide">
+            Upload Payment Screenshot
+          </label>
+          <label className="relative group block w-full cursor-pointer">
             <input
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              className="sr-only"
             />
-            
-            {screenshot && (
-              <div className="flex items-center gap-3">
-                <img 
-                  src={URL.createObjectURL(screenshot)} 
-                  alt="Screenshot preview" 
-                  className="w-16 h-16 object-cover rounded border"
-                />
-                <span className="text-sm text-gray-600">{screenshot.name}</span>
+            <div className="w-full px-4 py-3 bg-white border-2 border-dashed border-gray-300 rounded-xl hover:border-gray-500 transition-all duration-300 text-center group-hover:bg-gray-50">
+              <div className="flex items-center justify-center gap-2 text-sm font-light text-gray-700 group-hover:text-gray-900">
+                <UploadIcon className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
+                <span>Click to upload screenshot</span>
               </div>
+            </div>
+          </label>
+          {screenshot && (
+            <p className="text-xs text-gray-600 font-light">Selected: {screenshot.name}</p>
+          )}
+
+          <button
+            onClick={uploadScreenshot}
+            disabled={uploading || !screenshot}
+            className={`relative w-full py-3.5 rounded-xl font-light shadow-md transition-all duration-300 border overflow-hidden ${
+              uploading || !screenshot
+                ? "bg-gray-200 text-gray-500 cursor-not-allowed border-gray-300"
+                : "bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white hover:shadow-lg hover:scale-[1.02] active:scale-100 cursor-pointer border-gray-600"
+            }`}
+            style={{ letterSpacing: "0.05em" }}
+          >
+            {!uploading && !(uploading || !screenshot) && (
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
             )}
-            
-            <button
-              onClick={uploadScreenshot}
-              disabled={!screenshot || uploading}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {uploading ? 'Uploading...' : 'Upload Screenshot'}
-            </button>
-          </div>
+            <span className="relative flex items-center justify-center gap-2.5">
+              {uploading ? (
+                <>
+                  <LoadingSpinner />
+                  Uploading...
+                </>
+              ) : (
+                'Upload Payment Screenshot'
+              )}
+            </span>
+          </button>
         </div>
       )}
 
       {/* Uploaded Screenshots */}
       {interacInfo.screenshots && interacInfo.screenshots.length > 0 && (
-        <div className="border-t border-blue-200 pt-4 mt-4">
-          <h5 className="font-medium text-gray-900 mb-3">Uploaded Screenshots</h5>
-          <div className="space-y-2">
+        <div className="mt-6">
+          <h5 className="text-sm font-medium text-gray-800 mb-3 uppercase tracking-wide">
+            Uploaded Screenshots
+          </h5>
+          <div className="space-y-3">
             {interacInfo.screenshots
               .filter(screenshot => screenshot.payment_type === 'final')
               .map((screenshot, index) => (
-              <div key={index} className="flex items-center justify-between bg-white p-3 rounded border">
-                <div className="flex items-center gap-3">
-                  <img 
-                    src={screenshot.screenshot_url} 
-                    alt={`Screenshot ${index + 1}`} 
-                    className="w-12 h-12 object-cover rounded"
-                  />
-                  <div>
-                    <p className="text-sm font-medium">Screenshot {index + 1}</p>
-                    <p className="text-xs text-gray-500">
-                      {new Date(screenshot.uploaded_at).toLocaleDateString()}
-                    </p>
+                <div
+                  key={index}
+                  className={`p-4 rounded-xl text-sm border font-light ${
+                    screenshot.admin_verified
+                      ? "bg-green-50 border-green-200"
+                      : "bg-yellow-50 border-yellow-200"
+                  }`}
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <span className={`font-medium ${screenshot.admin_verified ? "text-green-800" : "text-yellow-800"}`}>
+                      {screenshot.payment_type === "final" ? "Final" : "Deposit"} Payment
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      screenshot.admin_verified ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                    }`}>
+                      {screenshot.admin_verified ? "Verified ✓" : "Pending Review"}
+                    </span>
                   </div>
+                  <p className={`text-xs ${screenshot.admin_verified ? "text-green-700" : "text-yellow-700"}`}>
+                    Uploaded: {new Date(screenshot.uploaded_at).toLocaleDateString()}
+                  </p>
                 </div>
-                <div className={`px-2 py-1 rounded text-xs font-medium ${
-                  screenshot.admin_verified 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-yellow-100 text-gray-500'
-                }`}>
-                  {screenshot.admin_verified ? 'Verified' : 'Pending Review'}
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       )}
@@ -182,8 +226,8 @@ function InteracPaymentSection({ bookingId, remainingAmount, processing, setProc
 export default function RemainingPayment() {
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  const [step, setStep] = useState('lookup'); // 'lookup', 'confirm', 'processing'
-  const [lookupMethod, setLookupMethod] = useState('booking-id'); // 'booking-id' or 'email'
+  const [step, setStep] = useState('lookup');
+  const [lookupMethod, setLookupMethod] = useState('booking-id');
   const [bookingId, setBookingId] = useState('');
   const [email, setEmail] = useState('');
   const [booking, setBooking] = useState(null);
@@ -194,59 +238,22 @@ export default function RemainingPayment() {
   const [paymentMethod, setPaymentMethod] = useState('stripe');
   const [paypalLoaded, setPaypalLoaded] = useState(false);
 
-  // Check for booking_id in URL parameters or state
   useEffect(() => {
     const bookingIdFromUrl = searchParams.get('booking_id');
     const bookingFromState = location.state?.booking;
     const bookingIdFromState = location.state?.bookingId;
 
     if (bookingFromState) {
-      // Booking data passed in state
       setBooking(bookingFromState);
       setStep('confirm');
     } else if (bookingIdFromUrl || bookingIdFromState) {
-      // Booking ID passed in URL or state
       const bid = bookingIdFromUrl || bookingIdFromState;
       setBookingId(bid);
       setLookupMethod('booking-id');
       setLoading(true);
-      // Auto-lookup the booking
       handleAutoLookup(bid);
     }
   }, [searchParams, location.state]);
-
-  // Load PayPal script when payment method changes
-  React.useEffect(() => {
-    if (paymentMethod === 'paypal' && !paypalLoaded && booking) {
-      const script = document.createElement('script');
-      script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID || 'AZDxjDScFpQtjWTOUtWKbyN_bDt4OgqaF4eYXlewfBP4-8aqX3PiV8e1GWU6liB2CUXlkA59kJXE7M6R'}&currency=CAD&components=buttons`;
-      script.onload = () => {
-        setPaypalLoaded(true);
-        if (window.paypal) {
-          window.paypal.Buttons({
-            createOrder: async () => {
-              const response = await api.post('/paypal/create-order', {
-                booking: { unique_id: booking.booking_id },
-                paymentType: 'remaining_balance'
-              });
-              const order = response.data;
-              return order.id;
-            },
-            onApprove: async (data) => {
-              const response = await api.post(`/paypal/capture-order/${data.orderID}`);
-              const result = response.data;
-              if (result.success) {
-                window.location.href = `/success?payment_method=paypal&session_id=${data.orderID}&booking_id=${bookingId}`;
-              } else {
-                setError('Payment failed');
-              }
-            }
-          }).render('#paypal-button-container-remaining');
-        }
-      };
-      document.body.appendChild(script);
-    }
-  }, [paymentMethod, paypalLoaded, booking]);
 
   const handleAutoLookup = async (autoBookingId) => {
     setLoading(true);
@@ -310,14 +317,12 @@ export default function RemainingPayment() {
           booking_id: booking.booking_id
         });
         
-        // Redirect to Stripe Checkout
         window.location.href = response.data.url;
       } catch (error) {
         setError(error.response?.data?.details || 'Failed to process payment. Please try again.');
         setLoading(false);
       }
     }
-    // PayPal payment is handled by the PayPal buttons
   };
 
   const formatDate = (dateString) => {
@@ -327,58 +332,59 @@ export default function RemainingPayment() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4">
-        {/* Header */}
+      <div className="max-w-3xl mx-auto px-4">
+        {/* Logo & Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Payment</h1>
-          <p className="text-gray-600">Pay the remaining balance for your booking</p>
+          <img src={Logo} alt="Logo" className="w-[180px] sm:w-[220px] lg:w-[260px] mx-auto mb-4" />
+          <h1 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-2" style={{ letterSpacing: "0.02em" }}>
+            Complete Your Payment
+          </h1>
+          <div className="h-0.5 w-20 bg-gray-800 rounded-full mx-auto mb-3"></div>
+          <p className="text-gray-600 font-light" style={{ letterSpacing: "0.01em" }}>
+            Pay the remaining balance for your booking
+          </p>
         </div>
 
-        {/* Loading State for Auto-lookup */}
+        {/* Loading State */}
         {loading && step === 'lookup' && (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Your Booking</h2>
-            <p className="text-gray-600">Please wait while we retrieve your booking information...</p>
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8 text-center">
+            <div className="relative w-16 h-16 mx-auto mb-6">
+              <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-gray-700 animate-spin"></div>
+            </div>
+            <h2 className="text-xl font-normal text-gray-900 mb-2" style={{ letterSpacing: "0.02em" }}>
+              Loading Your Booking
+            </h2>
+            <p className="text-gray-600 font-light">Please wait...</p>
           </div>
         )}
 
         {/* Lookup Step */}
         {step === 'lookup' && !loading && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Find Your Booking</h2>
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sm:p-8">
+            <h2 className="text-xl font-normal text-gray-900 mb-6" style={{ letterSpacing: "0.02em" }}>
+              Find Your Booking
+            </h2>
             
-            {/* Lookup Method Selection */}
             <div className="space-y-4 mb-6">
               <div className="flex space-x-4">
-                <label className="flex items-center">
+                <label className="flex items-center font-light">
                   <input
                     type="radio"
                     value="booking-id"
                     checked={lookupMethod === 'booking-id'}
                     onChange={(e) => setLookupMethod(e.target.value)}
-                    className="mr-2"
+                    className="mr-2 text-gray-800 focus:ring-gray-500"
                   />
                   <span>I have my Booking ID</span>
                 </label>
-                {/* <label className="flex items-center">
-                  <input
-                    type="radio"
-                    value="email"
-                    checked={lookupMethod === 'email'}
-                    onChange={(e) => setLookupMethod(e.target.value)}
-                    className="mr-2"
-                  />
-                  <span>Lookup by Email</span>
-                </label> */}
               </div>
             </div>
 
-            {/* Input Fields */}
             <div className="space-y-4">
-              {lookupMethod === 'booking-id' ? (
+              {lookupMethod === 'booking-id' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-800 mb-2 uppercase tracking-wide">
                     Booking ID
                   </label>
                   <input
@@ -386,28 +392,16 @@ export default function RemainingPayment() {
                     value={bookingId}
                     onChange={(e) => setBookingId(e.target.value)}
                     placeholder="Enter your booking ID (e.g., BB123abc)"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-                  />
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email address"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-700/40 focus:border-gray-700 transition-all text-gray-900 placeholder-gray-500 font-light"
+                    style={{ letterSpacing: "0.01em" }}
                   />
                 </div>
               )}
             </div>
 
             {error && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-red-600 text-sm">{error}</p>
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-red-600 text-sm font-light">{error}</p>
               </div>
             )}
 
@@ -415,53 +409,14 @@ export default function RemainingPayment() {
               <button
                 onClick={handleLookupBooking}
                 disabled={loading}
-                className="w-full bg-purple-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="relative w-full py-3.5 rounded-xl font-light shadow-md transition-all duration-300 border overflow-hidden bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white hover:shadow-lg hover:scale-[1.02] active:scale-100 cursor-pointer border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ letterSpacing: "0.05em" }}
               >
-                {loading ? 'Searching...' : 'Find My Booking'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Select Booking Step */}
-        {step === 'select' && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Select Your Booking</h2>
-            
-            {bookings.length === 0 ? (
-              <p className="text-gray-600">No bookings found for this email address.</p>
-            ) : (
-              <div className="space-y-4">
-                {bookings.map((bookingOption) => (
-                  <div key={bookingOption.booking_id} className="border border-gray-200 rounded-lg p-4 hover:border-pink-300 transition-colors">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">Booking #{bookingOption.booking_id}</h3>
-                        <p className="text-sm text-gray-600">Event: {formatDate(bookingOption.event_date)}</p>
-                        <p className="text-sm text-gray-600">Service: {bookingOption.service_type}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-pink-600">${bookingOption.pricing?.remaining_amount?.toFixed(2) || '0.00'}</p>
-                        <p className="text-sm text-gray-600">Remaining</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleSelectBooking(bookingOption)}
-                      className="w-full bg-purple-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-purple-700 transition-colors cursor-pointer"
-                    >
-                      Select This Booking
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="mt-6 text-center">
-              <button
-                onClick={() => setStep('lookup')}
-                className="px-4 py-2 md:px-6 md:py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors cursor-pointer text-sm md:text-base"
-              >
-                ← Back to Search
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+                <span className="relative flex items-center justify-center gap-2.5">
+                  {loading && <LoadingSpinner />}
+                  {loading ? 'Searching...' : 'Find My Booking'}
+                </span>
               </button>
             </div>
           </div>
@@ -469,151 +424,135 @@ export default function RemainingPayment() {
 
         {/* Confirm Payment Step */}
         {step === 'confirm' && booking && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Confirm Payment</h2>
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sm:p-8">
+            <h2 className="text-xl font-normal text-gray-900 mb-6" style={{ letterSpacing: "0.02em" }}>
+              Confirm Payment
+            </h2>
             
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Booking Details</h3>
-              <div className="space-y-2 text-sm">
+            <div className="bg-gray-50 rounded-xl p-5 mb-6 border border-gray-200">
+              <h3 className="font-medium text-gray-900 mb-4 uppercase tracking-wide text-sm">
+                Booking Details
+              </h3>
+              <div className="space-y-2.5 text-sm font-light">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Booking ID:</span>
-                  <span className="font-medium">{booking.booking_id}</span>
+                  <span className="text-gray-900 font-medium">{booking.booking_id}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Service:</span>
-                  <span className="font-medium">{booking.service_type}</span>
+                  <span className="text-gray-900 font-medium">{booking.service_type}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Event Date:</span>
-                  <span className="font-medium">{formatDate(booking.event_date)}</span>
+                  <span className="text-gray-900 font-medium">{formatDate(booking.event_date)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Total Amount:</span>
-                  <span className="font-medium">${booking.pricing?.quote_total?.toFixed(2) || '0.00'}</span>
+                  <span className="text-gray-900 font-medium">${booking.pricing?.quote_total?.toFixed(2) || '0.00'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Amount Paid:</span>
-                  <span className="font-medium">${booking.pricing?.amount_paid?.toFixed(2) || '0.00'}</span>
+                  <span className="text-gray-900 font-medium">${booking.pricing?.amount_paid?.toFixed(2) || '0.00'}</span>
                 </div>
-                <div className="flex justify-between font-semibold text-lg border-t border-gray-300 pt-2 mt-2">
+                <div className="flex justify-between font-medium text-base border-t border-gray-300 pt-3 mt-3">
                   <span className="text-gray-900">Remaining Balance:</span>
-                  <span className="text-pink-600">${booking.pricing?.remaining_amount?.toFixed(2) || '0.00'}</span>
+                  <span className="text-gray-900 font-semibold">${booking.pricing?.remaining_amount?.toFixed(2) || '0.00'} CAD</span>
                 </div>
               </div>
             </div>
 
             {/* Payment Method Selection */}
             <div className="mb-6">
-              <h3 className="font-semibold text-lg text-gray-900 mb-4">Choose Payment Method</h3>
+              <h3 className="font-medium text-gray-900 mb-4 uppercase tracking-wide text-sm">
+                Choose Payment Method
+              </h3>
               
-              {/* Coupon Discount Notice */}
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg p-4 mb-6">
+              {/* Coupon Notice */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="text-purple-600">
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                    </svg>
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <StarIcon className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <p className="font-bold text-purple-800 text-lg">🎟️ Coupon Discounts Available!</p>
-                    <p className="text-purple-700 font-medium">Apply coupon codes only through Credit/Debit Card (Stripe) payments</p>
+                    <p className="font-medium text-blue-900 text-base">
+                      Coupon Discounts Available!
+                    </p>
+                    <p className="text-blue-800 font-light text-sm">
+                      Apply coupon codes only through Credit/Debit Card (Stripe) payments
+                    </p>
                   </div>
                 </div>
               </div>
               
-              <div className="flex flex-col gap-4 mb-4">
+              <div className="grid grid-cols-1 gap-4 mb-6">
                 {/* Stripe Option */}
                 <div 
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                  className={`border-2 rounded-xl p-5 cursor-pointer transition-all duration-300 ${
                     paymentMethod === 'stripe' 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 hover:border-blue-300'
+                      ? 'border-gray-600 bg-gray-50 shadow-md' 
+                      : 'border-gray-200 bg-white hover:border-gray-400'
                   }`}
                   onClick={() => setPaymentMethod('stripe')}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="stripe"
-                        checked={paymentMethod === 'stripe'}
-                        onChange={() => setPaymentMethod('stripe')}
-                        className="text-blue-600 focus:ring-blue-500"
-                      />
-                      <div className="text-blue-600">
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v2h16V6H4zm0 4v8h16v-8H4z"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Credit/Debit Card</p>
-                        <p className="text-sm text-gray-600">Powered by Stripe</p>
-                      </div>
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="stripe"
+                      checked={paymentMethod === 'stripe'}
+                      onChange={() => setPaymentMethod('stripe')}
+                      className="text-gray-800 focus:ring-gray-500 focus:ring-2"
+                    />
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+                      paymentMethod === 'stripe' ? "bg-gray-800 border border-gray-600" : "bg-gray-100 border border-gray-300"
+                    }`}>
+                      <svg className={`w-6 h-6 ${paymentMethod === 'stripe' ? "text-white" : "text-gray-600"}`} viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v2h16V6H4zm0 4v8h16v-8H4z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className={`font-medium ${paymentMethod === 'stripe' ? "text-gray-900" : "text-gray-700"}`}>
+                        Credit/Debit Card
+                      </p>
+                      <p className={`text-sm font-light ${paymentMethod === 'stripe' ? "text-gray-700" : "text-gray-500"}`}>
+                        Powered by Stripe
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                {/* PayPal Option */}
-                {/* <div 
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                    paymentMethod === 'paypal' 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 hover:border-blue-300'
-                  }`}
-                  onClick={() => setPaymentMethod('paypal')}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="paypal"
-                        checked={paymentMethod === 'paypal'}
-                        onChange={() => setPaymentMethod('paypal')}
-                        className="text-blue-600 focus:ring-blue-500"
-                      />
-                      <div className="text-blue-600">
-                        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.622 1.566 1.035.974 1.481 2.408 1.34 3.948-.013.104-.023.208-.033.31l.196 1.42c.043.31.068.625.084.94.263 5.224-1.835 8.167-6.704 8.167h-2.128c-.492 0-.889.322-.983.796l-.553 2.628c-.054.257-.226.44-.491.47zm1.425-16.53H6.77c-.813 0-1.428.183-1.865.547-.416.347-.683.895-.683 1.605 0 .406.063.74.187 1.004.122.26.344.438.645.534.302.096.668.143 1.092.143h.75c.875 0 1.591-.221 2.14-.662.545-.441.817-1.028.817-1.756 0-.72-.269-1.314-.807-1.76-.544-.448-1.257-.67-2.125-.67z"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">PayPal</p>
-                        <p className="text-sm text-gray-600">Pay with PayPal account</p>
-                      </div>
-                    </div>
-                  </div>
-                </div> */}
-
                 {/* Interac Option */}
                 <div 
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                  className={`border-2 rounded-xl p-5 cursor-pointer transition-all duration-300 ${
                     paymentMethod === 'interac' 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 hover:border-blue-300'
+                      ? 'border-gray-600 bg-gray-50 shadow-md' 
+                      : 'border-gray-200 bg-white hover:border-gray-400'
                   }`}
                   onClick={() => setPaymentMethod('interac')}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="interac"
-                        checked={paymentMethod === 'interac'}
-                        onChange={() => setPaymentMethod('interac')}
-                        className="text-blue-600 focus:ring-blue-500"
-                      />
-                      <div className="text-blue-600">
-                        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Interac E-Transfer</p>
-                        <p className="text-sm text-gray-600">Send payment via Interac</p>
-                      </div>
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="interac"
+                      checked={paymentMethod === 'interac'}
+                      onChange={() => setPaymentMethod('interac')}
+                      className="text-gray-800 focus:ring-gray-500 focus:ring-2"
+                    />
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+                      paymentMethod === 'interac' ? "bg-gray-800 border border-gray-600" : "bg-gray-100 border border-gray-300"
+                    }`}>
+                      <svg className={`w-6 h-6 ${paymentMethod === 'interac' ? "text-white" : "text-gray-600"}`} viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p className={`font-medium ${paymentMethod === 'interac' ? "text-gray-900" : "text-gray-700"}`}>
+                        Interac E-Transfer
+                      </p>
+                      <p className={`text-sm font-light ${paymentMethod === 'interac' ? "text-gray-700" : "text-gray-500"}`}>
+                        Send payment via Interac
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -621,14 +560,14 @@ export default function RemainingPayment() {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-red-600 text-sm">{error}</p>
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-red-600 text-sm font-light">{error}</p>
               </div>
             )}
 
             {success && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                <p className="text-green-600 text-sm">{success}</p>
+              <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl">
+                <p className="text-green-600 text-sm font-light">{success}</p>
               </div>
             )}
 
@@ -637,20 +576,16 @@ export default function RemainingPayment() {
                 <button
                   onClick={handleProcessPayment}
                   disabled={loading}
-                  className="w-full bg-purple-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="relative w-full py-3.5 rounded-xl font-light shadow-md transition-all duration-300 border overflow-hidden bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white hover:shadow-lg hover:scale-[1.02] active:scale-100 cursor-pointer border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ letterSpacing: "0.05em" }}
                 >
-                  {loading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
-                      Processing...
-                    </>
-                  ) : (
-                    `Pay Remaining Balance $${booking.pricing?.remaining_amount?.toFixed(2) || '0.00'}`
-                  )}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
+                  <span className="relative flex items-center justify-center gap-2.5">
+                    {loading && <LoadingSpinner />}
+                    {loading ? 'Processing...' : `Pay $${booking.pricing?.remaining_amount?.toFixed(2) || '0.00'}`}
+                  </span>
                 </button>
-              ) : /* paymentMethod === 'paypal' ? (
-                <div id="paypal-button-container-remaining" className="paypal-button-container"></div>
-              ) : */ paymentMethod === 'interac' ? (
+              ) : paymentMethod === 'interac' ? (
                 <InteracPaymentSection 
                   bookingId={booking.booking_id}
                   remainingAmount={booking.pricing?.remaining_amount}
@@ -661,10 +596,10 @@ export default function RemainingPayment() {
                 />
               ) : null}
 
-              <div className="text-center">
+              <div className="text-center mt-6">
                 <button
                   onClick={() => setStep('lookup')}
-                  className="px-4 py-2 md:px-6 md:py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors cursor-pointer text-sm md:text-base"
+                  className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all text-sm"
                 >
                   ← Back to Search
                 </button>

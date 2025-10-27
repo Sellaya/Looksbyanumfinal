@@ -1043,7 +1043,7 @@ const loadBooking = async () => {
               </div>
 
               {/* Trial Section (Bridal only) */}
-              {booking?.service_type?.toLowerCase() === "bridal" && (
+              {booking?.service_type?.toLowerCase() === "bridal" && booking?.needs_trial === "Yes" && (
                 <div className="space-y-4">
                   <h4 className="text-gray-800 font-medium text-base">Trial</h4>
                   <div className="grid md:grid-cols-2 gap-4">
@@ -1170,6 +1170,7 @@ const loadBooking = async () => {
   )
 }
 
+// Update the PackageBreakdown component:
 function PackageBreakdown({
   onBookNow,
   onScheduleCall,
@@ -1178,20 +1179,17 @@ function PackageBreakdown({
 }) {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [callLoading, setCallLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false)
-  const [trialDate, setTrialDate] = useState("")
-  const [trialTime, setTrialTime] = useState("")
-
 
   const pricingBooking = selectedDate
     ? { ...booking, event_date: selectedDate }
     : booking;
   const packages = pricingBooking ? getDynamicPackages(pricingBooking) : [];
 
-  const handleBookNow = async () => {
+  // ✅ Fixed: Pass the specific package when clicked
+  const handleBookNow = async (pkg) => {
     setBookingLoading(true);
     try {
-      await onBookNow();
+      await onBookNow(pkg); // Pass the selected package
     } finally {
       setBookingLoading(false);
     }
@@ -1226,34 +1224,30 @@ function PackageBreakdown({
       {/* Package Grid */}
       <div className="flex justify-center">
         <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5 mb-4">
-
-
           {packages.map((pkg, index) => (
             <div
               key={pkg.id}
               className={`group relative rounded-2xl p-6 sm:p-7 transition-all duration-500 overflow-hidden hover:scale-[1.02] mb-5 ${
                 index === 0
-                  ? "border border-gray-300/80 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 text-gray-900 shadow-[0_6px_25px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_35px_rgba(0,0,0,0.18)] absolute inset-0  opacity-100 "
+                  ? "border border-gray-300/80 bg-gradient-to-b from-gray-100 via-gray-200 to-gray-300 text-gray-900 shadow-[0_6px_25px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_35px_rgba(0,0,0,0.18)]"
                   : "border border-gray-200 bg-gradient-to-b from-white to-gray-50 shadow-sm hover:shadow-lg hover:from-gray-50 hover:to-white hover:border-gray-400/60"
               }`}
->
-
+            >
               {/* Gradient Accent Bar */}
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-700 via-gray-900 to-gray-700 rounded-t-2xl opacity-70 "></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gray-700 via-gray-900 to-gray-700 rounded-t-2xl opacity-70"></div>
 
               {/* Package Content */}
               <div className="relative">
                 {/* Title & Description */}
                 <div className="flex flex-col h-25">
-                  <h3
-                    className="text-xl sm:text-2xl font-medium text-gray-900 mb-1.5 tracking-tight"
-                  >
+                  <h3 className="text-xl sm:text-2xl font-medium text-gray-900 mb-1.5 tracking-tight">
                     {pkg.name}
                   </h3>
                   <p className="text-gray-600 mb-4 text-sm sm:text-base font-light leading-snug">
                     {pkg.description}
                   </p>
                 </div>
+                
                 {/* Price */}
                 <div className="text-3xl font-semibold text-gray-900 mb-5">
                   ${formatCurrency(pkg.price)}{" "}
@@ -1311,10 +1305,7 @@ function PackageBreakdown({
                           service.includes("Deposit required")
                       )
                       .map((service, i) => (
-                        <div
-                          key={i}
-                          className="flex justify-between font-light"
-                        >
+                        <div key={i} className="flex justify-between font-light">
                           <span
                             className={`${
                               service.includes("Total:")
@@ -1343,12 +1334,12 @@ function PackageBreakdown({
                 </div>
               </div>
 
-              {/* Select Package Button */}
-              <div className="mt-5 ">
+              {/* Select Package Button - ✅ FIXED: Now passes the correct pkg */}
+              <div className="mt-5">
                 <button
-                  onClick={() => handleBookNow(pkg)}
+                  onClick={() => handleBookNow(pkg)} // ✅ Pass the specific package
                   disabled={bookingLoading}
-                  className="after:relative w-full bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white py-2.5 sm:py-3 px-4 rounded-lg font-light shadow-md hover:shadow-lg  active:scale-100 transition-all duration-300 disabled:opacity-50 border border-gray-600 overflow-hidden text-sm sm:text-base"
+                  className="relative w-full bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white py-2.5 sm:py-3 px-4 rounded-lg font-light shadow-md hover:shadow-lg active:scale-100 transition-all duration-300 disabled:opacity-50 border border-gray-600 overflow-hidden text-sm sm:text-base"
                   style={{ letterSpacing: "0.05em" }}
                 >
                   {!bookingLoading && (
@@ -1359,12 +1350,8 @@ function PackageBreakdown({
                   </span>
                 </button>
               </div>
-
-
-              
             </div>
           ))}
-
         </div>
       </div>
 
@@ -1382,21 +1369,6 @@ function PackageBreakdown({
       {/* Action Buttons */}
       <div className="text-center px-3">
         <div className="space-y-3 max-w-md mx-auto">
-          {/* Book Now */}
-          {/* <button
-            onClick={handleBookNow}
-            disabled={bookingLoading}
-            className="relative w-full bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white py-3 px-5 rounded-lg font-light shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-100 transition-all duration-300 disabled:opacity-50 border border-gray-600 overflow-hidden text-sm sm:text-base"
-            style={{ letterSpacing: "0.05em" }}
-          >
-            {!bookingLoading && (
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-            )}
-            <span className="relative flex items-center justify-center gap-2">
-              {bookingLoading ? <LoadingSpinner /> : "📅"} Proceed to Booking
-            </span>
-          </button> */}
-
           {/* Schedule Call */}
           <button
             onClick={handleScheduleCall}
