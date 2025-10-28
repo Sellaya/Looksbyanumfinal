@@ -126,8 +126,8 @@ function InteracPaymentSection({ bookingId, remainingAmount, processing, setProc
         </div>
         <div className="mt-4 p-3 bg-gray-100 border border-gray-300 rounded-lg">
           <p className="text-xs text-gray-700 font-light leading-relaxed">
-            <strong className="text-gray-900">Instructions:</strong> Send the remaining balance via Interac e-transfer to the email above, 
-            include your booking ID ({bookingId}) in the message, then upload a screenshot of the payment confirmation below.
+            <strong className="text-gray-900 font-medium">Instructions:</strong> Send the remaining balance via Interac e-transfer to the email above, 
+            <span className="text-red-500 font-medium">include your booking ID ({bookingId}) in the message</span>, then upload a screenshot of the payment confirmation below.
           </p>
         </div>
       </div>
@@ -601,7 +601,7 @@ export default function RemainingPayment() {
                   onClick={() => setStep('lookup')}
                   className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all text-sm"
                 >
-                  ← Back to Search
+                  Back to Search
                 </button>
               </div>
             </div>

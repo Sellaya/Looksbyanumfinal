@@ -731,7 +731,7 @@ function AddressSelection({ onAddressSelect, onBack, initialAddress }) {
             style={{ letterSpacing: "0.05em" }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-            <span className="relative">← Back</span>
+            <span className="relative"> Back</span>
           </button>
 
           <button
@@ -805,7 +805,6 @@ const loadBooking = async () => {
     // ✅ check if it's a bridal booking
     const isBridal =
       serviceType?.toLowerCase() === "bridal" &&
-      brideService?.toLowerCase() === "bridal" &&
       needsTrial?.toLowerCase() === "yes";
 
     // set all states
@@ -1875,7 +1874,7 @@ function AddressSelection({ onAddressSelect, onBack, initialAddress }) {
             style={{ letterSpacing: "0.05em" }}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-            <span className="relative">← Back</span>
+            <span className="relative"> Back</span>
           </button>
 
           <button
