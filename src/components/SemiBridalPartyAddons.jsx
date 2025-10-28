@@ -12,7 +12,7 @@ export default function SemiBridalPartyAddons({ register, watch, errors, onNext,
   // Calculate maximum extension count (limited to people getting hair)
   const maxExtensions = totalHairCount;
 
-  return (
+  return ( 
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-sm">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Party Add-ons</h2>

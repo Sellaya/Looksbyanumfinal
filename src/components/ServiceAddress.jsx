@@ -10,7 +10,7 @@ const ServiceAddress = ({ onNext, onBack, register, getValues, errors, setValue 
     getValues("onsite_contact") &&
     getValues("onsite_phone");
 
-  return (
+  return ( 
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-2xl bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/10 p-8 md:p-10 relative overflow-hidden">
         {/* Decorative gradient overlay */}

@@ -35,7 +35,7 @@ export default function PaymentScreenshotUpload() {
           {/* Upload Icon */}
           <UploadIcon className="w-5 h-5 mr-3 flex-shrink-0 text-gray-700 transition-colors duration-300 group-hover:text-gray-900" />
 
-          {/* Text Container */}
+          {/* Text Container */} 
           <div className="text-left relative flex-1 min-w-0 pr-6">
             <div className="font-light text-sm sm:text-base text-gray-800 group-hover:text-gray-900 transition-colors">
               Upload your Interac screenshot

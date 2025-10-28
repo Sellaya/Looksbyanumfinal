@@ -142,7 +142,7 @@ export default function SemiBridalServiceSelection({ register, watch, errors, on
             )}
             <span className="relative flex items-center justify-center gap-2">Continue</span>
           </button>
-        </div>
+        </div> 
         <div className="mt-8 flex justify-center">
             <div>
             <p className="inline-block">

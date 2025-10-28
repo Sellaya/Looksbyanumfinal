@@ -208,8 +208,8 @@ export default function SemiBridalParty({ register, watch, errors, onNext, onBac
               shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30
               hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
           >
-            Continue
-          </button>
+            Continue 
+          </button> 
         </div>
         <div className="mt-8 flex justify-center">
             <div>

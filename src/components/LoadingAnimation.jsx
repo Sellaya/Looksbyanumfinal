@@ -12,7 +12,7 @@ export default function RoseGlowSparkle({
   size = "lg",
   position = "top-left",
   intensity = "normal",
-}) {
+}) { 
   // Determine size classes with refined proportions
   let sizeClasses = "w-[500px] h-[500px]";
   if (size === "sm") {

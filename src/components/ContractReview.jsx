@@ -14,7 +14,7 @@ export default function ContractReview({ register, watch, errors, onNext, onBack
     const serviceType = watchedFields.service_type;
     const packageType = watchedFields.package?.type || 'senior';
     
-    // Package pricing multipliers
+    // Package pricing multipliers 
     const packageMultipliers = {
       senior: { both: 500, hair: 250, makeup: 300 },
       junior: { both: 360, hair: 130, makeup: 220 },

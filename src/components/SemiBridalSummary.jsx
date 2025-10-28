@@ -12,7 +12,7 @@ const SemiBridalSummary = ({ onNext, onBack, getValues, onBook }) => {
           <div className="flex justify-between">
             <span className="font-semibold">Client:</span>
             <span>{getValues('first_name') + ' ' + getValues('last_name')}</span>
-          </div>
+          </div> 
           <div className="flex justify-between">
             <span className="font-semibold">Email:</span>
             <span>{getValues('email')}</span>

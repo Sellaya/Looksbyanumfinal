@@ -78,8 +78,8 @@ const DateTimeSelection = ({ onNext, onBack, register, setValue, getValues, erro
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          Continue to Address →
-        </button>
+          Continue to Address
+        </button> 
       </div>
     </div>
   );

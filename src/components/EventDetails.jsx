@@ -10,7 +10,7 @@ export default function EventDetails({ onNext, onBack, register, errors }) {
       </h2>
       
       <div className="space-y-6 mb-8">
-        <DatePicker
+        <DatePicker 
           register={register}
           name="event.date"
           label="Event Date"

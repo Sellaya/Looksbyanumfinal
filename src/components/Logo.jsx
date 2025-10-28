@@ -12,7 +12,7 @@ export default function Logo({ size = "md", className = "" }) {
     <div className={`${sizeClasses[size]} ${className} flex items-center justify-center`}>
       <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
         {/* Elegant makeup brush and mirror logo */}
-        {/* Mirror circle */}
+        {/* Mirror circle */} 
         <circle cx="50" cy="50" r="45" stroke="currentColor" strokeWidth="2" fill="none" />
 
         {/* Makeup brush handle */}

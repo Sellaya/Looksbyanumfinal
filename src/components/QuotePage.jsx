@@ -806,7 +806,7 @@ const loadBooking = async () => {
     const isBridal =
       serviceType?.toLowerCase() === "bridal" &&
       needsTrial?.toLowerCase() === "yes";
-
+ 
     // set all states
     setBooking(bk);
     setIsBridal(isBridal); // ✅ added bridal state setter

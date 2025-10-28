@@ -293,7 +293,7 @@ export default function DestinationEventDates({ onNext, onBack, register, errors
               hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
             >
               Continue
-            </button>
+            </button> 
           </div>
           <div className="mt-8 flex justify-center">
             <div>

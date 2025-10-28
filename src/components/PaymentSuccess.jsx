@@ -13,7 +13,7 @@ export default function PaymentSuccess() {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+ 
   useEffect(() => {
     const sessionId = searchParams.get("session_id");
     const bookingId = searchParams.get("booking_id");

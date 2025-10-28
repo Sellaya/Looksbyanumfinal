@@ -65,7 +65,7 @@ export default function BrideAddons({ onNext, onBack, register }) {
               bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white shadow-md hover:scale-[1.02] border border-gray-600 transition-all duration-300"
               style={{ letterSpacing: "0.05em" }}
             >
-              Continue
+              Continue 
             </button>
           </div>
         </form>

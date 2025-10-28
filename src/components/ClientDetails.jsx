@@ -153,7 +153,7 @@ export default function ClientDetails({
             ) : (
               <span className="relative flex items-center justify-center gap-2.5">Continue</span>
             )}
-          </button>
+          </button> 
         </div>
         <div className="mt-8 flex justify-center">
             <div>

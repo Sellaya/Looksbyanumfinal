@@ -8,5 +8,5 @@ export default function BookingFooter ()
         </p>
         <a href="/interac-upload" className="pl-2 text-blue-700">Upload Interac Screenshot</a>
         </div>
-    </div>
+    </div> 
 } 

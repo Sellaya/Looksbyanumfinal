@@ -205,7 +205,7 @@ export default function ServiceModeSelection({ onNext, register, setValue, getVa
             </p>
             <a href="/interac-upload" className="pl-2 text-blue-700">Upload Interac Screenshot</a>
           </div>
-        </div>
+        </div> 
 
             
       </div>

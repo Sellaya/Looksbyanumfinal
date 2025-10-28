@@ -285,7 +285,7 @@ export default function RegionSelection({ onNext, onBack, register, setValue, ge
           >
             {isNextEnabled && (
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 ease-out"></div>
-            )}
+            )} 
             <span className="relative">Continue</span>
           </button>
         </div>

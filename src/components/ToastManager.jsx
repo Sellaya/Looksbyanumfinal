@@ -20,7 +20,7 @@ const Toast = ({ message, type = 'info', onClose, duration = 4000 }) => {
       transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
       max-w-md min-w-80
     `;
-
+ 
     switch (type) {
       case 'success':
         return `${baseStyles} bg-green-50 border-green-200 text-green-800`;

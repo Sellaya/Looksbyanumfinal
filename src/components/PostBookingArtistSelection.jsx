@@ -10,7 +10,7 @@ const PostBookingArtistSelection = ({ onNext, onBack, getValues, setValue }) => 
       <p className="text-gray-600 mb-6">
         Choose your preferred makeup artist for your special day. All our artists are professionally trained and experienced.
       </p>
-
+ 
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         {/* Artist 1 */}
         <div className={`border-2 rounded-lg p-6 cursor-pointer transition-all duration-200 ${

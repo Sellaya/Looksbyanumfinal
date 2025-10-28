@@ -10,7 +10,7 @@ export default function PaymentStep({ onBack, booking, quote, onPaymentSuccess }
 
   // Get consistent API base URL
   const apiBase = import.meta.env.VITE_API_URL || 'https://looksbyanum-saqib.vercel.app/api';
-
+ 
   const handlePayment = async () => {
     if (isProcessing) return;
     

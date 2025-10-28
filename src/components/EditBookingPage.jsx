@@ -37,7 +37,7 @@ export default function EditBookingPage() {
               Go Back
             </button>
           </div>
-        )}
+        )} 
       </div>
     </div>
   )

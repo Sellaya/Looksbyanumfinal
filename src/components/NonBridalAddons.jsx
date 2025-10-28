@@ -10,7 +10,7 @@ export default function NonBridalAddons({ register, watch, errors, onNext, onBac
   // Show extensions option only if Hair or Both is selected
   const showExtensions = serviceType === 'Hair Only' || serviceType === 'Both Hair & Makeup';
 
-  return (
+  return ( 
     <div className="max-w-sm md:max-w-2xl mx-auto p-4 md:p-6 bg-white rounded-lg shadow-sm">
       <div className="text-center mb-4 md:mb-8">
         <h2 className="text-sm md:text-2xl font-bold text-gray-800 mb-2">Add-ons for Non-Bridal</h2>

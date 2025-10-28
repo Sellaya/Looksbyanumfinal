@@ -25,4 +25,4 @@ export default function AppRouter() {
       <Route path="/edit-booking" element={<EditBookingPage />} />
     </Routes>
   );
-}
+} 

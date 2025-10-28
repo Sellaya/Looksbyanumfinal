@@ -605,7 +605,7 @@ export default function RemainingPayment() {
                 </button>
               </div>
             </div>
-          </div>
+          </div> 
         )}
       </div>
     </div>

@@ -134,7 +134,7 @@ export default function DestinationDetails({ onNext, onBack, register, errors })
 //             type="submit"
 //             className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200"
 //           >
-//             Continue
+//             Continue 
 //           </button>
 //         </div>
 //       </form>

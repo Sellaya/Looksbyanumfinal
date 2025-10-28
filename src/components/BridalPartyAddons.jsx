@@ -14,7 +14,7 @@ export default function BridalPartyAddons({
     : "";
   const extensions = watchedFields.party_extensions_count
     ? parseInt(watchedFields.party_extensions_count)
-    : "";
+    : ""; 
   const airbrush = watchedFields.airbrush_count
     ? parseInt(watchedFields.airbrush_count)
     : "";

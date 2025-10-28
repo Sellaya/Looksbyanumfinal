@@ -412,7 +412,7 @@ export default function EventDetails({ onNext, onBack, register, errors, handleS
             >
               Back
             </button>
-
+ 
             <button
               type="submit"
               className="relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden

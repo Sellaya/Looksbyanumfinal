@@ -22,7 +22,7 @@ export default function ServiceDetails({ register, watch, errors, onNext, onBack
         >
           {Array.from({ length: 11 }, (_, i) => (
             <option key={i} value={i}>
-              {i}
+              {i} 
             </option>
           ))}
         </select>

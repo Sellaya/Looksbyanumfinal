@@ -87,7 +87,7 @@ export default function PackageSelection({ register, watch, errors, onNext, onBa
               key={pkg.id}
               onClick={() => pkg.available && handlePackageSelect(pkg.id)}
               className={`border-2 rounded-xl p-6 sm:p-7 transition-all duration-300 ${
-                !pkg.available
+                !pkg.available 
                   ? "border-gray-300 bg-gray-100 opacity-50 cursor-not-allowed"
                   : selectedPackage === pkg.id
                     ? "border-gray-700 bg-gray-50 cursor-pointer shadow-lg shadow-gray-400/20"

@@ -9,7 +9,7 @@ export default function BookingHeader({ step, getTotalSteps, getStepTitle, isEdi
       <div className="flex justify-center mb-4">
         <img
           src={Logo}
-          alt="Logo"
+          alt="Logo" 
           className="w-56 sm:w-44 md:w-52 lg:w-72 -mt-5 sm:-mt-2 md:-mt-3 lg:-mt-5"
         />
       </div>

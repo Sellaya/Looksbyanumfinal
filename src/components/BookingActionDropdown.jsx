@@ -28,7 +28,7 @@ export default function BookingActionDropdown() {
 
   return (
     <div className="relative w-full max-w-md mx-auto">
-      <button
+      <button 
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between px-4 py-3 open:bg-gray-200 text-gray-800 bg-white border border-gray-300 rounded-md hover:border-gray-700 hover:bg-gray-50 transition-all duration-200"
       >

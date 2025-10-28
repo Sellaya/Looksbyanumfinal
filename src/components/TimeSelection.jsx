@@ -11,7 +11,7 @@ export default function TimeSelection({ register, watch, errors, onNext, onBack,
     
     if (serviceType === 'Bridal') {
       const brideService = watchedFields.bride?.service;
-      const bothCount = parseInt(watchedFields.party?.both) || 0;
+      const bothCount = parseInt(watchedFields.party?.both) || 0; 
       const makeupCount = parseInt(watchedFields.party?.makeup) || 0;
       const hairCount = parseInt(watchedFields.party?.hair) || 0;
       

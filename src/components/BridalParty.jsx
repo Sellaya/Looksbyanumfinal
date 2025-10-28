@@ -206,7 +206,7 @@ export default function BridalParty({ register, watch, errors, onNext, onBack, s
               shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30
               hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
           >
-            Continue
+            Continue 
           </button>
         </div>
         <div className="mt-8 flex justify-center">

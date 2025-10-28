@@ -70,7 +70,7 @@ export default function SemiBridalAddons({ onNext, onBack, register }) {
               style={{ letterSpacing: "0.05em" }}
             >
               Continue
-            </button>
+            </button> 
           </div>
           <div className="mt-8 flex justify-center">
             <div>

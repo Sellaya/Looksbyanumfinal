@@ -194,7 +194,7 @@ export default function ServiceTypeSelection({ onNext, onBack, register, setValu
         </div>
         </div>
         <div className="mt-8 flex justify-center">
-            <div>
+            <div> 
             <p className="inline-block">
                 Want to start Over?
             </p>

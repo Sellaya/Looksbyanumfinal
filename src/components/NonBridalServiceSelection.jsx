@@ -85,7 +85,7 @@ export default function NonBridalServiceSelection({
               isNextEnabled
                 ? "bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white border-gray-600 hover:shadow-lg hover:scale-[1.02]"
                 : "bg-gray-300 text-gray-500 border-gray-400 cursor-not-allowed"
-            }`}
+            }`} 
           >
             Continue
           </button>

@@ -588,7 +588,7 @@ export default function BrideServiceSelection({ register, watch, errors, onNext,
               bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white
               shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30
               hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
-          >
+          > 
             Continue
           </button>
         </div>

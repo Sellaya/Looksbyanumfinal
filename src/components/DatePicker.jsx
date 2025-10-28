@@ -10,7 +10,7 @@ import React from "react";
  */
 
 const DatePicker = ({
-  register,
+  register, 
   name,
   label,
   required = false,

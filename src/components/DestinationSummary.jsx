@@ -186,8 +186,8 @@ export default function DestinationSummary({ onNext, onBack, getValues }) {
             hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
           >
             Continue
-          </button>
-        </div>
+          </button> 
+        </div> 
         <div className="mt-8 flex justify-center">
             <div>
             <p className="inline-block">

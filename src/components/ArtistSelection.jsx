@@ -6,7 +6,7 @@ const ArtistSelection = ({
   getValues,
   setValue,
   selectedArtist,
-  setSelectedArtist,
+  setSelectedArtist, 
   calculatePrice,
 }) => {
   return (

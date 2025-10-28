@@ -84,7 +84,7 @@ export default function StudioAddress({ onNext, onBack }) {
           >
             Continue
           </button>
-        </div>
+        </div> 
         <div className="mt-8 flex justify-center">
             <div>
             <p className="inline-block">
