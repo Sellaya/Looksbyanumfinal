@@ -1,20 +1,22 @@
-"use client"
-import { useState, useEffect } from "react"
+"use client";
+import { useState, useEffect } from "react";
 import BridalMakeupIcon from "../assets/Bridal-Makeup (2).png";
 import SemiBridalMakeupIcon from "../assets/Semi-Bridal-Makeup.png";
 
-
 // Icons
-const RingIcon = ({ className }) => (
-  <img src={BridalMakeupIcon}></img>
-)
+const RingIcon = ({ className }) => <img src={BridalMakeupIcon}></img>;
 
 const MakeupIcon = ({ className }) => (
   <img src={SemiBridalMakeupIcon} classname=""></img>
-)
+);
 
 const CameraIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -23,10 +25,18 @@ const CameraIcon = ({ className }) => (
     />
     <circle cx="12" cy="13" r="3" />
   </svg>
-)
+);
 
-export default function ServiceTypeSelection({ onNext, onBack, register, setValue, getValues, watch, errors }) {
-  const [selectedService, setSelectedService] = useState("")
+export default function ServiceTypeSelection({
+  onNext,
+  onBack,
+  register,
+  setValue,
+  getValues,
+  watch,
+  errors,
+}) {
+  const [selectedService, setSelectedService] = useState("");
 
   const serviceTypes = [
     {
@@ -50,41 +60,44 @@ export default function ServiceTypeSelection({ onNext, onBack, register, setValu
       description: "Makeup and styling for photoshoots or events",
       icon: CameraIcon,
     },
-  ]
+  ];
 
-  const watchedServiceType = watch("service_type")
+  const watchedServiceType = watch("service_type");
 
   useEffect(() => {
     if (watchedServiceType) {
-      const service = serviceTypes.find((s) => s.value === watchedServiceType)
-      if (service) setSelectedService(service.name)
+      const service = serviceTypes.find((s) => s.value === watchedServiceType);
+      if (service) setSelectedService(service.name);
     } else {
-      setSelectedService("")
+      setSelectedService("");
     }
-  }, [watchedServiceType])
+  }, [watchedServiceType]);
 
   const handleServiceSelect = (service) => {
-    setSelectedService(service.name)
-    setValue("service_type", service.value)
-  }
+    setSelectedService(service.name);
+    setValue("service_type", service.value);
+  };
 
   const handleNext = () => {
-    if (selectedService) onNext()
-  }
+    if (selectedService) onNext();
+  };
 
-  const isNextEnabled = !!selectedService
+  const isNextEnabled = !!selectedService;
 
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
-        {/* Header */}
-        <div className="sm:p-8 text-left">
+      {/* Header */}
+      <div className="sm:p-8 text-left">
         {/* Header Section */}
         <div className="text-left mb-4 sm:mb-5">
           <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 sm:mb-3 tracking-wide">
             Select Your Service Type
             <span className="text-gray-400 ml-2">*</span>
           </h2>
-          <p className="text-gray-700 text-sm sm:text-base font-light max-w-2xl mx-auto" style={{ letterSpacing: "0.01em" }}>
+          <p
+            className="text-gray-700 text-sm sm:text-base font-light max-w-2xl mx-auto"
+            style={{ letterSpacing: "0.01em" }}
+          >
             Choose the service that best suits your occasion.
           </p>
         </div>
@@ -92,8 +105,8 @@ export default function ServiceTypeSelection({ onNext, onBack, register, setValu
         {/* Service Type Cards */}
         <div className="space-y-2 mb-6 sm:mb-5">
           {serviceTypes.map((service) => {
-            const isSelected = selectedService === service.name
-            const IconComponent = service.icon
+            const isSelected = selectedService === service.name;
+            const IconComponent = service.icon;
             return (
               <button
                 key={service.id}
@@ -116,7 +129,11 @@ export default function ServiceTypeSelection({ onNext, onBack, register, setValu
                         strokeWidth="2"
                         viewBox="0 0 24 24"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     </div>
                   ) : (
@@ -134,7 +151,9 @@ export default function ServiceTypeSelection({ onNext, onBack, register, setValu
                 >
                   <IconComponent
                     className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors ${
-                      isSelected ? "text-gray-700" : "text-gray-600 group-hover:text-gray-700"
+                      isSelected
+                        ? "text-gray-700"
+                        : "text-gray-600 group-hover:text-gray-700"
                     }`}
                   />
                 </div>
@@ -143,7 +162,9 @@ export default function ServiceTypeSelection({ onNext, onBack, register, setValu
                 <div className="flex-1 min-w-0">
                   <h3
                     className={`text-sm sm:text-base font-light transition-colors leading-tight ${
-                      isSelected ? "text-gray-900" : "text-gray-800 group-hover:text-gray-900"
+                      isSelected
+                        ? "text-gray-900"
+                        : "text-gray-800 group-hover:text-gray-900"
                     }`}
                     style={{ letterSpacing: "0.01em" }}
                   >
@@ -151,7 +172,9 @@ export default function ServiceTypeSelection({ onNext, onBack, register, setValu
                   </h3>
                   <p
                     className={`text-xs sm:text-sm font-light transition-colors leading-relaxed ${
-                      isSelected ? "text-gray-700" : "text-gray-600 group-hover:text-gray-700"
+                      isSelected
+                        ? "text-gray-700"
+                        : "text-gray-600 group-hover:text-gray-700"
                     }`}
                     style={{ letterSpacing: "0.01em" }}
                   >
@@ -159,7 +182,7 @@ export default function ServiceTypeSelection({ onNext, onBack, register, setValu
                   </p>
                 </div>
               </button>
-            )
+            );
           })}
         </div>
 
@@ -191,24 +214,20 @@ export default function ServiceTypeSelection({ onNext, onBack, register, setValu
                 Continue
               </span>
             </button>
-        </div>
+          </div>
         </div>
         <div className="mt-8 flex justify-center">
-            <div> 
-            <p className="inline-block">
-                Want to start Over?
-            </p>
-            <a href="/" className="pl-2 text-blue-700">Go to First Step</a>
-            </div>
+          <div>
+            <p className="inline-block">Want to start Over?</p>
+            <a href="/" className="pl-2 text-blue-700">
+              Go to First Step
+            </a>
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
-
-
-
-
 
 // import { useState, useEffect } from 'react';
 // import React from 'react';

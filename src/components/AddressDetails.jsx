@@ -177,7 +177,7 @@ export default function AddressDetails({ register, watch, errors, onNext, onBack
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          Continue →
+          Continue
         </button>
       </div>
     </div>

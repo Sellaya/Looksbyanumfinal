@@ -480,6 +480,76 @@ const CheckIcon = ({ className }) => (
   </svg>
 );
 
+const loadBooking = async () => {
+  try {
+    const res = await api.get(`/quote/${bookingId}`);
+    const bk = res.data;
+    
+    // 🔍 DEBUG: Log the complete booking data
+    console.log("🔍 RAW BOOKING DATA FROM API:", JSON.stringify(bk, null, 2));
+    console.log("🔍 Booking fields:", {
+      service_type: bk.service_type,
+      bride_service: bk.bride_service,
+      needs_trial: bk.needs_trial,
+      needs_jewelry: bk.needs_jewelry,
+      needs_extensions: bk.needs_extensions,
+      needs_saree_draping: bk.needs_saree_draping,
+      needs_hijab_setting: bk.needs_hijab_setting,
+      has_party_members: bk.has_party_members,
+      party_both_count: bk.party_both_count,
+      party_makeup_count: bk.party_makeup_count,
+      party_hair_count: bk.party_hair_count,
+      region: bk.region,
+      service_mode: bk.service_mode,
+      event_date: bk.event_date,
+    });
+    
+    const paymentStatus = bk.payment_status || bk.ops?.payment_status;
+
+    if (paymentStatus === "deposit_paid" || paymentStatus === "fully_paid") {
+      setPaymentCompleted(true);
+      setPricingReady(true);
+      setLoading(false);
+      return;
+    }
+
+    const brideService = bk.bride_service || bk.ops?.brideService;
+    const needsTrial = bk.needs_trial || bk.ops?.needs_trial;
+    const serviceType = bk.service_type || bk.ops?.service_type;
+
+    const isBridal =
+      serviceType?.toLowerCase() === "bridal" &&
+      needsTrial?.toLowerCase() === "yes";
+ 
+    setBooking(bk);
+    setIsBridal(isBridal);
+
+    if (bk.event_date)
+      setSelectedDate(new Date(bk.event_date).toISOString().split("T")[0]);
+    if (bk.ready_time) setSelectedTime(bk.ready_time);
+    if (bk.trial_date)
+      setTrialDate(new Date(bk.trial_date).toISOString().split("T")[0]);
+    if (bk.trial_time) setTrialTime(bk.trial_time);
+    if (bk.bride_service) {
+        const s = (bk.bride_service || "").toLowerCase();
+        setSelectedService(s.includes("bridal") ? "bridal" : "bridal");
+      }
+
+    // 🔍 DEBUG: Test pricing calculation
+    console.log("🔍 Testing pricing calculation...");
+    const testPricingLead = calculateBookingPrice(bk, "Lead");
+    const testPricingTeam = calculateBookingPrice(bk, "Team");
+    console.log("🔍 Lead Artist Pricing:", testPricingLead);
+    console.log("🔍 Team Artist Pricing:", testPricingTeam);
+
+    setPricingReady(true);
+  } catch (err) {
+    console.error("❌ Failed to load booking:", err);
+    console.error("❌ Error details:", err.response?.data || err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
 export default function QuotePage() {
   const { bookingId } = useParams()
@@ -1227,12 +1297,21 @@ function PackageBreakdown({
     booking?.inspiration_link ? [booking.inspiration_link] : [""]
   );
 
-
-  const base = selectedDate
-    ? { ...booking, event_date: selectedDate }
-    : booking;
+  console.log("🔍 PackageBreakdown - booking data:", booking);
+  console.log("🔍 PackageBreakdown - selectedDate:", selectedDate);
+  
+  const base = selectedDate ? { ...booking, event_date: selectedDate } : booking;
+  
+  console.log("🔍 PackageBreakdown - base object for pricing:", base);
+  console.log("🔍 PackageBreakdown - base.bride_service:", base.bride_service);
+  console.log("🔍 PackageBreakdown - base.service_type:", base.service_type);
+  
   const pricingAnum = calculateBookingPrice(base, "Lead");
   const pricingTeam = calculateBookingPrice(base, "Team");
+  
+  console.log("🔍 PackageBreakdown - pricingAnum result:", pricingAnum);
+  console.log("🔍 PackageBreakdown - pricingTeam result:", pricingTeam);
+
   const artists = [
     {
       id: "Lead",

@@ -1,6 +1,6 @@
 import React from "react"
 
-export default function BrideAddons({ onNext, onBack, register }) {
+export default function BrideAddons({ onNext, onBack, register, watch, setValue, selectedDates }) {
   const addonsList = [
     "Hair Extensions Installation",
     "Jewelry & Dupatta/Veil Setting",
@@ -8,74 +8,136 @@ export default function BrideAddons({ onNext, onBack, register }) {
     "Hijab Setting",
   ]
 
+  const [addonsByDate, setAddonsByDate] = React.useState({})
+  const [activeDate, setActiveDate] = React.useState(null)
+
+  // 🧠 Load saved selections (if user navigates back)
+  React.useEffect(() => {
+    const saved = watch("addons_by_date")
+    if (saved) {
+      setAddonsByDate(saved)
+    }
+    if (selectedDates?.length > 0 && !activeDate) {
+      setActiveDate(selectedDates[0])
+    }
+  }, [selectedDates])
+
+  // 🧩 Handle add-on toggle per date
+  const handleToggleAddon = (date, addon) => {
+    const current = addonsByDate[date] || []
+    const updatedAddons = current.includes(addon)
+      ? current.filter((a) => a !== addon)
+      : [...current, addon]
+
+    const updated = { ...addonsByDate, [date]: updatedAddons }
+    setAddonsByDate(updated)
+    setValue("addons_by_date", updated)
+  }
+
+  // ✅ Move to next date after making a selection (optional, can disable)
+  const handleSelectAndAdvance = (date, addon) => {
+    handleToggleAddon(date, addon)
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     onNext()
   }
 
-  // Reusable card for addon selection
-  const AddonCard = ({ label, value }) => (
-    <label className="group relative w-full p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-gray-700 transition-all duration-300 text-left overflow-hidden cursor-pointer flex items-center gap-3 sm:gap-4">
-      <input
-        type="checkbox"
-        {...register("addons")}
-        value={value}
-        className="w-4 h-4 accent-gray-700"
-      />
-      <span className="text-gray-800 text-sm sm:text-base font-light">{label}</span>
-    </label>
-  )
+  const formatDisplayDate = (dateString) => {
+    if (!dateString) return ""
+    const date = new Date(dateString + "T00:00:00")
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
-        {/* Header */}
-        <div className="sm:p-8 text-left">
-        {/* Header Section */}
+      <div className="sm:p-8 text-left">
         <div className="text-left mb-4 sm:mb-5">
           <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 sm:mb-3 tracking-wide">
             Bridal Add-Ons
           </h2>
           <p className="text-gray-700 text-sm sm:text-base font-light max-w-2xl mx-auto" style={{ letterSpacing: "0.01em" }}>
-            Choose any additional bridal services you would like.
+            Choose any additional bridal services for each date.
           </p>
         </div>
 
-        {/* Form Section */}
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            {addonsList.map((addon) => (
-              <AddonCard key={addon} label={addon} value={addon} />
-            ))}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-between items-center pt-6 sm:pt-8 border-t border-gray-300 mt-4 md:mt-6">
+        {/* ✅ Date Chips */}
+        <div className="flex gap-2 mb-4 overflow-x-auto whitespace-nowrap pb-1 no-scrollbar">
+          {selectedDates?.map((date) => (
             <button
+              key={date}
               type="button"
-              onClick={onBack}
-              className="px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg bg-gray-200 text-gray-900 
-              hover:bg-gray-300 border border-gray-400 transition-all duration-300"
+              onClick={() => setActiveDate(date)}
+              className={`px-4 py-2 rounded-lg text-sm font-light transition-all duration-200 ${
+                activeDate === date
+                  ? "bg-gray-800 text-white border-2 border-gray-600"
+                  : "bg-gray-200 text-gray-800 border-2 border-gray-300 hover:bg-gray-300"
+              }`}
             >
-              Back
+              {formatDisplayDate(date)}
+              {addonsByDate[date]?.length > 0 && (
+                <span className="ml-2 opacity-75">✓</span>
+              )}
             </button>
+          ))}
+        </div>
 
-            <button
-              type="submit"
-              className="px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg 
-              bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white shadow-md hover:scale-[1.02] border border-gray-600 transition-all duration-300"
-              style={{ letterSpacing: "0.05em" }}
-            >
-              Continue 
-            </button>
-          </div>
-        </form>
-        <div className="mt-8 flex justify-center">
-            <div>
-            <p className="inline-block">
-                Want to start Over?
-            </p>
-            <a href="/" className="pl-2 text-blue-700">Go to First Step</a>
+        {/* ✅ Addon options per active date */}
+        {activeDate && (
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {addonsList.map((addon) => (
+                <label
+                  key={addon}
+                  className="group relative w-full p-3 sm:p-4 rounded-lg border border-gray-200 hover:border-gray-700 transition-all duration-300 text-left overflow-hidden cursor-pointer flex items-center gap-3 sm:gap-4"
+                >
+                  <input
+                    type="checkbox"
+                    checked={addonsByDate[activeDate]?.includes(addon) || false}
+                    onChange={() => handleSelectAndAdvance(activeDate, addon)}
+                    className="w-4 h-4 accent-gray-700"
+                  />
+                  <span className="text-gray-800 text-sm sm:text-base font-light">
+                    {addon}
+                  </span>
+                </label>
+              ))}
             </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-between items-center pt-6 sm:pt-8 border-t border-gray-300 mt-4 md:mt-6">
+              <button
+                type="button"
+                onClick={onBack}
+                className="px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg bg-gray-200 text-gray-900 
+                hover:bg-gray-300 border border-gray-400 transition-all duration-300"
+              >
+                Back
+              </button>
+
+              <button
+                type="submit"
+                className="px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg 
+                bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white shadow-md hover:scale-[1.02] border border-gray-600 transition-all duration-300"
+              >
+                Continue
+              </button>
+            </div>
+          </form>
+        )}
+
+        <div className="mt-8 flex justify-center">
+          <div>
+            <p className="inline-block">Want to start Over?</p>
+            <a href="/" className="pl-2 text-blue-700">
+              Go to First Step
+            </a>
+          </div>
         </div>
       </div>
     </div>

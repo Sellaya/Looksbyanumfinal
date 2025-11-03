@@ -18,6 +18,13 @@ body {
   body {
     @apply bg-white text-gray-900;
   }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
   /* Update form elements for light theme */
   input,
   select,

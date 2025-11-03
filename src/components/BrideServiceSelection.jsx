@@ -354,39 +354,65 @@ const CheckCircleIcon = ({ className = "w-5 h-5" }) => (
   </svg>
 )
 
-export default function BrideServiceSelection({ register, watch, errors, onNext, onBack, setValue }) {
-  const watchedFields = watch()
-  const selectedService = watchedFields.bride_service
-  const needsTrial = watchedFields.needs_trial
-  const trialService = watchedFields.trial_service
-  const trialDate = watchedFields.trial_date
-  const trialTime = watchedFields.trial_time
+export default function BrideServiceSelection({
+  register,
+  watch,
+  errors,
+  onNext,
+  onBack,
+  setValue,
+  selectedDates = [],
+}) {
+  const watchedFields = watch();
+  const needsTrial = watchedFields.needs_trial;
+  const trialService = watchedFields.trial_service;
+  const trialDate = watchedFields.trial_date;
+  const trialTime = watchedFields.trial_time;
 
-  const handleServiceSelect = (service) => setValue("bride_service", service)
+  // ✅ restore from form value or start fresh
+  const [servicesByDate, setServicesByDate] = React.useState(
+    watchedFields.services_by_date || {}
+  );
+
+  // currently selected date chip
+  const [activeDate, setActiveDate] = React.useState(
+    selectedDates?.[0] || null
+  );
+
+  const handleServiceSelectForDate = (date, service) => {
+    const updated = { ...servicesByDate, [date]: service };
+    setServicesByDate(updated);
+    setValue("services_by_date", updated);
+
+    // ✅ move to next date automatically
+    const currentIndex = selectedDates.indexOf(date);
+    if (currentIndex < selectedDates.length - 1) {
+      setActiveDate(selectedDates[currentIndex + 1]);
+    }
+  };
+
   const handleTrialSelect = (trial) => {
-    setValue("needs_trial", trial)
+    setValue("needs_trial", trial);
     if (trial === "No") {
-      setValue("trial_service", "")
-      setValue("trial_date", "")
-      setValue("trial_time", "")
+      setValue("trial_service", "");
+      setValue("trial_date", "");
+      setValue("trial_time", "");
     }
-  }
-  const handleTrialServiceSelect = (service) => setValue("trial_service", service)
+  };
 
-  const handleNext = () => {
-    if (
-      selectedService &&
-      needsTrial !== undefined &&
-      (needsTrial === "No" || (trialService && trialDate && trialTime))
-    ) {
-      onNext()
-    }
-  }
+  const handleTrialServiceSelect = (service) =>
+    setValue("trial_service", service);
 
-  const isNextEnabled =
-    selectedService &&
-    needsTrial !== undefined &&
-    (needsTrial === "No" || (trialService && trialDate && trialTime))
+  // compute earliest event date for trial restriction
+  const earliestEventDate = selectedDates?.length
+    ? selectedDates.map((d) => new Date(d)).sort((a, b) => a - b)[0]
+    : null;
+
+  const maxTrialDate =
+    earliestEventDate &&
+    new Date(earliestEventDate.getTime() - 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
 
   const SelectCard = ({ value, label, subtext, onClick, isSelected }) => (
     <button
@@ -428,118 +454,141 @@ export default function BrideServiceSelection({ register, watch, errors, onNext,
         )}
       </div>
     </button>
-  )
+  );
 
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
-        {/* Header */}
-        <div className="sm:p-8 text-left">
-        {/* Header Section */}
-        <div className="text-left mb-4 sm:mb-5">
-          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 sm:mb-3 tracking-wide">
-            Bridal Service Details <span className="text-gray-400">*</span>
-          </h2>
-          <p className="text-gray-700 text-sm sm:text-base font-light max-w-2xl mx-auto">
-            Select the primary service and specify trial requirements.
-          </p>
-        </div>
+      <div className="sm:p-8 text-left">
+        <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 sm:mb-3 tracking-wide">
+          Bridal Service Details <span className="text-gray-400">*</span>
+        </h2>
+        <p className="text-gray-700 text-sm sm:text-base font-light max-w-2xl mx-auto mb-4">
+          Select services for each event date and specify trial details.
+        </p>
 
-        {/* Bride Service Selection */}
-        <div className="space-y-2 sm:space-y-3 mb-6">
-          {["Both Hair & Makeup", "Hair Only", "Makeup Only"].map((service) => (
-            <SelectCard
-              key={service}
-              value={service}
-              label={service}
-              subtext={service === "Both Hair & Makeup" ? "Complete bridal styling package" : service === "Hair Only" ? "Professional hair styling only" : "Professional makeup application only"}
-              onClick={() => handleServiceSelect(service)}
-              isSelected={selectedService === service}
-            />
-          ))}
-        </div>
+        {/* ✅ Date Chips */}
+        {selectedDates?.length > 0 && (
+          <div className="flex gap-2 mb-4 overflow-x-auto whitespace-nowrap pb-1 no-scrollbar">
+            {selectedDates.map((date) => {
+              const formatted = new Date(date + "T00:00:00").toLocaleDateString(
+                "en-US",
+                { month: "short", day: "numeric", year: "numeric" }
+              );
 
-        {/* Trial Question */}
-        {selectedService && (
-          <div className="space-y-2 sm:space-y-3 mb-6">
-            <h3 className="text-lg sm:text-xl font-normal text-gray-900 mb-2">Do you need a Bridal Trial?</h3>
-            <div className="flex gap-3 sm:gap-4">
-              {["Yes", "No"].map((trial) => (
-                <SelectCard
-                  key={trial}
-                  value={trial}
-                  label={trial}
-                  // subtext={trial === "Yes" ? "I would like to add a trial" : "No trial needed"}
-                  onClick={() => handleTrialSelect(trial)}
-                  isSelected={needsTrial === trial}
-                />
-              ))}
-            </div>
+              return (
+                <button
+                  key={date}
+                  type="button"
+                  onClick={() => setActiveDate(date)}
+                  className={`px-4 py-2 rounded-lg text-sm font-light transition-all duration-200 ${
+                    activeDate === date
+                      ? "bg-gray-800 text-white border-2 border-gray-600"
+                      : "bg-gray-200 text-gray-800 border-2 border-gray-300 hover:bg-gray-300"
+                  }`}
+                >
+                  {formatted}
+                  {servicesByDate[date] && (
+                    <span className="ml-2 opacity-75">✓</span> // ✅ tick mark
+                  )}
+                </button>
+              );
+            })}
           </div>
         )}
 
-        {/* Trial Service Selection */}
-        {needsTrial === "Yes" && (
-          <div className="space-y-2 sm:space-y-3 mb-6">
-            <h3 className="text-lg sm:text-xl font-normal text-gray-900 mb-2">
-              What trials does the bride need?
-            </h3>
-            <div className="space-y-2 sm:space-y-3">
+        {/* ✅ Active Date Service Selection */}
+        {activeDate && (
+          <div>
+            <div className="space-y-2 sm:space-y-3 mb-8">
               {["Both Hair & Makeup", "Hair Only", "Makeup Only"].map((service) => (
                 <SelectCard
                   key={service}
                   value={service}
                   label={service}
-                  subtext=""
-                  onClick={() => handleTrialServiceSelect(service)}
-                  isSelected={trialService === service}
+                  subtext={
+                    service === "Both Hair & Makeup"
+                      ? "Complete bridal styling package"
+                      : service === "Hair Only"
+                      ? "Professional hair styling only"
+                      : "Professional makeup application only"
+                  }
+                  onClick={() => handleServiceSelectForDate(activeDate, service)}
+                  isSelected={servicesByDate[activeDate] === service}
                 />
               ))}
             </div>
           </div>
         )}
 
-        {/* Trial Date & Time */}
-        {needsTrial === "Yes" && trialService && (
-          <div className="space-y-4 sm:space-y-6 mb-6">
+        {/* ✅ Trial Section */}
+        {selectedDates?.length > 0 && (
+          <div className="border-t border-gray-200 pt-6">
             <h3 className="text-lg sm:text-xl font-normal text-gray-900 mb-2">
-              When would you like to schedule your trial?
+              Do you need a Bridal Trial?
             </h3>
-            <div className="grid md:grid-cols-2 gap-3 sm:gap-4">
-              <div>
-                <DatePicker
-                  label="Preferred Trial Date"
-                  name="trial_date"
-                  register={register}
-                  error={errors.trial_date?.message}
-                  value={watchedFields.trial_date}
-                  required
-                  minDaysAdvance={2}
-                  maxDate={
-                    watchedFields.event_date
-                      ? (() => {
-                          const d = new Date(watchedFields.event_date)
-                          d.setDate(d.getDate() - 1)
-                          return d.toISOString().split("T")[0]
-                        })()
-                      : undefined
-                  }
+            <div className="flex gap-3 sm:gap-4 mb-6">
+              {["Yes", "No"].map((trial) => (
+                <SelectCard
+                  key={trial}
+                  value={trial}
+                  label={trial}
+                  onClick={() => handleTrialSelect(trial)}
+                  isSelected={needsTrial === trial}
                 />
-              </div>
-              <div>
-                <TimePicker
-                  label="Preferred Trial Time"
-                  name="trial_time"
-                  register={register}
-                  error={errors.trial_time?.message}
-                  value={watchedFields.trial_time}
-                  required
-                />
-              </div>
+              ))}
             </div>
+
+            {needsTrial === "Yes" && (
+              <>
+                <div className="space-y-2 sm:space-y-3 mb-6">
+                  <h3 className="text-lg sm:text-xl font-normal text-gray-900 mb-2">
+                    What trials does the bride need?
+                  </h3>
+                  {["Both Hair & Makeup", "Hair Only", "Makeup Only"].map(
+                    (service) => (
+                      <SelectCard
+                        key={service}
+                        value={service}
+                        label={service}
+                        onClick={() => handleTrialServiceSelect(service)}
+                        isSelected={trialService === service}
+                      />
+                    )
+                  )}
+                </div>
+
+                {trialService && (
+                  <div className="grid md:grid-cols-2 gap-3 sm:gap-4 mb-6">
+                    <div>
+                      <DatePicker
+                        label="Preferred Trial Date"
+                        name="trial_date"
+                        register={register}
+                        error={errors.trial_date?.message}
+                        value={trialDate}
+                        required
+                        minDaysAdvance={2}
+                        maxDate={maxTrialDate}
+                      />
+                    </div>
+                    <div>
+                      <TimePicker
+                        label="Preferred Trial Time"
+                        name="trial_time"
+                        register={register}
+                        error={errors.trial_time?.message}
+                        value={trialTime}
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
 
-        {/* Action Buttons */}
+        {/* Buttons */}
         <div className="flex justify-between gap-5 pt-6 sm:pt-8 border-t border-gray-200">
           <button
             onClick={onBack}
@@ -550,59 +599,24 @@ export default function BrideServiceSelection({ register, watch, errors, onNext,
 
           <button
             onClick={() => {
-              const isValid =
-                selectedService &&
-                needsTrial !== undefined &&
-                (needsTrial === "No" || (trialService && trialDate && trialTime))
-
-              if (!selectedService) {
-                alert("Please select a bridal service before continuing.")
-                return
-              }
-
-              if (needsTrial === undefined) {
-                alert("Please specify if you need a bridal trial.")
-                return
-              }
-
-              if (needsTrial === "Yes" && !trialService) {
-                alert("Please select the type of trial service required.")
-                return
-              }
-
-              if (needsTrial === "Yes" && !trialDate) {
-                alert("Please select a preferred trial date.")
-                return
-              }
-
-              if (needsTrial === "Yes" && !trialTime) {
-                alert("Please select a preferred trial time.")
-                return
-              }
-
-              if (isValid) {
-                onNext()
-              }
+              const allFilled = selectedDates.every((date) => servicesByDate[date]);
+              if (!allFilled)
+                return alert("Please select a bridal service for all event dates.");
+              if (
+                needsTrial === "Yes" &&
+                (!trialService || !trialDate || !trialTime)
+              )
+                return alert("Please complete all trial details.");
+              onNext();
             }}
-            className="relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden
-              bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white
-              shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30
-              hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
-          > 
+            className="relative px-8 sm:px-10 py-2.5 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 text-white shadow-md shadow-gray-700/20 hover:shadow-lg hover:shadow-gray-700/30 hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-600"
+          >
             Continue
           </button>
         </div>
-        <div className="mt-8 flex justify-center">
-            <div>
-            <p className="inline-block">
-                Want to start Over?
-            </p>
-            <a href="/" className="pl-2 text-blue-700">Go to First Step</a>
-            </div>
-        </div>
       </div>
     </div>
-  )
+  );
 }
 
 

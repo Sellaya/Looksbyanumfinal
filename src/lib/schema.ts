@@ -67,6 +67,11 @@ export const BookingSchema = z
     needs_extensions: z.enum(["Yes", "No"]).optional().default("No"),
     needs_saree_draping: z.enum(["Yes", "No"]).optional().default("No"),
 
+    selectedDates: z.array(z.any()).optional(),
+    services_by_date: z.record(z.string()).optional(),
+    addons_by_date: z.record(z.array(z.string())).optional(),
+    bridalPartySelections: z.record(z.any()).optional(),
+
     // Party member counts
     has_party_members: z.enum(["Yes", "No"]).optional().default("No"),
     party_both_count: z

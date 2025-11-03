@@ -1,32 +1,29 @@
 import React from "react"
 
-// Custom Date Picker (Light + Charcoalish Theme)
-const CustomDatePicker = ({
+// Custom Multi-Date Picker
+const CustomMultiDatePicker = ({
   label,
   name,
   register,
   error,
   required,
   maxDate,
-  minDate: propMinDate, // 👈 allow passing minDate from parent
-  value, // 👈 add this
+  propMinDate,
+  value,
+  onChange: parentOnChange,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false)
-  const [selectedDate, setSelectedDate] = React.useState(value || "")
-  
+  const [selectedDates, setSelectedDates] = React.useState(value || [])
   const [currentMonth, setCurrentMonth] = React.useState(new Date())
   const dropdownRef = React.useRef(null)
 
-  // ✅ Use today's date if no minDate prop is provided
   const getMinimumDate = () => {
     const now = new Date()
     const offset = now.getTimezoneOffset()
-    // Convert to local midnight by removing offset
     const localMidnight = new Date(now.getTime() - offset * 60 * 1000)
     localMidnight.setHours(0, 0, 0, 0)
     return propMinDate ? new Date(propMinDate) : localMidnight
   }
-
 
   const minDate = getMinimumDate()
   minDate.setHours(0, 0, 0, 0)
@@ -35,8 +32,6 @@ const CustomDatePicker = ({
     if (!dateString) return ""
     const date = new Date(dateString + "T00:00:00")
     return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      year: "numeric",
       month: "short",
       day: "numeric",
     })
@@ -51,22 +46,38 @@ const CustomDatePicker = ({
   }
 
   const isDateDisabled = (date) => {
-    // ✅ allow current day and onwards
     if (date < minDate) return true
     if (maxDate && date > new Date(maxDate)) return true
     return false
   }
 
-  const handleDateSelect = (day, onChange) => {
+  const handleDateSelect = (day) => {
     const year = currentMonth.getFullYear()
     const month = currentMonth.getMonth()
     const selectedDateObj = new Date(year, month, day)
     if (isDateDisabled(selectedDateObj)) return
 
     const formatted = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-    setSelectedDate(formatted)
-    onChange({ target: { name, value: formatted } })
-    setIsOpen(false)
+    
+    let newDates
+    if (selectedDates.includes(formatted)) {
+      newDates = selectedDates.filter(d => d !== formatted)
+    } else {
+      newDates = [...selectedDates, formatted].sort()
+    }
+    
+    setSelectedDates(newDates)
+    if (parentOnChange) {
+      parentOnChange(newDates)
+    }
+  }
+
+  const handleRemoveDate = (dateToRemove) => {
+    const newDates = selectedDates.filter(d => d !== dateToRemove)
+    setSelectedDates(newDates)
+    if (parentOnChange) {
+      parentOnChange(newDates)
+    }
   }
 
   const handlePrevMonth = () =>
@@ -82,9 +93,14 @@ const CustomDatePicker = ({
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  React.useEffect(() => {
+    if (value && Array.isArray(value)) {
+      setSelectedDates(value)
+    }
+  }, [value])
+
   const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentMonth)
   const monthName = currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })
-  const { onChange, ...registerProps } = register(name)
 
   const calendarDays = []
   for (let i = 0; i < startingDayOfWeek; i++)
@@ -93,14 +109,14 @@ const CustomDatePicker = ({
   for (let day = 1; day <= daysInMonth; day++) {
     const dateObj = new Date(year, month, day)
     const isDisabled = isDateDisabled(dateObj)
-    const isSelected =
-      selectedDate === `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    const formatted = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    const isSelected = selectedDates.includes(formatted)
 
     calendarDays.push(
       <button
         key={day}
         type="button"
-        onClick={() => !isDisabled && handleDateSelect(day, onChange)}
+        onClick={() => !isDisabled && handleDateSelect(day)}
         disabled={isDisabled}
         className={`p-2.5 rounded-md text-sm font-light transition-all duration-200
           ${
@@ -116,29 +132,44 @@ const CustomDatePicker = ({
     )
   }
 
-  React.useEffect(() => {
-    if (value) setSelectedDate(value)
-  }, [value])
-
   return (
     <div>
-      <label
-        htmlFor={name}
-        className="block text-sm sm:text-base font-light text-gray-800 mb-2"
-      >
+      <label className="block text-sm sm:text-base font-light text-gray-800 mb-2">
         {label} {required && <span className="text-gray-700">*</span>}
       </label>
 
+      {/* Selected dates display */}
+      {selectedDates.length > 0 && (
+        <div className="flex gap-2 mb-4 overflow-x-auto whitespace-nowrap pb-1 no-scrollbar">
+          {selectedDates.map((date) => (
+            <div
+              key={date}
+              className="flex items-center gap-2 px-3 py-1.5 bg-gray-800 text-white rounded-lg text-sm"
+            >
+              <span>{formatDisplayDate(date)}</span>
+              <button
+                type="button"
+                onClick={() => handleRemoveDate(date)}
+                className="hover:bg-gray-700 rounded-full p-0.5 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="relative" ref={dropdownRef}>
-        <input type="hidden" {...registerProps} onChange={onChange} />
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className="group relative w-full p-3.5 sm:p-4 rounded-lg border border-gray-300 bg-white 
           hover:border-gray-500 hover:bg-gray-50 text-left flex items-center justify-between transition-all duration-300"
         >
-          <span className={selectedDate ? "text-gray-800" : "text-gray-400"}>
-            {selectedDate ? formatDisplayDate(selectedDate) : "Select date..."}
+          <span className={selectedDates.length > 0 ? "text-gray-800" : "text-gray-400"}>
+            {selectedDates.length > 0 ? `${selectedDates.length} date(s) selected` : "Select dates..."}
           </span>
           <svg
             className="w-5 h-5 text-gray-500"
@@ -213,16 +244,12 @@ const CustomDatePicker = ({
   )
 }
 
-
-
-
-// Custom Time Picker (Light + Charcoalish Theme)
-const CustomTimePicker = ({ label, name, register, error, required, value }) => {
+// Custom Time Picker
+const CustomTimePicker = ({ label, name, value, onChange, error, required }) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const [selectedTime, setSelectedTime] = React.useState("")
   const dropdownRef = React.useRef(null)
 
-  // Generate times like before
   const generateTimeOptions = () => {
     const times = []
     const periods = ["AM", "PM"]
@@ -253,9 +280,7 @@ const CustomTimePicker = ({ label, name, register, error, required, value }) => 
   }
 
   const timeOptions = generateTimeOptions()
-  const { onChange, ...registerProps } = register(name)
 
-  // Convert "13:30" → "1:30 PM"
   const formatTimeLabel = (timeValue) => {
     if (!timeValue) return ""
     const [hourStr, minute] = timeValue.split(":")
@@ -265,16 +290,17 @@ const CustomTimePicker = ({ label, name, register, error, required, value }) => 
     return `${hour}:${minute} ${period}`
   }
 
-  // Sync with external value (so it shows correctly when reloading)
   React.useEffect(() => {
     if (value) {
       setSelectedTime(formatTimeLabel(value))
     }
   }, [value])
 
-  const handleTimeSelect = (time, onChange) => {
+  const handleTimeSelect = (time) => {
     setSelectedTime(time.label)
-    onChange({ target: { name, value: time.value } })
+    if (onChange) {
+      onChange(time.value)
+    }
     setIsOpen(false)
   }
 
@@ -288,15 +314,7 @@ const CustomTimePicker = ({ label, name, register, error, required, value }) => 
 
   return (
     <div>
-      <label
-        htmlFor={name}
-        className="block text-sm sm:text-base font-light text-gray-800 mb-2"
-      >
-        {label} {required && <span className="text-gray-900">*</span>}
-      </label>
-
       <div className="relative" ref={dropdownRef}>
-        <input type="hidden" {...registerProps} onChange={onChange} />
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
@@ -325,7 +343,7 @@ const CustomTimePicker = ({ label, name, register, error, required, value }) => 
                 <button
                   key={i}
                   type="button"
-                  onClick={() => handleTimeSelect(t, onChange)}
+                  onClick={() => handleTimeSelect(t)}
                   className="w-full px-4 py-2 text-left text-gray-800 bg-gray-50 hover:bg-gray-400 hover:text-gray-50 border-b border-gray-100 text-sm font-light transition-all"
                 >
                   {t.label}
@@ -345,22 +363,91 @@ const CustomTimePicker = ({ label, name, register, error, required, value }) => 
   )
 }
 
+export default function EventDetails({ onNext, onBack, register, errors, handleSubmit, watch, selectedDates, setSelectedDates }) {
+  const [dateTimes, setDateTimes] = React.useState({})
+  const [activeDate, setActiveDate] = React.useState(null)
 
-export default function EventDetails({ onNext, onBack, register, errors, handleSubmit, watch }) {
-  const watchedValues = watch()
+  React.useEffect(() => {
+    // Load saved state when component mounts
+    const savedDates = JSON.parse(localStorage.getItem("event_selected_dates") || "[]")
+    const savedDateTimes = JSON.parse(localStorage.getItem("event_date_times") || "{}")
+    const savedActiveDate = localStorage.getItem("event_active_date")
 
-  const onSubmit = (data) => {
-    const { event_date, ready_time } = watchedValues
-    if (!event_date) return window.showToast?.("Please select an event date.", "error")
-    if (!ready_time) return window.showToast?.("Please select a ready time.", "error")
+    if (savedDates.length > 0) setSelectedDates(savedDates)
+    if (Object.keys(savedDateTimes).length > 0) setDateTimes(savedDateTimes)
+    if (savedActiveDate) setActiveDate(savedActiveDate)
+  }, [])
+
+  React.useEffect(() => {
+    // Save state whenever it changes
+    localStorage.setItem("event_selected_dates", JSON.stringify(selectedDates))
+    localStorage.setItem("event_date_times", JSON.stringify(dateTimes))
+    localStorage.setItem("event_active_date", activeDate || "")
+  }, [selectedDates, dateTimes, activeDate])
+
+
+  React.useEffect(() => {
+    if (selectedDates.length > 0 && !activeDate) {
+      setActiveDate(selectedDates[0])
+    } else if (selectedDates.length === 0) {
+      setActiveDate(null)
+    } else if (activeDate && !selectedDates.includes(activeDate)) {
+      setActiveDate(selectedDates[0] || null)
+    }
+  }, [selectedDates, activeDate])
+
+  const handleDatesChange = (dates) => {
+    setSelectedDates(dates)
+    
+    const newDateTimes = { ...dateTimes }
+    Object.keys(newDateTimes).forEach(date => {
+      if (!dates.includes(date)) {
+        delete newDateTimes[date]
+      }
+    })
+    setDateTimes(newDateTimes)
+  }
+
+  const handleTimeChange = (date, time) => {
+    setDateTimes(prev => ({
+      ...prev,
+      [date]: time
+    }))
+    
+    const currentIndex = selectedDates.indexOf(date)
+    if (currentIndex < selectedDates.length - 1) {
+      setActiveDate(selectedDates[currentIndex + 1])
+    }
+  }
+
+  const formatDisplayDate = (dateString) => {
+    if (!dateString) return ""
+    const date = new Date(dateString + "T00:00:00")
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    })
+  }
+
+  const onSubmit = () => {
+    if (selectedDates.length === 0) {
+      return window.showToast?.("Please select at least one event date.", "error")
+    }
+    
+    for (const date of selectedDates) {
+      if (!dateTimes[date]) {
+        return window.showToast?.(`Please select a ready time for ${formatDisplayDate(date)}.`, "error")
+      }
+    }
+    
     onNext()
   }
 
   return (
     <div className="max-w-3xl mx-auto px-2 sm:px-4 py-6 sm:py-8">
-        {/* Header Section */}
-        <div className="sm:p-8 text-left">
-          <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 sm:mb-3 tracking-wide">
+      <div className="sm:p-8 text-left">
+        <h2 className="text-2xl sm:text-3xl font-normal text-gray-900 mb-1 sm:mb-3 tracking-wide">
           Event Details<span className="text-gray-400 ml-2">*</span>
         </h2>
         <p
@@ -371,42 +458,73 @@ export default function EventDetails({ onNext, onBack, register, errors, handleS
         </p>
       </div>
 
-      {/* Centered inner wrapper for the form */}
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto py-6 sm:py-0">
         <form
           onSubmit={(e) => {
             e.preventDefault()
-            onSubmit(watchedValues)
+            onSubmit()
           }}
         >
-          <div className="space-y-6 sm:space-y-3">
-            <CustomDatePicker
-              register={register}
-              name="event_date"
-              label="What's your event date?"
+          <div className="space-y-6 sm:space-y-6">
+            <CustomMultiDatePicker
+              name="event_dates"
+              label="What are your event date(s)?"
               required={true}
-              value={watchedValues.event_date}
-              error={errors.event_date?.message}
+              value={selectedDates}
+              onChange={handleDatesChange}
             />
 
-            <CustomTimePicker
-              register={register}
-              name="ready_time"
-              label="What is your get ready time?"
-              required={true}
-              value={watchedValues.ready_time}
-              error={errors.ready_time?.message}
-            />
+            {selectedDates.length > 0 && (
+              <div>
+                <label className="block text-sm sm:text-base font-light text-gray-800 mb-3">
+                  What is your get ready time? <span className="text-gray-900">*</span>
+                </label>
+                
+                {/* Horizontal date chips */}
+                <div className="flex gap-2 mb-4 overflow-x-auto whitespace-nowrap pb-1 no-scrollbar">
+                  {selectedDates.map((date) => (
+                    <button
+                      key={date}
+                      type="button"
+                      onClick={() => setActiveDate(date)}
+                      className={`px-4 py-2 rounded-lg text-sm font-light transition-all duration-200 ${
+                        activeDate === date
+                          ? "bg-gray-800 text-white border-2 border-gray-600"
+                          : "bg-gray-200 text-gray-800 border-2 border-gray-300 hover:bg-gray-300"
+                      }`}
+                    >
+                      {formatDisplayDate(date)}
+                      {dateTimes[date] && (
+                        <span className="ml-2 opacity-75">✓</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
 
-            <p className="text-xs sm:text-sm text-gray-600 mb-5">
-              This is the{" "}
-              <span className="font-semibold text-gray-800">time you need to be ready by</span>. It is NOT the start time.
-            </p>
+                {/* Time picker for active date */}
+                {activeDate && (
+                  <div className="mt-4">
+                    <CustomTimePicker
+                      name={`time_${activeDate}`}
+                      required={true}
+                      value={dateTimes[activeDate] || ""}
+                      onChange={(time) => handleTimeChange(activeDate, time)}
+                    />
+                  </div>
+                )}
+
+                <p className="text-xs sm:text-sm text-gray-600 mt-4">
+                  This is the{" "}
+                  <span className="font-semibold text-gray-800">time you need to be ready by</span>. It is NOT the start time.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Buttons */}
           <div className="flex justify-between gap-5 pt-6 sm:pt-8 border-t border-gray-200">
             <button
+              type="button"
               onClick={onBack}
               className="group relative px-5 py-2.5 sm:px-8 sm:py-3 text-sm sm:text-base font-light rounded-lg transition-all duration-300 overflow-hidden bg-gray-200 text-gray-900 shadow-md shadow-gray-400/20 hover:bg-gray-300 hover:scale-[1.02] active:scale-100 cursor-pointer border border-gray-400"
             >
@@ -425,20 +543,17 @@ export default function EventDetails({ onNext, onBack, register, errors, handleS
           </div>
         </form>
         <div className="mt-8 flex justify-center">
-            <div>
+          <div>
             <p className="inline-block">
-                Want to start Over?
+              Want to start Over?
             </p>
             <a href="/" className="pl-2 text-blue-700">Go to First Step</a>
-            </div>
+          </div>
         </div>
       </div>
     </div>
   )
-
-
 }
-
 
 
 // =====================================================================================
